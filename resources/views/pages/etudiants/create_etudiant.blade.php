@@ -38,17 +38,38 @@
             <input type="text" class="form-control" id="ine" name="INE" placeholder="Ex: 2026INE123">
         </div>
         <div class="mb-3">
-            <label for="filiere" class="form-label">Filière</label>
-            <input type="text" class="form-control" id="filiere" name="filiere" placeholder="Informatique">
+            <label for="id_ufr" class="form-label">UFR</label>
+            <select class="form-select" id="id_ufr" name="id_ufr">
+                <option value="">-- Sélectionner un ufr --</option>
+                @foreach($ufrs as $u)
+                    <option value="{{ $u->id_ufr }}">{{ $u->nom }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="id_departement" class="form-label">Département</label>
+            <select class="form-select" id="id_departement" name="id_departement">
+                <option value="">-- Sélectionner un département --</option>
+                @foreach($departements as $d)
+                    <option value="{{ $d->id_departement }}">{{ $d->nom }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="id_filiere" class="form-label">Filière</label>
+            <select class="form-select" id="id_filiere" name="id_filiere">
+                <option value="">-- Sélectionner une filière --</option>
+                @foreach($filieres as $f)
+                    <option value="{{ $f->id_filiere }}">{{ $f->nom }}</option>
+                @endforeach
+            </select>
         </div>
         <div class="mb-3">
             <label for="niveau" class="form-label">Niveau</label>
             <select class="form-select" id="niveau" name="niveau">
-                <option value="Licence 1">Licence 1</option>
-                <option value="Licence 2">Licence 2</option>
-                <option value="Licence 3">Licence 3</option>
-                <option value="Master 1">Master 1</option>
-                <option value="Master 2">Master 2</option>
+                @foreach($niveaux as $value => $label)
+                    <option value="{{ $value }}">{{ $label }}</option>
+                @endforeach
             </select>
         </div>
         <div class="mb-3">

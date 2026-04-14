@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Etudiant;
 use App\Models\User;
+use App\Models\Ufr;
+use App\Models\Departement;
+use App\Models\Filiere;
 use Illuminate\Http\Request;
 
 class EtudiantController extends Controller
@@ -19,7 +22,11 @@ class EtudiantController extends Controller
     public function create()
     {
         $users = User::all();
-        return view('pages.etudiants.create_etudiant', compact('users'));
+        $niveaux = Etudiant::getNiveaux();
+        $ufrs = Ufr::all();
+        $departements = Departement::all();
+        $filieres = Filiere::all();
+        return view('pages.etudiants.create_etudiant', compact('users', 'niveaux','ufrs', 'departements', 'filieres'));
     }
 
     // Enregistrer un étudiant
@@ -28,8 +35,10 @@ class EtudiantController extends Controller
         $request->validate([
             'id_user' => 'required|exists:users,id',
             'INE' => 'required|unique:etudiants,INE',
-            'filiere' => 'required',
-            'niveau' => 'required',
+            'id_ufr' => 'required|exists:ufrs,id_ufr',
+            'id_departement' => 'required|exists:departements,id_departement',
+            'id_filiere' => 'required|exists:filieres,id_filiere',
+            'niveau' => 'required|in:' . implode(',', array_keys(Etudiant::getNiveaux())),
             'date_naissance' => 'nullable|date',
             'photo' => 'nullable|image|max:4096',
         ]);
@@ -42,7 +51,9 @@ class EtudiantController extends Controller
         Etudiant::create([
             'id_user' => $request->id_user,
             'INE' => $request->INE,
-            'filiere' => $request->filiere,
+            'id_ufr' => $request->id_ufr,
+            'id_departement' => $request->id_departement,
+            'id_filiere' => $request->id_filiere,
             'niveau' => $request->niveau,
             'date_naissance' => $request->date_naissance,
             'photo' => $photoPath,
@@ -55,8 +66,12 @@ class EtudiantController extends Controller
     public function edit($id)
         {
             $etudiant = Etudiant::findOrFail($id);
-            $users = User::all(); // pour recharger la liste des utilisateurs
-            return view('pages.etudiants.modifier_etudiant', compact('etudiant', 'users'));
+            $users = User::all();
+            $niveaux = Etudiant::getNiveaux();
+            $ufrs = Ufr::all();
+            $departements = Departement::all();
+            $filieres = Filiere::all();
+            return view('pages.etudiants.modifier_etudiant', compact('etudiant', 'users', 'niveaux', 'filieres'));
         }
 
     // Enregistrer la modification
@@ -68,8 +83,8 @@ class EtudiantController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'prenom' => 'nullable|string|max:255',
-                'filiere' => 'required',
-                'niveau' => 'required',
+                'id_filiere' => 'required|exists:filieres,id_filiere',
+                'niveau' => 'required|in:' . implode(',', array_keys(Etudiant::getNiveaux())),
                 'date_naissance' => 'nullable|date',
                 'photo' => 'nullable|image|max:4096',
             ]);
@@ -85,7 +100,7 @@ class EtudiantController extends Controller
             }
 
             $etudiant->update([
-                'filiere' => $request->filiere,
+                'id_filiere' => $request->id_filiere,
                 'niveau' => $request->niveau,
                 'date_naissance' => $request->date_naissance,
                 'photo' => $etudiant->photo,

@@ -39,15 +39,47 @@
         </div>
 
         <div class="mb-3">
-            <label for="id_circonscription" class="form-label">Circonscription</label>
-            <select class="form-select" id="id_circonscription" name="id_circonscription">
-                @foreach($circonscriptions as $c)
-                    <option value="{{ $c->id_circonscription }}" {{ $election->id_circonscription == $c->id_circonscription ? 'selected' : '' }}>
-                        {{ $c->nom }}
-                    </option>
+            <label class="form-label">Type d\'élection</label>
+            <div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="type" id="type_ufr" value="ufr" {{ $election->type == 'ufr' ? 'checked' : '' }} required>
+                    <label class="form-check-label" for="type_ufr">UFR</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="type" id="type_promotion" value="promotion" {{ $election->type == 'promotion' ? 'checked' : '' }} required>
+                    <label class="form-check-label" for="type_promotion">Promotion</label>
+                </div>
+            </div>
+        </div>
+
+        <div id="ufr-group" style="{{ $election->type == 'ufr' ? 'display: block;' : 'display: none;' }}" class="mb-3">
+            <label for="id_ufr" class="form-label">UFR</label>
+            <select class="form-select" id="id_ufr" name="id_ufr">
+                <option value="">-- Sélectionner UFR --</option>
+                @foreach($ufrs as $ufr)
+                    <option value="{{ $ufr->id_ufr }}" {{ $election->id_ufr == $ufr->id_ufr ? 'selected' : '' }}>{{ $ufr->nom }}</option>
                 @endforeach
             </select>
         </div>
+
+        <div id="promotion-group" style="{{ $election->type == 'promotion' ? 'display: block;' : 'display: none;' }}" class="mb-3">
+            <label for="id_filiere" class="form-label">Filière</label>
+            <select class="form-select" id="id_filiere" name="id_filiere">
+                <option value="">-- Sélectionner filière --</option>
+                @foreach($filieres as $filiere)
+                    <option value="{{ $filiere->id_filiere }}" {{ $election->id_filiere == $filiere->id_filiere ? 'selected' : '' }}>{{ $filiere->nom }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <script>
+            document.querySelectorAll('input[name="type"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.getElementById('ufr-group').style.display = this.value === 'ufr' ? 'block' : 'none';
+                    document.getElementById('promotion-group').style.display = this.value === 'promotion' ? 'block' : 'none';
+                });
+            });
+        </script>
 
         <div class="mb-3">
             <label for="statut" class="form-label">Statut</label>

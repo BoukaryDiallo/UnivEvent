@@ -52,9 +52,6 @@ Route::get('/elections/{id}/cloturer', [ElectionController::class, 'cloturer']);
 Route::post('/elections/{id}/generer-liste', [ElectionController::class, 'genererListeElectorale'])
      ->name('elections.generer-liste');
 
-/////////////////////////////////////GESTION DES ETUDIANTS///////////////////////////////////
-Route::resource('circonscriptions', CirconscriptionController::class);
-
 /////////////////////////////////////GESTION DES CANDIDATURES///////////////////////////////////
 Route::resource('candidatures', CandidatureController::class);
 

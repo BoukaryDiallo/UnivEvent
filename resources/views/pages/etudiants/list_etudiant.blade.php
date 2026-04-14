@@ -29,6 +29,8 @@
             <tr>
                 <th>INE</th>
                 <th>Nom</th>
+                <th>UFR</th>
+                <th>Département</th>
                 <th>Filière</th>
                 <th>Niveau</th>
                 <th>Date de naissance</th>
@@ -41,6 +43,8 @@
             <tr>
                 <td>{{ $etudiant->INE }}</td>
                 <td>{{ $etudiant->user->name }}</td>
+                <td>{{ $etudiant->ufr }}</td>
+                <td>{{ $etudiant->departement }}</td>
                 <td>{{ $etudiant->filiere }}</td>
                 <td>{{ $etudiant->niveau }}</td>
                 <td>{{ $etudiant->date_naissance }}</td>

@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Election;
-use App\Models\Circonscription;
+use App\Models\Ufr;
+use App\Models\Filiere;
 use Illuminate\Http\Request;
 use App\Services\ListeElectoraleService;
 
@@ -14,7 +15,7 @@ class ElectionController extends Controller
      */
     public function index()
     {
-        $elections = Election::with('circonscription')
+        $elections = Election::with(['ufr', 'filiere'])
             ->orderByDesc('created_at')
             ->get();
 
@@ -26,9 +27,10 @@ class ElectionController extends Controller
      */
     public function create()
     {
-        $circonscriptions = Circonscription::all();
+        $ufrs = Ufr::all();
+        $filieres = Filiere::all();
 
-        return view('pages.elections.create_election', compact('circonscriptions'));
+        return view('pages.elections.create_election', compact('ufrs', 'filieres'));
     }
 
     /**
@@ -41,18 +43,32 @@ class ElectionController extends Controller
             'description' => 'nullable|string',
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after:date_debut',
-            'id_circonscription' => 'required|exists:circonscriptions,id_circonscription',
+            'type' => 'required|in:ufr,promotion',
+            'id_ufr' => 'nullable|exists:ufrs,id_ufr',
+'id_filiere' => 'nullable|exists:filieres,id_filiere',
+        ], [
+            'type.required' => 'Le type d\'élection est requis.',
+            'id_ufr.exists' => 'L\'UFR sélectionnée est invalide.',
+            'id_filiere.exists' => 'La filière sélectionnée est invalide.',
         ]);
+
+        // Validation métier
+        if ($request->type === 'ufr' && !$request->id_ufr) {
+            return back()->withErrors(['id_ufr' => 'L\'UFR est requis pour une élection UFR.']);
+        }
+        if ($request->type === 'promotion' && !$request->id_filiere) {
+            return back()->withErrors(['id_filiere' => 'La filière est requise pour une élection de promotion (niveau choisi à la génération).']);
+        }
 
         Election::create([
             'titre' => $request->titre,
             'description' => $request->description,
             'date_debut' => $request->date_debut,
             'date_fin' => $request->date_fin,
-            'id_circonscription' => $request->id_circonscription,
-
-            // IMPORTANT LOGIQUE E-VOTE
-            'statut' => 'brouillon', // ou 'ouverte' si tu veux direct
+            'type' => $request->type,
+            'id_ufr' => $request->id_ufr,
+            'id_filiere' => $request->id_filiere,
+            'statut' => 'brouillon',
             'tour' => 1,
         ]);
 
@@ -66,7 +82,8 @@ class ElectionController extends Controller
     public function show(string $id)
     {
         $election = Election::with([
-            'circonscription',
+            'ufr',
+            'filiere',
             'candidatures.user',
             'listesElectorales'
         ])->findOrFail($id);
@@ -80,11 +97,13 @@ class ElectionController extends Controller
     public function edit(string $id)
     {
         $election = Election::findOrFail($id);
-        $circonscriptions = Circonscription::all();
+        $ufrs = Ufr::all();
+        $filieres = Filiere::all();
 
         return view('pages.elections.edit_election', compact(
             'election',
-            'circonscriptions'
+            'ufrs',
+            'filieres'
         ));
     }
 
@@ -100,16 +119,28 @@ class ElectionController extends Controller
             'description' => 'nullable|string',
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after:date_debut',
-            'id_circonscription' => 'required|exists:circonscriptions,id_circonscription',
+            'type' => 'required|in:ufr,promotion',
+            'id_ufr' => 'nullable|exists:ufrs,id_ufr',
+'id_filiere' => 'nullable|exists:filieres,id_filiere',
             'statut' => 'required|in:brouillon,ouverte,second_tour,terminee',
         ]);
+
+        // Validation métier
+        if ($request->type === 'ufr' && !$request->id_ufr) {
+            return back()->withErrors(['id_ufr' => 'L\'UFR est requis pour une élection UFR.']);
+        }
+        if ($request->type === 'promotion' && !$request->id_filiere) {
+            return back()->withErrors(['id_filiere' => 'La filière est requise pour une élection de promotion (niveau choisi à la génération).']);
+        }
 
         $election->update([
             'titre' => $request->titre,
             'description' => $request->description,
             'date_debut' => $request->date_debut,
             'date_fin' => $request->date_fin,
-            'id_circonscription' => $request->id_circonscription,
+            'type' => $request->type,
+            'id_ufr' => $request->id_ufr,
+            'id_filiere' => $request->id_filiere,
             'statut' => $request->statut,
         ]);
 
@@ -161,20 +192,25 @@ class ElectionController extends Controller
     {
         $election = Election::findOrFail($id);
 
-        // éviter double génération
+        // Validation dynamique
+        if ($election->type === 'promotion') {
+            $request->validate([
+                'niveau' => 'required|string|max:10',
+            ]);
+        }
+
         if ($election->listesElectorales()->exists()) {
-            return back()->with('error', 'La liste électorale a déjà été générée.');
+            return back()->with('error', 'Liste déjà générée.');
         }
 
         try {
             $service = new ListeElectoraleService();
+            $filters = $request->only('niveau');
 
-            $count = $service->generer($election, $request->all());
+            $count = $service->generer($election, $filters);
 
-            return back()->with('success', "Liste électorale générée avec succès ({$count} étudiants).");
-
+            return back()->with('success', "Liste générée: {$count} électeurs.");
         } catch (\Exception $e) {
-
             return back()->with('error', $e->getMessage());
         }
     }

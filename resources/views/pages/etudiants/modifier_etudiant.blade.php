@@ -39,19 +39,22 @@
 
         <!-- Filière -->
         <div class="mb-3">
-            <label for="filiere" class="form-label">Filière</label>
-            <input type="text" class="form-control" id="filiere" name="filiere" value="{{ $etudiant->filiere }}">
+            <label for="id_filiere" class="form-label">Filière</label>
+            <select class="form-select" id="id_filiere" name="id_filiere">
+                <option value="">-- Sélectionner une filière --</option>
+                @foreach($filieres as $f)
+                    <option value="{{ $f->id_filiere }}" {{ $etudiant->id_filiere == $f->id_filiere ? 'selected' : '' }}>{{ $f->nom }}</option>
+                @endforeach
+            </select>
         </div>
 
         <!-- Niveau -->
         <div class="mb-3">
             <label for="niveau" class="form-label">Niveau</label>
             <select class="form-select" id="niveau" name="niveau">
-                <option value="Licence 1" {{ $etudiant->niveau == 'Licence 1' ? 'selected' : '' }}>Licence 1</option>
-                <option value="Licence 2" {{ $etudiant->niveau == 'Licence 2' ? 'selected' : '' }}>Licence 2</option>
-                <option value="Licence 3" {{ $etudiant->niveau == 'Licence 3' ? 'selected' : '' }}>Licence 3</option>
-                <option value="Master 1" {{ $etudiant->niveau == 'Master 1' ? 'selected' : '' }}>Master 1</option>
-                <option value="Master 2" {{ $etudiant->niveau == 'Master 2' ? 'selected' : '' }}>Master 2</option>
+                @foreach($niveaux as $value => $label)
+                    <option value="{{ $value }}" {{ $etudiant->niveau === $value ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
             </select>
         </div>
 

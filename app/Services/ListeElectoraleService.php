@@ -11,7 +11,7 @@ class ListeElectoraleService
     /**
      * 🎯 Générer la liste électorale pour une élection
      */
-    public function generer(Election $election, array $filters)
+    public function generer(Election $election, array $filters = [])
     {
         // Vérifier si déjà générée
         $exist = ListeElectorale::where('id_election', $election->id_election)->exists();
@@ -20,38 +20,30 @@ class ListeElectoraleService
             throw new \Exception("La liste électorale a déjà été générée pour cette élection.");
         }
 
-        //  Construire la requête de filtrage
-        $query = Etudiant::query();
+        $query = Etudiant::query()->where('statut', 'inscrit');
 
-        if (!empty($filters['id_ufr'])) {
-            $query->where('id_ufr', $filters['id_ufr']);
+        if ($election->type === 'ufr') {
+            if (!$election->id_ufr) throw new \Exception('UFR requise.');
+            $query->where('id_ufr', $election->id_ufr);
+        } elseif ($election->type === 'promotion') {
+            if (!$election->id_filiere) throw new \Exception('Filière requise.');
+            if (empty($filters['niveau'])) throw new \Exception('Niveau requis pour promotion.');
+            $query->where('id_filiere', $election->id_filiere)
+                  ->where('niveau', $filters['niveau']);
+        } else {
+            throw new \Exception("Type non supporté: " . $election->type);
         }
-
-        if (!empty($filters['id_departement'])) {
-            $query->where('id_departement', $filters['id_departement']);
-        }
-
-        if (!empty($filters['id_filiere'])) {
-            $query->where('id_filiere', $filters['id_filiere']);
-        }
-
-        if (!empty($filters['niveau'])) {
-            $query->where('niveau', $filters['niveau']);
-        }
-
-        // étudiants uniquement inscrits
-        $query->where('statut', 'inscrit');
 
         $etudiants = $query->get();
 
-        // Insérer dans liste électorale
         foreach ($etudiants as $etudiant) {
             ListeElectorale::create([
                 'id_election' => $election->id_election,
                 'id_etudiant' => $etudiant->id,
+                'statut_snapshot' => $etudiant->statut,
             ]);
         }
 
-        return count($etudiants);
+        return $etudiants->count();
     }
 }

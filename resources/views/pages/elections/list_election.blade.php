@@ -19,7 +19,7 @@
                 <th>Date début</th>
                 <th>Date fin</th>
                 <th>Statut</th>
-                <th>Circonscription</th>
+                <th>Portée</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -27,11 +27,23 @@
             @foreach($elections as $election)
             <tr>
                 <td>{{ $election->titre }}</td>
-                <td>{{ $election->description }}</td>
+                <td>{{ Str::limit($election->description ?? '', 50) }}</td>
                 <td>{{ $election->date_debut }}</td>
                 <td>{{ $election->date_fin }}</td>
-                <td>{{ $election->statut }}</td>
-                <td>{{ $election->circonscription->nom }}</td>
+                <td>
+                    <span class="badge {{ $election->statut == 'ouverte' ? 'bg-success' : 'bg-secondary' }}">
+                        {{ ucfirst($election->statut) }}
+                    </span>
+                </td>
+                <td>
+                    @if($election->type == 'ufr' && $election->ufr)
+                        UFR: {{ $election->ufr->nom }}
+                    @elseif($election->type == 'promotion' && $election->filiere)
+                        Promotion: {{ $election->filiere->nom }}
+                    @else
+                        Non définie
+                    @endif
+                </td>
                 <td>
                     <a href="{{ route('elections.edit', $election->id_election) }}" class="btn btn-warning btn-sm">Modifier</a>
                     <form action="{{ route('elections.destroy', $election->id_election) }}" method="POST" style="display:inline;">

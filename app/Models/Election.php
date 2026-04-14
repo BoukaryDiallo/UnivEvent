@@ -19,12 +19,19 @@ class Election extends Model
         'date_fin',
         'statut',
         'tour',
-        'id_circonscription',
+        'type',
+        'id_ufr',
+        'id_filiere',
     ];
 
-    public function circonscription()
+    public function ufr()
     {
-        return $this->belongsTo(Circonscription::class, 'id_circonscription');
+        return $this->belongsTo(Ufr::class, 'id_ufr');
+    }
+
+    public function filiere()
+    {
+        return $this->belongsTo(Filiere::class, 'id_filiere');
     }
 
     public function listesElectorales()
