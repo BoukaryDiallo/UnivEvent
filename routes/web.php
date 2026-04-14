@@ -5,6 +5,8 @@ use Laravel\Fortify\Features;
 use App\Http\Controllers\EtudiantController;
 use App\Http\Controllers\ElectionController;
 use App\Http\Controllers\CirconscriptionController;
+use App\Http\Controllers\CandidatureController;
+use App\Http\Controllers\VoteController;
 
 Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
@@ -16,43 +18,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 ///////////////////////////////ROUTES POUR ELECTIONS//////////////////////////////////////////////////////
 
 Route::get('/', function () {
-    return view('pages.elections.home');
+    return view('pages.home');
 });
 
-Route::get('/create_election', function () {
-    return view('pages.elections.create');
-});
-
-/////////////////////////////////////ROUTES POUR VOTE////////////////////////////////
-
-// crer un nouvel vote
-Route::get('/create_vote', function () {
-    return view('pages.votes.create');
-})->name('create.vote');
-
-/////////////////////////////////////ROUTES POUR CANDIDATURE////////////////////////////////
-
-// Creer un candidat
-Route::get('/create_candidature', function () {
-    return view('pages.candidatures.create');
-})->name('create.candidature');
-
-// voir les details d'un candidat
-Route::get('/detail_candidature', function () {
-    return view('pages.candidatures.programme');
-})->name('detail.candidature');
-
-// voir la liste des candidats inscrits
-Route::get('/list_candidature', function () {
-    return view('pages.candidatures.list');
-})->name('list.candidature');
-
-/////////////////////////////////////ROUTES POUR ADMIN////////////////////////////////
-
-// valider ou confirmer une candidature
-Route::get('/traiter_candidature', function () {
-    return view('pages.admin.traiter_candidature');
-})->name('traiter.candidature');
 
 /////////////////////////////////////GESTION DES UTILISATEUR///////////////////////////////////
 
@@ -79,10 +47,24 @@ Route::delete('/supprimer_etudiant/{id}', [EtudiantController::class, 'delete'])
 
 /////////////////////////////////////GESTION DES ETUDIANTS///////////////////////////////////
 Route::resource('elections', ElectionController::class);
+Route::get('/elections/{id}/ouvrir', [ElectionController::class, 'ouvrir']);
+Route::get('/elections/{id}/cloturer', [ElectionController::class, 'cloturer']);
+Route::post('/elections/{id}/generer-liste', [ElectionController::class, 'genererListeElectorale'])
+     ->name('elections.generer-liste');
 
 /////////////////////////////////////GESTION DES ETUDIANTS///////////////////////////////////
 Route::resource('circonscriptions', CirconscriptionController::class);
 
+/////////////////////////////////////GESTION DES CANDIDATURES///////////////////////////////////
+Route::resource('candidatures', CandidatureController::class);
 
+/////////////////////////////////////GESTION DES VOTES///////////////////////////////////
+Route::resource('votes', VoteController::class);
+
+Route::get('/resultats', [ResultatController::class, 'index'])
+    ->name('resultats.index');
+
+Route::get('/resultats/{id}', [ResultatController::class, 'show'])
+    ->name('resultats.show');
 
 require __DIR__.'/settings.php';

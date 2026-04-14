@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Candidature;
+use App\Models\User;
+use App\Models\Election;
+use Illuminate\Http\Request;
+
+class CandidatureController extends Controller
+{
+    // Liste des candidatures
+    public function index()
+    {
+        $candidatures = Candidature::with(['user','election'])->get();
+        return view('pages.candidatures.list_candidature', compact('candidatures'));
+    }
+
+    // Formulaire de création
+    public function create()
+    {
+        $users = User::all();
+        $elections = Election::all();
+        return view('pages.candidatures.create_candidature', compact('users','elections'));
+    }
+
+    // Enregistrer une candidature
+    public function store(Request $request)
+    {
+        $request->validate([
+            'id_user' => 'required|exists:users,id',
+            'id_election' => 'required|exists:elections,id_election',
+            'programme' => 'nullable|string',
+            'photo' => 'nullable|image|max:4096',
+            'cnib_pdf' => 'required|mimes:pdf|max:5120',
+            'casier_judiciaire_pdf' => 'required|mimes:pdf|max:5120',
+            'attestation_inscription_pdf' => 'required|mimes:pdf|max:5120',
+        ]);
+
+        $data = $request->all();
+
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('photos', 'public');
+        }
+        $data['cnib_pdf'] = $request->file('cnib_pdf')->store('candidatures', 'public');
+        $data['casier_judiciaire_pdf'] = $request->file('casier_judiciaire_pdf')->store('candidatures', 'public');
+        $data['attestation_inscription_pdf'] = $request->file('attestation_inscription_pdf')->store('candidatures', 'public');
+
+        Candidature::create($data);
+
+        return redirect()->route('candidatures.index')->with('success', 'Candidature déposée avec succès.');
+    }
+
+    // Afficher une candidature
+    public function show(string $id)
+    {
+        $candidature = Candidature::with(['user','election'])->findOrFail($id);
+        return view('pages.candidatures.show_candidature', compact('candidature'));
+    }
+
+    // Formulaire de modification
+    public function edit(string $id)
+    {
+        $candidature = Candidature::findOrFail($id);
+        $users = User::all();
+        $elections = Election::all();
+        return view('pages.candidatures.edit_candidature', compact('candidature','users','elections'));
+    }
+
+    // Mettre à jour une candidature
+    public function update(Request $request, string $id)
+    {
+        $candidature = Candidature::findOrFail($id);
+
+        $request->validate([
+            'programme' => 'nullable|string',
+            'photo' => 'nullable|image|max:4096',
+            'statut' => 'required|in:en_attente,validee,rejetee',
+        ]);
+
+        $data = $request->all();
+
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('photos', 'public');
+        }
+
+        $candidature->update($data);
+
+        return redirect()->route('candidatures.index')->with('success', 'Candidature mise à jour avec succès.');
+    }
+
+    // Supprimer (soft delete)
+    public function destroy(string $id)
+    {
+        $candidature = Candidature::findOrFail($id);
+        $candidature->delete();
+
+        return redirect()->route('candidatures.index')->with('success', 'Candidature supprimée.');
+    }
+}

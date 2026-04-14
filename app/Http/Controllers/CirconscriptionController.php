@@ -11,13 +11,13 @@ class CirconscriptionController extends Controller
     public function index()
     {
         $circonscriptions = Circonscription::all();
-        return view('pages.admin.circonscriptions.list_circonscription', compact('circonscriptions'));
+        return view('pages.circonscriptions.list_circonscription', compact('circonscriptions'));
     }
 
     // Formulaire de création
     public function create()
     {
-        return view('pages.admin.circonscriptions.create_circonscription');
+        return view('pages.circonscriptions.create_circonscription');
     }
 
     // Enregistrer une nouvelle circonscription
@@ -38,14 +38,14 @@ class CirconscriptionController extends Controller
     public function show(string $id)
     {
         $circonscription = Circonscription::findOrFail($id);
-        return view('pages.admin.circonscriptions.show_circonscription', compact('circonscription'));
+        return view('pages.circonscriptions.show_circonscription', compact('circonscription'));
     }
 
     // Formulaire de modification
     public function edit(string $id)
     {
         $circonscription = Circonscription::findOrFail($id);
-        return view('pages.admin.circonscriptions.edit_circonscription', compact('circonscription'));
+        return view('pages.circonscriptions.edit_circonscription', compact('circonscription'));
     }
 
     // Mettre à jour une circonscription

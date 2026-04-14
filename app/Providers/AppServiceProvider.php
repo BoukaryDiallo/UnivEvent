@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use App\Models\Election;
+use App\Observers\ElectionObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,7 +25,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Election::observe(ElectionObserver::class);
         $this->configureDefaults();
+
+
     }
 
     /**

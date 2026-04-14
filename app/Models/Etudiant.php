@@ -15,6 +15,7 @@ class Etudiant extends Model
         'filiere',
         'niveau',
         'date_naissance',
+        'statut',
         'photo',
     ];
 
@@ -22,4 +23,9 @@ class Etudiant extends Model
     {
         return $this->belongsTo(User::class, 'id_user');
     }
+
+    public function listesElectorales()
+{
+    return $this->hasMany(ListeElectorale::class, 'id_etudiant');
+}
 }

@@ -10,19 +10,28 @@ return new class extends Migration
         Schema::create('candidatures', function (Blueprint $table) {
             $table->id('id_candidature');
 
-            // Dossier
             $table->text('programme')->nullable();
             $table->string('photo')->nullable();
 
-            // Pièces justificatives (PDF)
             $table->string('cnib_pdf');
             $table->string('casier_judiciaire_pdf');
             $table->string('attestation_inscription_pdf');
 
-            $table->enum('statut', ['en_attente', 'validee', 'rejetee'])
-                  ->default('en_attente');
+            // dossier administratif
+            $table->enum('statut', [
+                'en_attente',
+                'validee',
+                'rejetee'
+            ])->default('en_attente');
 
-            // Relations
+            // résultat électoral
+            $table->enum('resultat', [
+                'en_attente',
+                'elu',
+                'eliminee',
+                'second_tour'
+            ])->default('en_attente');
+
             $table->foreignId('id_user')
                 ->constrained('users', 'id')
                 ->onDelete('cascade');
@@ -31,7 +40,6 @@ return new class extends Migration
                 ->constrained('elections', 'id_election')
                 ->onDelete('cascade');
 
-            // un seul dossier par élection
             $table->unique(['id_user', 'id_election']);
 
             $table->timestamps();

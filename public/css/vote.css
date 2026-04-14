@@ -13,3 +13,16 @@ canvas {
     border-radius: 10px;
     padding: 10px;
 }
+
+.card {
+    border-radius: 12px;
+}
+
+.progress {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+h2, h5 {
+    font-weight: 600;
+}

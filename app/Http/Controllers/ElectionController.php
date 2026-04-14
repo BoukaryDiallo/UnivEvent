@@ -5,29 +5,34 @@ namespace App\Http\Controllers;
 use App\Models\Election;
 use App\Models\Circonscription;
 use Illuminate\Http\Request;
+use App\Services\ListeElectoraleService;
 
 class ElectionController extends Controller
 {
     /**
-     * Afficher la liste des élections
+     * LISTE DES ÉLECTIONS
      */
     public function index()
     {
-        $elections = Election::with('circonscription')->get();
-        return view('pages.admin.elections.list_election', compact('elections'));
+        $elections = Election::with('circonscription')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('pages.elections.list_election', compact('elections'));
     }
 
     /**
-     * Formulaire de création
+     * FORMULAIRE CRÉATION
      */
     public function create()
     {
         $circonscriptions = Circonscription::all();
-        return view('pages.admin.elections.create_election', compact('circonscriptions'));
+
+        return view('pages.elections.create_election', compact('circonscriptions'));
     }
 
     /**
-     * Enregistrer une nouvelle élection
+     * CRÉER UNE ÉLECTION (CORRIGÉ)
      */
     public function store(Request $request)
     {
@@ -39,32 +44,52 @@ class ElectionController extends Controller
             'id_circonscription' => 'required|exists:circonscriptions,id_circonscription',
         ]);
 
-        Election::create($request->all());
+        Election::create([
+            'titre' => $request->titre,
+            'description' => $request->description,
+            'date_debut' => $request->date_debut,
+            'date_fin' => $request->date_fin,
+            'id_circonscription' => $request->id_circonscription,
 
-        return redirect()->route('elections.index')->with('success', 'Élection créée avec succès.');
+            // IMPORTANT LOGIQUE E-VOTE
+            'statut' => 'brouillon', // ou 'ouverte' si tu veux direct
+            'tour' => 1,
+        ]);
+
+        return redirect()->route('elections.index')
+            ->with('success', 'Élection créée avec succès.');
     }
 
     /**
-     * Afficher une élection spécifique
+     * AFFICHER UNE ÉLECTION
      */
     public function show(string $id)
     {
-        $election = Election::with('circonscription')->findOrFail($id);
-        return view('pages.admin.elections.show_election', compact('election'));
+        $election = Election::with([
+            'circonscription',
+            'candidatures.user',
+            'listesElectorales'
+        ])->findOrFail($id);
+
+        return view('pages.elections.show_election', compact('election'));
     }
 
     /**
-     * Formulaire de modification
+     * FORMULAIRE MODIFICATION
      */
     public function edit(string $id)
     {
         $election = Election::findOrFail($id);
         $circonscriptions = Circonscription::all();
-        return view('pages.admin.elections.edit_election', compact('election','circonscriptions'));
+
+        return view('pages.elections.edit_election', compact(
+            'election',
+            'circonscriptions'
+        ));
     }
 
     /**
-     * Mettre à jour une élection
+     * METTRE À JOUR (CORRIGÉ)
      */
     public function update(Request $request, string $id)
     {
@@ -76,22 +101,81 @@ class ElectionController extends Controller
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after:date_debut',
             'id_circonscription' => 'required|exists:circonscriptions,id_circonscription',
-            'statut' => 'required|in:ouverte,fermee',
+            'statut' => 'required|in:brouillon,ouverte,second_tour,terminee',
         ]);
 
-        $election->update($request->all());
+        $election->update([
+            'titre' => $request->titre,
+            'description' => $request->description,
+            'date_debut' => $request->date_debut,
+            'date_fin' => $request->date_fin,
+            'id_circonscription' => $request->id_circonscription,
+            'statut' => $request->statut,
+        ]);
 
-        return redirect()->route('elections.index')->with('success', 'Élection mise à jour avec succès.');
+        return redirect()->route('elections.index')
+            ->with('success', 'Élection mise à jour.');
     }
 
     /**
-     * Annuler une élection (soft delete ou statut fermé)
+     * SUPPRIMER ÉLECTION
      */
     public function destroy(string $id)
     {
         $election = Election::findOrFail($id);
+
         $election->delete();
 
-        return redirect()->route('elections.index')->with('success', 'Élection annulée.');
+        return redirect()->route('elections.index')
+            ->with('success', 'Élection supprimée.');
+    }
+
+    /**
+     * OUVRIR ÉLECTION (AJOUT IMPORTANT)
+     */
+    public function ouvrir($id)
+    {
+        $election = Election::findOrFail($id);
+
+        $election->update([
+            'statut' => 'ouverte'
+        ]);
+
+        return back()->with('success', 'Élection ouverte.');
+    }
+
+    /**
+     * CLOTURER ÉLECTION (AJOUT IMPORTANT)
+     */
+    public function cloturer($id)
+    {
+        $election = Election::findOrFail($id);
+
+        $election->update([
+            'statut' => 'cloturee'
+        ]);
+
+        return back()->with('success', 'Élection clôturée.');
+    }
+    public function genererListeElectorale(Request $request, string $id)
+    {
+        $election = Election::findOrFail($id);
+
+        // éviter double génération
+        if ($election->listesElectorales()->exists()) {
+            return back()->with('error', 'La liste électorale a déjà été générée.');
+        }
+
+        try {
+            $service = new ListeElectoraleService();
+
+            $count = $service->generer($election, $request->all());
+
+            return back()->with('success', "Liste électorale générée avec succès ({$count} étudiants).");
+
+        } catch (\Exception $e) {
+
+            return back()->with('error', $e->getMessage());
+        }
     }
 }

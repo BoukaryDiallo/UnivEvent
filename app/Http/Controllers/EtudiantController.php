@@ -12,14 +12,14 @@ class EtudiantController extends Controller
     public function list()
     {
         $etudiants = Etudiant::with('user')->get();
-        return view('pages.admin.etudiants.list_etudiant', compact('etudiants'));
+        return view('pages.etudiants.list_etudiant', compact('etudiants'));
     }
 
     // Formulaire de création
     public function create()
     {
         $users = User::all();
-        return view('pages.admin.etudiants.create_etudiant', compact('users'));
+        return view('pages.etudiants.create_etudiant', compact('users'));
     }
 
     // Enregistrer un étudiant
@@ -56,7 +56,7 @@ class EtudiantController extends Controller
         {
             $etudiant = Etudiant::findOrFail($id);
             $users = User::all(); // pour recharger la liste des utilisateurs
-            return view('pages.admin.etudiants.modifier_etudiant', compact('etudiant', 'users'));
+            return view('pages.etudiants.modifier_etudiant', compact('etudiant', 'users'));
         }
 
     // Enregistrer la modification
