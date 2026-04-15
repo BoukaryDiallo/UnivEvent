@@ -12,9 +12,9 @@ class UfrController extends Controller
      */
     public function index()
     {
-        $ufrs = Ufr::orderBy('nom')->get();
+        $ufrs = Ufr::withCount('departements')->orderBy('nom')->paginate(10);
 
-        return view('ufrs.index', compact('ufrs'));
+        return view('pages.ufr.list_ufr', compact('ufrs'));
     }
 
     /**
@@ -22,7 +22,7 @@ class UfrController extends Controller
      */
     public function create()
     {
-        return view('ufrs.create');
+        return view('pages.ufr.create_ufr');
     }
 
     /**
@@ -38,8 +38,8 @@ class UfrController extends Controller
             'nom' => $request->nom,
         ]);
 
-        return redirect()->route('ufrs.index')
-            ->with('success', 'UFR créée avec succès.');
+        return redirect()->route('ufr.index')
+            ->with('success', 'UFR créé avec succès.');
     }
 
     /**
@@ -47,10 +47,9 @@ class UfrController extends Controller
      */
     public function show(string $id)
     {
-        $ufr = Ufr::with('departements')
-            ->findOrFail($id);
+        $ufr = Ufr::with('departements')->findOrFail($id);
 
-        return view('ufrs.show', compact('ufr'));
+        return view('pages.ufr.show_ufr', compact('ufr'));
     }
 
     /**
@@ -60,7 +59,7 @@ class UfrController extends Controller
     {
         $ufr = Ufr::findOrFail($id);
 
-        return view('ufrs.edit', compact('ufr'));
+        return view('pages.ufr.edit_ufr', compact('ufr'));
     }
 
     /**
@@ -78,7 +77,7 @@ class UfrController extends Controller
             'nom' => $request->nom,
         ]);
 
-        return redirect()->route('ufrs.index')
+        return redirect()->route('ufr.index')
             ->with('success', 'UFR mise à jour.');
     }
 
@@ -91,7 +90,7 @@ class UfrController extends Controller
 
         $ufr->delete();
 
-        return redirect()->route('ufrs.index')
+        return redirect()->route('ufr.index')
             ->with('success', 'UFR supprimée.');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Filiere;
 use App\Models\Departement;
+use App\Models\Ufr;
 use Illuminate\Http\Request;
 
 class FiliereController extends Controller
@@ -13,11 +14,12 @@ class FiliereController extends Controller
      */
     public function index()
     {
-        $filieres = Filiere::with('departement')
+        $filieres = Filiere::with(['departement.ufr'])
+            ->withCount('etudiants')
             ->orderBy('nom')
-            ->get();
+            ->paginate(10);
 
-        return view('filieres.index', compact('filieres'));
+        return view('pages.filiere.list_filiere', compact('filieres'));
     }
 
     /**
@@ -25,9 +27,10 @@ class FiliereController extends Controller
      */
     public function create()
     {
-        $departements = Departement::all();
-
-        return view('filieres.create', compact('departements'));
+        $ufrs = Ufr::where('actif', true)->orderBy('nom')->get();
+        $departements = collect();
+        
+        return view('pages.filiere.create_filiere', compact('ufrs', 'departements'));
     }
 
     /**
@@ -45,7 +48,7 @@ class FiliereController extends Controller
             'id_departement' => $request->id_departement,
         ]);
 
-        return redirect()->route('filieres.index')
+        return redirect()->route('filiere.index')
             ->with('success', 'Filière créée avec succès.');
     }
 
@@ -54,10 +57,10 @@ class FiliereController extends Controller
      */
     public function show(string $id)
     {
-        $filiere = Filiere::with('departement')
+        $filiere = Filiere::with('departement.ufr')
             ->findOrFail($id);
 
-        return view('filieres.show', compact('filiere'));
+        return view('pages.filiere.show_filiere', compact('filiere'));
     }
 
     /**
@@ -66,9 +69,9 @@ class FiliereController extends Controller
     public function edit(string $id)
     {
         $filiere = Filiere::findOrFail($id);
-        $departements = Departement::all();
+        $departements = Departement::orderBy('nom')->get();
 
-        return view('filieres.edit', compact('filiere', 'departements'));
+        return view('pages.filiere.edit_filiere', compact('filiere', 'departements'));
     }
 
     /**
@@ -88,7 +91,7 @@ class FiliereController extends Controller
             'id_departement' => $request->id_departement,
         ]);
 
-        return redirect()->route('filieres.index')
+        return redirect()->route('filiere.index')
             ->with('success', 'Filière mise à jour.');
     }
 
@@ -101,7 +104,7 @@ class FiliereController extends Controller
 
         $filiere->delete();
 
-        return redirect()->route('filieres.index')
+        return redirect()->route('filiere.index')
             ->with('success', 'Filière supprimée.');
     }
 }

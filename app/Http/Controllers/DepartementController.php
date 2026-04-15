@@ -13,11 +13,12 @@ class DepartementController extends Controller
      */
     public function index()
     {
-        $departements = Departement::with('ufr')
+        $departements = Departement::with(['ufr', 'filieres'])
+            ->withCount('filieres')
             ->orderBy('nom')
-            ->get();
+            ->paginate(10);
 
-        return view('departements.index', compact('departements'));
+        return view('pages.departement.list_departement', compact('departements'));
     }
 
     /**
@@ -25,9 +26,9 @@ class DepartementController extends Controller
      */
     public function create()
     {
-        $ufrs = Ufr::all();
+        $ufrs = Ufr::where('actif', true)->orderBy('nom')->get();
 
-        return view('departements.create', compact('ufrs'));
+        return view('pages.departement.create_departement', compact('ufrs'));
     }
 
     /**
@@ -45,7 +46,7 @@ class DepartementController extends Controller
             'id_ufr' => $request->id_ufr,
         ]);
 
-        return redirect()->route('departements.index')
+        return redirect()->route('departement.index')
             ->with('success', 'Département créé avec succès.');
     }
 
@@ -57,7 +58,7 @@ class DepartementController extends Controller
         $departement = Departement::with(['ufr', 'filieres'])
             ->findOrFail($id);
 
-        return view('departements.show', compact('departement'));
+        return view('pages.departement.show_departement', compact('departement'));
     }
 
     /**
@@ -66,9 +67,9 @@ class DepartementController extends Controller
     public function edit(string $id)
     {
         $departement = Departement::findOrFail($id);
-        $ufrs = Ufr::all();
+        $ufrs = Ufr::orderBy('nom')->get();
 
-        return view('departements.edit', compact('departement', 'ufrs'));
+        return view('pages.departement.edit_departement', compact('departement', 'ufrs'));
     }
 
     /**
@@ -88,7 +89,7 @@ class DepartementController extends Controller
             'id_ufr' => $request->id_ufr,
         ]);
 
-        return redirect()->route('departements.index')
+        return redirect()->route('departement.index')
             ->with('success', 'Département mis à jour.');
     }
 
@@ -101,7 +102,7 @@ class DepartementController extends Controller
 
         $departement->delete();
 
-        return redirect()->route('departements.index')
+        return redirect()->route('departement.index')
             ->with('success', 'Département supprimé.');
     }
 }
