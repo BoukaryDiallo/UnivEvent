@@ -9,102 +9,84 @@ use Illuminate\Http\Request;
 
 class FiliereController extends Controller
 {
-    /**
-     * LISTE DES FILIÈRES
-     */
     public function index()
     {
         $filieres = Filiere::with(['departement.ufr'])
-            ->withCount('etudiants')
             ->orderBy('nom')
             ->paginate(10);
 
         return view('pages.filiere.list_filiere', compact('filieres'));
     }
 
-    /**
-     * FORMULAIRE CRÉATION
-     */
     public function create()
     {
-        $ufrs = Ufr::where('actif', true)->orderBy('nom')->get();
-        $departements = collect();
-        
+        $ufrs = Ufr::orderBy('nom')->get();
+        $departements = Departement::orderBy('nom')->get();
+
         return view('pages.filiere.create_filiere', compact('ufrs', 'departements'));
     }
 
-    /**
-     * ENREGISTRER
-     */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'nom' => 'required|string|max:255',
             'id_departement' => 'required|exists:departements,id_departement',
         ]);
 
-        Filiere::create([
-            'nom' => $request->nom,
-            'id_departement' => $request->id_departement,
-        ]);
+        Filiere::create($data);
 
         return redirect()->route('filiere.index')
             ->with('success', 'Filière créée avec succès.');
     }
 
-    /**
-     * AFFICHER UNE FILIÈRE
-     */
-    public function show(string $id)
+    public function show(Filiere $filiere)
     {
-        $filiere = Filiere::with('departement.ufr')
-            ->findOrFail($id);
+        $filiere->load('departement.ufr');
 
         return view('pages.filiere.show_filiere', compact('filiere'));
     }
 
-    /**
-     * FORMULAIRE MODIFICATION
-     */
-    public function edit(string $id)
+    public function edit(Filiere $filiere)
     {
-        $filiere = Filiere::findOrFail($id);
+        $ufrs = Ufr::orderBy('nom')->get();
         $departements = Departement::orderBy('nom')->get();
 
-        return view('pages.filiere.edit_filiere', compact('filiere', 'departements'));
+        return view('pages.filiere.edit_filiere', compact('filiere', 'ufrs', 'departements'));
     }
 
-    /**
-     * METTRE À JOUR
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Filiere $filiere)
     {
-        $filiere = Filiere::findOrFail($id);
-
-        $request->validate([
+        $data = $request->validate([
             'nom' => 'required|string|max:255',
             'id_departement' => 'required|exists:departements,id_departement',
         ]);
 
-        $filiere->update([
-            'nom' => $request->nom,
-            'id_departement' => $request->id_departement,
-        ]);
+        $filiere->update($data);
 
-        return redirect()->route('filiere.index')
+        return redirect()->route('filiere.show', $filiere)
             ->with('success', 'Filière mise à jour.');
     }
 
-    /**
-     * SUPPRIMER
-     */
-    public function destroy(string $id)
+    public function destroy(Filiere $filiere)
     {
-        $filiere = Filiere::findOrFail($id);
-
         $filiere->delete();
 
         return redirect()->route('filiere.index')
             ->with('success', 'Filière supprimée.');
+    }
+
+    public function getDepartementsByUfr($id_ufr)
+    {
+        $departements = Departement::where('id_ufr', $id_ufr)
+            ->orderBy('nom')
+            ->get()
+            ->map(function ($d) {
+                return [
+                    'id' => $d->id_departement,
+                    'text' =>$d->nom,
+                ];
+            });
+
+        return response()->json($departements);
     }
 }

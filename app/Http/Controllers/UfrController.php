@@ -12,7 +12,9 @@ class UfrController extends Controller
      */
     public function index()
     {
-        $ufrs = Ufr::withCount('departements')->orderBy('nom')->paginate(10);
+        $ufrs = Ufr::withCount('departements')
+            ->orderBy('nom')
+            ->paginate(10);
 
         return view('pages.ufr.list_ufr', compact('ufrs'));
     }
@@ -34,60 +36,50 @@ class UfrController extends Controller
             'nom' => 'required|string|max:255|unique:ufrs,nom',
         ]);
 
-        Ufr::create([
-            'nom' => $request->nom,
-        ]);
+        Ufr::create($request->only('nom'));
 
         return redirect()->route('ufr.index')
             ->with('success', 'UFR créé avec succès.');
     }
 
     /**
-     * AFFICHER UNE UFR
+     * AFFICHER UNE UFR (MODEL BINDING)
      */
-    public function show(string $id)
+    public function show(Ufr $ufr)
     {
-        $ufr = Ufr::with('departements')->findOrFail($id);
+        $ufr->load(['departements.filieres']);
 
         return view('pages.ufr.show_ufr', compact('ufr'));
     }
 
     /**
-     * FORMULAIRE MODIFICATION
+     * FORMULAIRE MODIFICATION (MODEL BINDING)
      */
-    public function edit(string $id)
+    public function edit(Ufr $ufr)
     {
-        $ufr = Ufr::findOrFail($id);
-
         return view('pages.ufr.edit_ufr', compact('ufr'));
     }
 
     /**
-     * METTRE À JOUR
+     * METTRE À JOUR (MODEL BINDING)
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Ufr $ufr)
     {
-        $ufr = Ufr::findOrFail($id);
-
         $request->validate([
             'nom' => 'required|string|max:255|unique:ufrs,nom,' . $ufr->id_ufr . ',id_ufr',
         ]);
 
-        $ufr->update([
-            'nom' => $request->nom,
-        ]);
+        $ufr->update($request->only('nom'));
 
         return redirect()->route('ufr.index')
             ->with('success', 'UFR mise à jour.');
     }
 
     /**
-     * SUPPRIMER
+     * SUPPRIMER (MODEL BINDING)
      */
-    public function destroy(string $id)
+    public function destroy(Ufr $ufr)
     {
-        $ufr = Ufr::findOrFail($id);
-
         $ufr->delete();
 
         return redirect()->route('ufr.index')

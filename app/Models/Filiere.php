@@ -3,20 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Filiere extends Model
 {
-    use SoftDeletes;
-
     protected $table = 'filieres';
     protected $primaryKey = 'id_filiere';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = [
+        'nom',
         'id_departement',
-        'nom'
     ];
 
+    /*
+     * PERMET AU ROUTE MODEL BINDING DE FONCTIONNER
+     */
+    public function getRouteKeyName()
+    {
+        return 'id_filiere';
+    }
 
     public function departement()
     {

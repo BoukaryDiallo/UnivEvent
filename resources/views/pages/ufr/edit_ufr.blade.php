@@ -6,7 +6,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="h3">Modifier l'UFR</h2>
-                <a href="{{ route('ufr.show', $ufr->id_ufr) }}" class="btn btn-secondary">
+<a href="{{ route('ufr.show', $ufr) }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Retour
                 </a>
             </div>
@@ -22,7 +22,7 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('ufr.update', $ufr->id_ufr) }}">
+                    <form method="POST" action="{{ route('ufr.update', $ufr) }}">
                         @csrf
                         @method('PUT')
                         
@@ -36,10 +36,10 @@
                         </div>
 
                         <div class="d-flex justify-content-end gap-2">
-                            <a href="{{ route('ufr.show', $ufr->id_ufr) }}" class="btn btn-secondary">
+                            <a href="{{ route('ufr.show', $ufr) }}" class="btn btn-secondary">
                                 <i class="fas fa-times me-2"></i>Annuler
                             </a>
-                            <button type="submit" class="btn btn-warning">
+                            <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save me-2"></i>Mettre à jour
                             </button>
                         </div>

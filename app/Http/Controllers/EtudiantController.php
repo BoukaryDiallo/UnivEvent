@@ -8,33 +8,44 @@ use App\Models\Ufr;
 use App\Models\Departement;
 use App\Models\Filiere;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class EtudiantController extends Controller
 {
-    // Afficher la liste des étudiants
-    public function list()
+    /**
+     * LISTE
+     */
+    public function index()
     {
-        $etudiants = Etudiant::with('user')->get();
+        $etudiants = Etudiant::with(['user', 'ufr', 'departement', 'filiere'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
         return view('pages.etudiants.list_etudiant', compact('etudiants'));
     }
 
-    // Formulaire de création
+    /**
+     * FORM CREATE
+     */
     public function create()
     {
-        $users = User::all();
-        $niveaux = Etudiant::getNiveaux();
-        $ufrs = Ufr::all();
-        $departements = Departement::all();
-        $filieres = Filiere::all();
-        return view('pages.etudiants.create_etudiant', compact('users', 'niveaux','ufrs', 'departements', 'filieres'));
+        return view('pages.etudiants.create_etudiant', [
+            'users' => User::orderBy('name')->get(),
+            'niveaux' => Etudiant::getNiveaux(),
+            'ufrs' => Ufr::orderBy('nom')->get(),
+            'departements' => Departement::orderBy('nom')->get(),
+            'filieres' => Filiere::orderBy('nom')->get(),
+        ]);
     }
 
-    // Enregistrer un étudiant
+    /**
+     * STORE
+     */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'id_user' => 'required|exists:users,id',
-            'INE' => 'required|unique:etudiants,INE',
+            'INE' => 'required|string|unique:etudiants,INE',
             'id_ufr' => 'required|exists:ufrs,id_ufr',
             'id_departement' => 'required|exists:departements,id_departement',
             'id_filiere' => 'required|exists:filieres,id_filiere',
@@ -43,81 +54,89 @@ class EtudiantController extends Controller
             'photo' => 'nullable|image|max:4096',
         ]);
 
-        $photoPath = null;
         if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('photos', 'public');
+            $data['photo'] = $request->file('photo')->store('photos', 'public');
         }
 
-        Etudiant::create([
-            'id_user' => $request->id_user,
-            'INE' => $request->INE,
-            'id_ufr' => $request->id_ufr,
-            'id_departement' => $request->id_departement,
-            'id_filiere' => $request->id_filiere,
-            'niveau' => $request->niveau,
-            'date_naissance' => $request->date_naissance,
-            'photo' => $photoPath,
-        ]);
+        Etudiant::create($data);
 
-        return redirect()->route('admin.list.etudiant')->with('success', 'Étudiant créé avec succès.');
+        return redirect()->route('etudiants.index')
+            ->with('success', 'Étudiant créé avec succès.');
     }
 
-    //Formulaire de modification
-    public function edit($id)
-        {
-            $etudiant = Etudiant::findOrFail($id);
-            $users = User::all();
-            $niveaux = Etudiant::getNiveaux();
-            $ufrs = Ufr::all();
-            $departements = Departement::all();
-            $filieres = Filiere::all();
-            return view('pages.etudiants.modifier_etudiant', compact('etudiant', 'users', 'niveaux', 'filieres'));
-        }
+    /**
+     * SHOW
+     */
+    public function show(string $id)
+    {
+        $etudiant = Etudiant::with(['user', 'ufr', 'departement', 'filiere'])
+            ->findOrFail($id);
 
-    // Enregistrer la modification
-   public function update(Request $request, $id)
-        {
-            $etudiant = Etudiant::findOrFail($id);
-            $user = $etudiant->user;
+        return view('pages.etudiants.show_etudiant', compact('etudiant'));
+    }
 
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'prenom' => 'nullable|string|max:255',
-                'id_filiere' => 'required|exists:filieres,id_filiere',
-                'niveau' => 'required|in:' . implode(',', array_keys(Etudiant::getNiveaux())),
-                'date_naissance' => 'nullable|date',
-                'photo' => 'nullable|image|max:4096',
-            ]);
+    /**
+     * EDIT
+     */
+    public function edit(string $id)
+    {
+        $etudiant = Etudiant::findOrFail($id);
 
-            // Mise à jour User
-            $user->update([
-                'name' => $request->name,
-            ]);
+        return view('pages.etudiants.edit_etudiant', [
+            'etudiant' => $etudiant,
+            'users' => User::orderBy('name')->get(),
+            'niveaux' => Etudiant::getNiveaux(),
+            'ufrs' => Ufr::orderBy('nom')->get(),
+            'departements' => Departement::orderBy('nom')->get(),
+            'filieres' => Filiere::orderBy('nom')->get(),
+        ]);
+    }
 
-            // Mise à jour Etudiant
-            if ($request->hasFile('photo')) {
-                $etudiant->photo = $request->file('photo')->store('photos', 'public');
+    /**
+     * UPDATE
+     */
+    public function update(Request $request, string $id)
+    {
+        $etudiant = Etudiant::findOrFail($id);
+
+        $data = $request->validate([
+            'id_user' => 'required|exists:users,id',
+            'INE' => 'required|string|unique:etudiants,INE,' . $etudiant->id,
+            'id_ufr' => 'required|exists:ufrs,id_ufr',
+            'id_departement' => 'required|exists:departements,id_departement',
+            'id_filiere' => 'required|exists:filieres,id_filiere',
+            'niveau' => 'required|in:' . implode(',', array_keys(Etudiant::getNiveaux())),
+            'date_naissance' => 'nullable|date',
+            'photo' => 'nullable|image|max:4096',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            if ($etudiant->photo) {
+                Storage::disk('public')->delete($etudiant->photo);
             }
-
-            $etudiant->update([
-                'id_filiere' => $request->id_filiere,
-                'niveau' => $request->niveau,
-                'date_naissance' => $request->date_naissance,
-                'photo' => $etudiant->photo,
-            ]);
-
-            return redirect()->route('admin.list.etudiant')->with('success', 'Étudiant et utilisateur mis à jour avec succès.');
+            $data['photo'] = $request->file('photo')->store('photos', 'public');
         }
 
+        $etudiant->update($data);
 
-        // Suppression d un etudiant(softdelete)
-    public function delete($id)
-        {
-            $etudiant = Etudiant::findOrFail($id);
-            $etudiant->delete(); 
+        return redirect()->route('etudiants.index')
+            ->with('success', 'Étudiant mis à jour avec succès.');
+    }
 
-            return redirect()->route('admin.list.etudiant')->with('success', 'Étudiant supprimé .');
+    /**
+     * DELETE
+     */
+    public function destroy(string $id)
+    {
+        $etudiant = Etudiant::findOrFail($id);
+
+        if ($etudiant->photo) {
+            Storage::disk('public')->delete($etudiant->photo);
         }
 
+        $etudiant->delete();
 
+        return redirect()->route('etudiants.index')
+            ->with('success', 'Étudiant supprimé avec succès.');
+    }
 }

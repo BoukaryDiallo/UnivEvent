@@ -30,19 +30,7 @@ Route::get('/create_user', function () {
 })->name('create.user');
 
 /////////////////////////////////////GESTION DES ETUDIANTS///////////////////////////////////
-// Liste
-Route::get('/list_etudiant', [EtudiantController::class, 'list'])->name('admin.list.etudiant');
-
-// Création
-Route::get('/create_etudiant', [EtudiantController::class, 'create'])->name('admin.create.etudiant');
-Route::post('/create_etudiant', [EtudiantController::class, 'store'])->name('admin.post_create.etudiant');
-
-// Modification
-Route::get('/modifier_etudiant/{id}', [EtudiantController::class, 'edit'])->name('admin.modifier.etudiant');
-Route::post('/modifier_etudiant/{id}', [EtudiantController::class, 'update'])->name('admin.post_modifier.etudiant');
-
-// Suppression
-Route::delete('/supprimer_etudiant/{id}', [EtudiantController::class, 'delete'])->name('admin.delete.etudiant');
+Route::resource('etudiants', EtudiantController::class);
 
 
 /////////////////////////////////////GESTION DES ETUDIANTS///////////////////////////////////
@@ -58,11 +46,11 @@ Route::resource('candidatures', CandidatureController::class);
 /////////////////////////////////////GESTION DES VOTES///////////////////////////////////
 Route::resource('votes', VoteController::class);
 
-Route::get('/resultats', [ResultatController::class, 'index'])
-    ->name('resultats.index');
-
-Route::get('/resultats/{id}', [ResultatController::class, 'show'])
-    ->name('resultats.show');
+// Route::get('/resultats', [ResultatController::class, 'index'])
+    // ->name('resultats.index');
+//
+// Route::get('/resultats/{id}', [ResultatController::class, 'show'])
+    // ->name('resultats.show');
 
 /////////////////////////////////////GESTION DES UFR///////////////////////////////////
 Route::resource('ufr', UfrController::class);

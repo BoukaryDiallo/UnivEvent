@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class DepartementController extends Controller
 {
     /**
-     * LISTE DES DÉPARTEMENTS
+     * LISTE
      */
     public function index()
     {
@@ -22,17 +22,17 @@ class DepartementController extends Controller
     }
 
     /**
-     * FORMULAIRE CRÉATION
+     * CREATE
      */
     public function create()
     {
-        $ufrs = Ufr::where('actif', true)->orderBy('nom')->get();
+        $ufrs = Ufr::orderBy('nom')->get();
 
         return view('pages.departement.create_departement', compact('ufrs'));
     }
 
     /**
-     * ENREGISTRER
+     * STORE
      */
     public function store(Request $request)
     {
@@ -41,65 +41,53 @@ class DepartementController extends Controller
             'id_ufr' => 'required|exists:ufrs,id_ufr',
         ]);
 
-        Departement::create([
-            'nom' => $request->nom,
-            'id_ufr' => $request->id_ufr,
-        ]);
+        Departement::create($request->only(['nom', 'id_ufr']));
 
         return redirect()->route('departement.index')
             ->with('success', 'Département créé avec succès.');
     }
 
     /**
-     * AFFICHER UN DÉPARTEMENT
+     * SHOW (FIX IMPORTANT)
      */
-    public function show(string $id)
+    public function show(Departement $departement)
     {
-        $departement = Departement::with(['ufr', 'filieres'])
-            ->findOrFail($id);
+        $departement->load(['ufr', 'filieres']);
 
         return view('pages.departement.show_departement', compact('departement'));
     }
 
     /**
-     * FORMULAIRE MODIFICATION
+     * EDIT
      */
-    public function edit(string $id)
+    public function edit(Departement $departement)
     {
-        $departement = Departement::findOrFail($id);
         $ufrs = Ufr::orderBy('nom')->get();
 
         return view('pages.departement.edit_departement', compact('departement', 'ufrs'));
     }
 
     /**
-     * METTRE À JOUR
+     * UPDATE
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Departement $departement)
     {
-        $departement = Departement::findOrFail($id);
-
         $request->validate([
             'nom' => 'required|string|max:255',
             'id_ufr' => 'required|exists:ufrs,id_ufr',
         ]);
 
-        $departement->update([
-            'nom' => $request->nom,
-            'id_ufr' => $request->id_ufr,
-        ]);
+        $departement->update($request->only(['nom', 'id_ufr']));
 
         return redirect()->route('departement.index')
             ->with('success', 'Département mis à jour.');
     }
 
     /**
-     * SUPPRIMER
+     * DELETE
      */
-    public function destroy(string $id)
+    public function destroy(Departement $departement)
     {
-        $departement = Departement::findOrFail($id);
-
         $departement->delete();
 
         return redirect()->route('departement.index')

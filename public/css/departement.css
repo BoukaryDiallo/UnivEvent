@@ -169,8 +169,8 @@
 }
 
 .departement-card-header-primary {
-    background-color: #007bff !important;
-    border-bottom: 1px solid #007bff;
+    background-color: #28a745 !important;
+    border-bottom: 1px solid #28a745;
 }
 
 .departement-card-header-warning {
@@ -180,8 +180,8 @@
 }
 
 .departement-card-header-info {
-    background-color: #17a2b8 !important;
-    border-bottom: 1px solid #17a2b8;
+    background-color: #28a745 !important;
+    border-bottom: 1px solid #28a745;
 }
 
 /* Table hover effects */
@@ -212,7 +212,7 @@
     justify-content: center;
     min-width: 2rem;
     height: 2rem;
-    background-color: #007bff;
+    background-color: #28a745;
     color: white;
     border-radius: 50%;
     font-size: 0.75rem;
