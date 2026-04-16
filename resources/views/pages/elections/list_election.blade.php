@@ -44,13 +44,28 @@
                         Non définie
                     @endif
                 </td>
-                <td>
-                    <a href="{{ route('elections.edit', $election->id_election) }}" class="btn btn-warning btn-sm">Modifier</a>
-                    <form action="{{ route('elections.destroy', $election->id_election) }}" method="POST" style="display:inline;">
-                        @csrf @method('DELETE')
-                        <button class="btn btn-danger btn-sm" onclick="return confirm('Annuler cette élection ?')">Annuler</button>
-                    </form>
-                </td>
+                <div class="row">
+                    <td class="text-center">
+                        <a href="{{ route('elections.edit', $election->id_election) }}"
+                        class="btn btn-warning btn-sm"
+                        title="Modifier">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+
+                        <form action="{{ route('elections.destroy', $election->id_election) }}"
+                            method="POST"
+                            style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Annuler cette élection ?')"
+                                    title="Annuler">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </div>
             </tr>
             @endforeach
         </tbody>

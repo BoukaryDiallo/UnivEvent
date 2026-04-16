@@ -11,6 +11,7 @@ class ListeElectorale extends Model
     protected $fillable = [
         'id_election',
         'id_etudiant',
+        'statut_snapshot',
     ];
 
     public function etudiant()

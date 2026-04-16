@@ -1,118 +1,134 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-5">
+<div class="container-fluid py-4" style="background:#f4f6f9; min-height:100vh;">
 
-    <!-- TITRE -->
-    <h2 class="text-center text-success mb-4">
-        📊 Résultats en temps réel - {{ $election->titre }}
-    </h2>
+    <!-- HEADER -->
+    <div class="mb-4">
+        <h3 class="fw-bold text-success">Tableau de bord Administrateur</h3>
+        <p class="text-muted mb-0">Vue globale du système UnivEvent</p>
+    </div>
 
-    <!-- CARDS STATS -->
-    <div class="row mb-4">
+    <!-- ACTIONS RAPIDES -->
+    <div class="mb-4">
+        <div class="d-flex flex-wrap gap-2">
 
-        <div class="col-md-4">
-            <div class="card shadow border-success">
-                <div class="card-body text-center">
-                    <h5>Total votes</h5>
-                    <h2 class="text-success">{{ $totalVotes }}</h2>
-                </div>
+            <a href="#" class="btn btn-success shadow-sm">
+                <i class="fas fa-plus me-1"></i> Nouvelle élection
+            </a>
+
+            <a href="#" class="btn btn-outline-success">
+                <i class="fas fa-users me-1"></i> Ajouter étudiants
+            </a>
+
+            <a href="#" class="btn btn-outline-success">
+                <i class="fas fa-user-check me-1"></i> Valider candidatures
+            </a>
+
+            <a href="#" class="btn btn-outline-success">
+                <i class="fas fa-vote-yea me-1"></i> Ouvrir vote
+            </a>
+
+            <a href="#" class="btn btn-outline-success">
+                <i class="fas fa-chart-bar me-1"></i> Voir résultats
+            </a>
+
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <div class="p-3 rounded shadow-sm" style="background:#e9f7ef;">
+                <small class="text-muted">Étudiants</small>
+                <h2 class="text-success fw-bold">1250</h2>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card shadow border-success">
-                <div class="card-body text-center">
-                    <h5>Tour actuel</h5>
-                    <h2 class="text-success">{{ $election->tour }}</h2>
-                </div>
+        <div class="col-md-3">
+            <div class="p-3 rounded shadow-sm" style="background:#e8f0fe;">
+                <small class="text-muted">Élections</small>
+                <h2 class="text-success fw-bold">8</h2>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card shadow border-success">
-                <div class="card-body text-center">
-                    <h5>Statut</h5>
-                    <h2 class="text-success">{{ $election->statut }}</h2>
-                </div>
+        <div class="col-md-3">
+            <div class="p-3 rounded shadow-sm" style="background:#fff4e5;">
+                <small class="text-muted">Candidatures</small>
+                <h2 class="text-success fw-bold">42</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="p-3 rounded shadow-sm" style="background:#fce8e6;">
+                <small class="text-muted">Votes</small>
+                <h2 class="text-success fw-bold">980</h2>
             </div>
         </div>
 
     </div>
 
-    <!-- GRAPHIQUE -->
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <canvas id="resultatsChart" height="100"></canvas>
-        </div>
-    </div>
+    <div class="row g-4">
 
-    <!-- DETAILS CANDIDATS -->
-    <div class="card shadow">
-        <div class="card-header bg-success text-white">
-            🧑‍💼 Détails des candidats
-        </div>
+        <!-- ACTIVITÉS -->
+        <div class="col-lg-6">
+            <div class="p-3 rounded shadow-sm" style="background:#ffffffcc; backdrop-filter:blur(5px);">
 
-        <div class="card-body">
+                <h6 class="fw-bold text-success mb-3">
+                    Activités récentes
+                </h6>
 
-            @foreach($resultats as $r)
+                <div class="list-group">
 
-                <div class="mb-4">
-
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <div class="d-flex align-items-center">
-
-                            <img src="{{ asset('storage/'.$r->candidat->photo) }}"
-                                 class="rounded-circle me-3"
-                                 width="50" height="50">
-
-                            <div>
-                                <h6 class="mb-0">
-                                    {{ $r->candidat->user->name }}
-                                </h6>
-
-                                <small class="text-muted">
-                                    Statut : {{ $r->statut }}
-                                </small>
-                            </div>
-
-                        </div>
-
-                        <div>
-                            <strong>{{ $r->nb_voix }} votes</strong>
-                            <span class="text-success">
-                                ({{ $r->pourcentage }}%)
-                            </span>
-                        </div>
-
+                    <div class="list-group-item border-0 mb-2 rounded" style="background:#f8f9fa;">
+                        🟢 Nouvelle élection créée
                     </div>
 
-                    <!-- BARRE PROGRESSION -->
-                    <div class="progress mt-2" style="height: 20px;">
-                        <div class="progress-bar bg-success"
-                             style="width: {{ $r->pourcentage }}%">
-                            {{ $r->pourcentage }}%
-                        </div>
+                    <div class="list-group-item border-0 mb-2 rounded" style="background:#f8f9fa;">
+                        🟡 Candidature en attente de validation
+                    </div>
+
+                    <div class="list-group-item border-0 mb-2 rounded" style="background:#f8f9fa;">
+                        🔵 Liste électorale générée
+                    </div>
+
+                    <div class="list-group-item border-0 mb-2 rounded" style="background:#f8f9fa;">
+                        🟢 Vote en cours
                     </div>
 
                 </div>
 
-            @endforeach
-
+            </div>
         </div>
+
+        <!-- ÉLECTIONS -->
+        <div class="col-lg-6">
+            <div class="p-3 rounded shadow-sm" style="background:#ffffffcc; backdrop-filter:blur(5px);">
+
+                <h6 class="fw-bold text-success mb-3">
+                    Élections en cours
+                </h6>
+
+                <div class="mb-3 p-2 rounded" style="background:#f8f9fa;">
+                    <strong>Délégué UFR SEA</strong><br>
+                    <span class="badge bg-success">EN COURS</span>
+                </div>
+
+                <div class="mb-3 p-2 rounded" style="background:#f8f9fa;">
+                    <strong>Délégué Informatique</strong><br>
+                    <span class="badge bg-warning text-dark">BROUILLON</span>
+                </div>
+
+                <div class="p-2 rounded" style="background:#f8f9fa;">
+                    <strong>Délégué Mathématiques</strong><br>
+                    <span class="badge bg-secondary">TERMINÉ</span>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 
 </div>
 @endsection
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    window.labels = @json($resultats->pluck('candidat.user.name'));
-    window.data = @json($resultats->pluck('nb_voix'));
-</script>
-
-<script src="{{ asset('js/resultats.js') }}"></script>
-@endpush

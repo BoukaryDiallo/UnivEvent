@@ -10,9 +10,10 @@ use App\Http\Controllers\VoteController;
 use App\Http\Controllers\UfrController;
 use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\FiliereController;
+use App\Http\Controllers\DepouillementController;
 
 Route::get('/', function () {
-    return view('pages.home');
+    return view('pages.admin.dashboard');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -35,22 +36,53 @@ Route::resource('etudiants', EtudiantController::class);
 
 /////////////////////////////////////GESTION DES ETUDIANTS///////////////////////////////////
 Route::resource('elections', ElectionController::class);
-Route::get('/elections/{id}/ouvrir', [ElectionController::class, 'ouvrir']);
-Route::get('/elections/{id}/cloturer', [ElectionController::class, 'cloturer']);
-Route::post('/elections/{id}/generer-liste', [ElectionController::class, 'genererListeElectorale'])
-     ->name('elections.generer-liste');
+Route::get('/elections/{election}/prepare',
+    [ElectionController::class, 'prepare'])
+    ->name('elections.prepare');
+
+Route::post('/elections/{election}/generer-liste',
+    [ElectionController::class, 'genererListe'])
+    ->name('elections.genererListe');
+Route::get('/elections/{election}/generer-liste', [ElectionController::class, 'formGenererListe'])
+    ->name('elections.genererListe.form');
+
+Route::get('/elections/{election}/ouvrir',
+    [ElectionController::class, 'ouvrir'])
+    ->name('elections.ouvrir');
+Route::get('/elections/{election}/cloturer', [ElectionController::class, 'cloturer'])
+    ->name('elections.cloturer');
+
 
 /////////////////////////////////////GESTION DES CANDIDATURES///////////////////////////////////
 Route::resource('candidatures', CandidatureController::class);
 
 /////////////////////////////////////GESTION DES VOTES///////////////////////////////////
+
+
+// Liste des élections ouvertes
+Route::get('/votes/participer', [VoteController::class, 'electionsOuvertes'])
+    ->name('votes.elections');
+
+// Liste des candidats d'une élection
+Route::get('/votes/{election}/candidats', [VoteController::class, 'candidats'])
+    ->name('votes.candidats');
+
+// Détail d'un candidat
+Route::get('/votes/candidat/{candidature}', [VoteController::class, 'showCandidat'])
+    ->name('votes.candidat');
+
+// Enregistrement du vote
+Route::post('/votes/store', [VoteController::class, 'store'])
+    ->name('votes.store');
+
 Route::resource('votes', VoteController::class);
 
-// Route::get('/resultats', [ResultatController::class, 'index'])
-    // ->name('resultats.index');
-//
-// Route::get('/resultats/{id}', [ResultatController::class, 'show'])
-    // ->name('resultats.show');
+Route::get('/elections/{election}/depouillement', [DepouillementController::class, 'depouiller'])
+    ->name('depouillement.depouiller');
+
+// Route::resource('resultats', ResultatController::class);
+
+
 
 /////////////////////////////////////GESTION DES UFR///////////////////////////////////
 Route::resource('ufr', UfrController::class);

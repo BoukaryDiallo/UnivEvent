@@ -1,97 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>UnivEvent - Gestion des Élections</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap CDN -->
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome CDN -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- CSS Select2 -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- ton CSS global -->
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <style>
+        body {
+            overflow-x: hidden;
+        }
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+        }
+        .sidebar .nav-link {
+            color: #ffffff;
+            margin-bottom: 6px;
+            border-radius: 6px;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #198754;
+        }
+        .content-area {
+            width: 100%;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+    </style>
 
-    <!-- styles spécifiques poussés par les pages -->
     @stack('styles')
 </head>
+
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand" href="{{ route('home') }}">
-      <i class="fas fa-vote-yea me-2"></i>UnivEvent
+<!-- TOP NAVBAR -->
+<nav class="navbar navbar-dark bg-dark px-3">
+    <a class="navbar-brand" href="#">
+        <i class="fas fa-vote-yea me-2"></i>UnivEvent Admin
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link active" href="{{ route('home') }}">
-            <i class="fas fa-home me-1"></i>Accueil
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ route('elections.index') }}">
-            <i class="fas fa-poll me-1"></i>Élections
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ route('candidatures.index') }}">
-            <i class="fas fa-users me-1"></i>Candidatures
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ route('votes.index') }}">
-            <i class="fas fa-vote-yea me-1"></i>Votes
-          </a>
-        </li>
-        @guest
-          <li class="nav-item">
-            <a class="nav-link" href="{{ route('login') }}">
-              <i class="fas fa-sign-in-alt me-1"></i>Connexion
-            </a>
-          </li>
-        @else
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-user me-1"></i>{{ Auth::user()->name }}
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{{ route('dashboard') }}">
-                <i class="fas fa-tachometer-alt me-1"></i>Tableau de bord
-              </a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{{ route('logout') }}">
-                <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
-              </a></li>
-            </ul>
-          </li>
-        @endguest
-      </ul>
-    </div>
-  </div>
 </nav>
 
-<!-- CONTENU -->
-<div class="container mt-4">
-    @yield('content')
+<div class="d-flex">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar bg-dark text-white p-3">
+
+        <h6 class="text-uppercase text-muted mb-3">Navigation</h6>
+
+        <ul class="nav nav-pills flex-column">
+
+            <li class="nav-item">
+            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+            </li>
+
+            <li class="nav-item">
+            <a href="{{ route('ufr.index') }}" class="nav-link {{ request()->routeIs('ufr.*') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-university me-2"></i>UFR
+                </a>
+            </li>
+
+            <li class="nav-item">
+            <a href="{{ route('departement.index') }}" class="nav-link {{ request()->routeIs('departement.*') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-building me-2"></i>Départements
+                </a>
+            </li>
+
+            <li class="nav-item">
+            <a href="{{ route('filiere.index') }}" class="nav-link {{ request()->routeIs('filiere.*') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-layer-group me-2"></i>Filières
+                </a>
+            </li>
+
+            <li class="nav-item">
+            <a href="{{ route('etudiants.index') }}" class="nav-link {{ request()->routeIs('etudiants.*') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-users me-2"></i>Étudiants
+                </a>
+            </li>
+
+            <hr class="text-secondary">
+
+            <h6 class="text-uppercase text-muted mb-3">Processus électoral</h6>
+
+            <li class="nav-item">
+            <a href="{{ route('elections.index') }}" class="nav-link {{ request()->routeIs('elections.*') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-poll me-2"></i>Élections
+                </a>
+            </li>
+
+            <li class="nav-item">
+            <a href="{{ route('elections.index') }}" class="nav-link {{ request()->routeIs('elections.*') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-list me-2"></i>Listes électorales
+                </a>
+            </li>
+
+            <li class="nav-item">
+            <a href="{{ route('candidatures.index') }}" class="nav-link {{ request()->routeIs('candidatures.*') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-user-check me-2"></i>Candidatures
+                </a>
+            </li>
+
+            <li class="nav-item">
+            <a href="{{ route('votes.index') }}" class="nav-link {{ request()->routeIs('votes.*') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-vote-yea me-2"></i>Votes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('votes.elections') }}"
+                class="nav-link {{ request()->routeIs('votes.elections') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-play-circle me-2"></i>
+                    Participer à un vote
+                </a>
+            </li>
+
+            <li class="nav-item">
+            <a href="#" class="nav-link {{ request()->routeIs('resultats.*') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-chart-bar me-2"></i>Résultats & Dépouillement
+                </a>
+            </li>
+
+            <hr class="text-secondary">
+
+            <h6 class="text-uppercase text-muted mb-3">Administration</h6>
+
+            <li class="nav-item">
+            <a href="{{ route('create.user') }}" class="nav-link {{ request()->is('create_user') ? 'active bg-success' : '' }}">
+                    <i class="fas fa-user-cog me-2"></i>Utilisateurs
+                </a>
+            </li>
+
+            <li class="nav-item">
+            <a href="#" class="nav-link">
+                    <i class="fas fa-cogs me-2"></i>Configuration
+                </a>
+            </li>
+
+        </ul>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="content-area p-4">
+        @yield('content')
+    </div>
+
 </div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- JS Select2 -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-
-<!-- JS global -->
-<script src="{{ asset('js/app.js') }}"></script>
-
-<!-- scripts spécifiques poussés par les pages -->
 @stack('scripts')
-
 </body>
 </html>

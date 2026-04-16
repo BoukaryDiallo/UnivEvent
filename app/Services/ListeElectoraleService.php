@@ -2,48 +2,55 @@
 
 namespace App\Services;
 
+use App\Models\Election;
 use App\Models\Etudiant;
 use App\Models\ListeElectorale;
-use App\Models\Election;
+use Illuminate\Validation\ValidationException;
 
-class ListeElectoraleService
-{
-    /**
-     * 🎯 Générer la liste électorale pour une élection
-     */
-    public function generer(Election $election, array $filters = [])
+    class ListeElectoraleService
     {
-        // Vérifier si déjà générée
-        $exist = ListeElectorale::where('id_election', $election->id_election)->exists();
+        public function generer(Election $election, array $filters = []): int
+        {
+            $this->verifierExistence($election);
 
-        if ($exist) {
-            throw new \Exception("La liste électorale a déjà été générée pour cette élection.");
+            $etudiants = $this->buildQuery($election, $filters)->get();
+
+            $this->insertListe($election, $etudiants);
+
+            return $etudiants->count();
         }
 
-        $query = Etudiant::query()->where('statut', 'inscrit');
-
-        if ($election->type === 'ufr') {
-            if (!$election->id_ufr) throw new \Exception('UFR requise.');
-            $query->where('id_ufr', $election->id_ufr);
-        } elseif ($election->type === 'promotion') {
-            if (!$election->id_filiere) throw new \Exception('Filière requise.');
-            if (empty($filters['niveau'])) throw new \Exception('Niveau requis pour promotion.');
-            $query->where('id_filiere', $election->id_filiere)
-                  ->where('niveau', $filters['niveau']);
-        } else {
-            throw new \Exception("Type non supporté: " . $election->type);
+        private function verifierExistence(Election $election): void
+        {
+            if (ListeElectorale::where('id_election', $election->id_election)->exists()) {
+                throw new \RuntimeException("La liste électorale existe déjà.");
+            }
         }
 
-        $etudiants = $query->get();
+        private function buildQuery(Election $election, array $filters)
+        {
+            $query = Etudiant::where('statut', 'inscrit');
 
-        foreach ($etudiants as $etudiant) {
-            ListeElectorale::create([
-                'id_election' => $election->id_election,
-                'id_etudiant' => $etudiant->id,
-                'statut_snapshot' => $etudiant->statut,
-            ]);
+            if ($election->type === 'ufr') {
+                $query->where('id_ufr', $election->id_ufr);
+            }
+
+            if ($election->type === 'promotion') {
+                $query->where('id_filiere', $election->id_filiere)
+                    ->where('niveau', $filters['niveau']);
+            }
+
+            return $query;
         }
 
-        return $etudiants->count();
+        private function insertListe(Election $election, $etudiants): void
+        {
+            foreach ($etudiants as $etudiant) {
+                ListeElectorale::create([
+                    'id_election' => $election->id_election,
+                    'id_etudiant' => $etudiant->id,
+                    'statut_snapshot' => $etudiant->statut,
+                ]);
+            }
+        }
     }
-}
