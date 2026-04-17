@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\EtudiantController;
@@ -126,5 +127,11 @@ Route::resource('departement', DepartementController::class);
 /////////////////////////////////////GESTION DES FILIERES///////////////////////////////////
 Route::resource('filiere', FiliereController::class);
 Route::get('departements/by-ufr/{ufr_id}', [FiliereController::class, 'getDepartementsByUfr']);
+
+Route::middleware(['auth', 'verified'])
+    ->middleware('role:admin')
+    ->group(function () {
+        Route::get('roles', [UserController::class, 'index'])->name('roles');
+    });
 
 require __DIR__.'/settings.php';
