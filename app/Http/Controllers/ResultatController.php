@@ -5,64 +5,105 @@ namespace App\Http\Controllers;
 use App\Models\Election;
 use App\Models\Vote;
 use App\Models\Candidature;
-use Illuminate\Support\Facades\DB;
 
 class ResultatController extends Controller
 {
-    /**
-     * HISTORIQUE DES ÉLECTIONS
-     */
     public function index()
     {
-        $elections = Election::with('candidatures')
+        $elections = Election::withCount('votes')
             ->orderByDesc('created_at')
             ->get();
 
         return view('pages.resultats.historique', compact('elections'));
     }
 
-    /**
-     * RÉSULTATS D’UNE ÉLECTION (DETAIL COMPLET)
-     */
-    public function show($id)
+    public function show(Election $election)
     {
-        $election = Election::with([
-            'candidatures.user',
-            'listesElectorales'
-        ])->findOrFail($id);
+        $election->load(['candidatures.user', 'listesElectorales']);
 
-        $votes = Vote::where('id_election', $id)
-            ->where('tour', $election->tour);
+        $totalVotes = Vote::where('id_election', $election->id_election)->count();
+        $totalVoters = $election->listesElectorales()->count();
 
-        $totalVotes = $votes->count();
+        $candidates = $this->getCandidates($election, $totalVotes);
+        $finalResults = $this->getFinalResults($election, $totalVotes);
 
-        $resultats = $votes->select(
-                'id_candidature',
-                DB::raw('count(*) as nb_voix')
-            )
-            ->groupBy('id_candidature')
-            ->orderByDesc('nb_voix')
-            ->get();
+        return view('pages.votes.resultats_vote', [
+            'election' => $this->formatElection($election, $totalVotes, $totalVoters),
+            'candidates' => $candidates,
+            'finalResults' => $finalResults
+        ]);
+    }
 
-        // enrichir avec infos candidat
-        foreach ($resultats as $r) {
+    private function getCandidates($election, $totalVotes)
+    {
+        return $election->candidatures()
+            ->with('user')
+            ->where('statut', 'validee')
+            ->get()
+            ->map(function ($cand) use ($election, $totalVotes) {
 
-            $candidat = Candidature::with('user')
-                ->find($r->id_candidature);
+                $votes = Vote::where('id_candidature', $cand->id_candidature)
+                    ->where('id_election', $election->id_election)
+                    ->count();
 
-            $r->candidat = $candidat;
+                return (object)[
+                    'name' => $cand->user->name ?? 'Candidat',
+                    'photo' => $cand->user->photo ?? null,
+                    'slogan' => $cand->slogan ?? '',
+                    'votes' => $votes,
+                    'vote_percentage' => $totalVotes > 0
+                        ? round(($votes * 100) / $totalVotes, 2)
+                        : 0,
+                ];
+            });
+    }
 
-            $r->pourcentage = $totalVotes > 0
-                ? round(($r->nb_voix * 100) / $totalVotes, 2)
-                : 0;
-
-            $r->statut = $candidat->resultat;
+    private function getFinalResults($election, $totalVotes)
+    {
+        if ($election->statut !== 'cloturee') {
+            return null;
         }
 
-        return view('pages.resultats.dashboard', compact(
-            'election',
-            'resultats',
-            'totalVotes'
-        ));
+        return Candidature::with('user')
+            ->where('id_election', $election->id_election)
+            ->where('statut', 'validee')
+            ->get()
+            ->map(function ($cand) use ($election, $totalVotes) {
+
+                $votes = Vote::where('id_candidature', $cand->id_candidature)
+                    ->where('id_election', $election->id_election)
+                    ->count();
+
+                return (object)[
+                    'name' => $cand->user->name,
+                    'photo' => $cand->user->photo,
+                    'votes' => $votes,
+                    'percentage' => $totalVotes > 0
+                        ? round(($votes * 100) / $totalVotes, 2)
+                        : 0,
+                    'isWinner' => false
+                ];
+            })
+            ->sortByDesc('votes')
+            ->values()
+            ->map(function ($item, $index) {
+                $item->isWinner = $index === 0;
+                return $item;
+            });
+    }
+
+    private function formatElection($election, $totalVotes, $totalVoters)
+    {
+        return (object)[
+            'id_election' => $election->id_election,
+            'title' => $election->titre,
+            'promotion' => $election->promotion,
+            'status' => ucfirst($election->statut),
+            'votes_count' => $totalVotes,
+            'total_voters' => $totalVoters,
+            'progress' => $totalVoters > 0
+                ? round(($totalVotes * 100) / $totalVoters, 2)
+                : 0
+        ];
     }
 }

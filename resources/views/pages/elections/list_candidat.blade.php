@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mt-5">
 
-    <h3 class="text-success mb-4">
+    <h3 class="text-success mb-4 fw-bold">
         {{ $election->titre }}
     </h3>
 
@@ -11,61 +11,70 @@
         ← Retour aux élections
     </a>
 
-    <div class="row">
+    {{-- 🔔 MESSAGES FLASH (IMPORTANT) --}}
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
-        @foreach($candidatures as $c)
-            <div class="col-md-4 col-sm-6 mb-4">
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
 
-                <div class="card h-100 shadow-sm border-0">
-
-                    {{-- IMAGE PROFIL --}}
-                    <div class="text-center p-3">
-                        <img src="{{ $c->user->photo ?? 'https://via.placeholder.com/150' }}"
-                             class="rounded-circle"
-                             width="120"
-                             height="120"
-                             style="object-fit: cover;">
-                    </div>
-
-                    {{-- BODY --}}
-                    <div class="card-body text-center">
-
-                        <h5 class="fw-bold mb-2">
-                            {{ $c->user->name }}
-                        </h5>
-
-                        <p class="text-muted small">
-                            {{ Str::limit($c->programme ?? 'Programme non disponible', 80) }}
-                        </p>
-
-                    </div>
-
-                    {{-- FOOTER ACTIONS --}}
-                    <div class="card-footer bg-white border-0 d-flex justify-content-between">
-
-                        <a href="{{ route('votes.candidat', $c) }}"
-                           class="btn btn-outline-info btn-sm w-50 me-1">
-                            Voir profil
-                        </a>
-
-                        <form method="POST" action="{{ route('votes.store') }}" class="w-50 ms-1">
-                            @csrf
-                            <input type="hidden" name="id_election" value="{{ $election->id_election }}">
-                            <input type="hidden" name="id_candidature" value="{{ $c->id_candidature }}">
-
-                            <button class="btn btn-success btn-sm w-100">
-                                Voter
-                            </button>
-                        </form>
-
-                    </div>
-
-                </div>
-
-            </div>
-        @endforeach
-
+    {{-- BANDEAU TITRE --}}
+    <div class="mb-3">
+        <div class="bg-success text-white fw-bold px-3 py-2 rounded">
+            {{ $election->titre }}
+        </div>
     </div>
 
+    {{-- LISTE CANDIDATS --}}
+    @foreach($candidatures as $c)
+        <div class="candidat-item mb-3 d-flex align-items-center justify-content-between">
+
+            {{-- PHOTO + INFOS --}}
+            <div class="d-flex align-items-center">
+                <img src="{{ $c->user->photo ?? 'https://ui-avatars.com/api/?name=Candidate&background=0D8ABC&color=fff&size=128' }}"
+                     class="candidat-photo me-3">
+
+                <div>
+                    <div class="fw-bold fs-5 text-dark">
+                        {{ $c->user->name }}
+                    </div>
+                    <div class="text-muted small">
+                        {{ Str::limit($c->programme ?? 'Programme non disponible', 80) }}
+                    </div>
+                </div>
+            </div>
+
+            {{-- ACTIONS --}}
+            <div class="d-flex gap-2">
+                <a href="{{ route('votes.candidat.show', $c) }}"
+                   class="btn btn-profil">
+                    Voir Profil
+                </a>
+
+                <form method="POST" action="{{ route('votes.store') }}">
+                    @csrf
+                    <input type="hidden" name="id_election" value="{{ $election->id_election }}">
+                    <input type="hidden" name="id_candidature" value="{{ $c->id_candidature }}">
+
+                    <button class="btn btn-voter">
+                        Voter
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    @endforeach
+
 </div>
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/vote.css') }}">
+@endpush
+
 @endsection

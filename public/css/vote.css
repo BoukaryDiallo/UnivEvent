@@ -26,3 +26,41 @@ canvas {
 h2, h5 {
     font-weight: 600;
 }
+
+/*////////////////////////////////////Page Listes des candidats vue de l'electeur list_candidat.blade.php/////////////////////////*/
+
+.candidat-item{
+    background: linear-gradient(90deg, #e8f5e9, #d0f0d6);
+    border-radius: 10px;
+    padding: 15px 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.candidat-item:hover{
+    transform: scale(1.01);
+}
+
+.candidat-photo{
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.btn-profil{
+    background-color: #0d6efd;
+    color: white;
+    border-radius: 6px;
+    padding: 6px 15px;
+    font-weight: 500;
+}
+
+.btn-voter{
+    background-color: #198754;
+    color: white;
+    border-radius: 6px;
+    padding: 6px 15px;
+    font-weight: 500;
+}
+

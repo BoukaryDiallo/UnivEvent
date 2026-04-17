@@ -45,47 +45,5 @@ input[type="file"] {
     font-weight: 600;
 }
 
-.candidat-page {
-    min-height: 85vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 
-.candidat-card {
-    width: 550px;
-    border-radius: 20px;
-    padding: 25px;
-}
-
-.candidat-photo {
-    width: 150px;
-    height: 150px;
-    object-fit: cover;
-}
-
-.candidat-icon {
-    font-size: 120px;
-    color: #6c757d;
-}
-
-.candidat-programme {
-    color: #6c757d;
-    font-size: 14px;
-    margin-bottom: 30px;
-    min-height: 80px;
-}
-
-.candidat-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.candidat-btn {
-    width: 200px;
-    height: 50px;
-    font-size: 16px;
-    font-weight: 600;
-}
 
