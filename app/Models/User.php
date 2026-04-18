@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'role', 'est_actif'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -29,6 +29,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'est_actif' => 'boolean'
         ];
+    }
+
+
+    public function isAdmin(){
+        return $this->role === 'admin';
+    }
+
+    public function isEtudiant(){
+        return $this->role === 'etudiant';
+    }
+
+    public function isEnseignant(){
+        return $this->role === 'enseignant';
     }
 }
