@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureScolarite;
 use App\Http\Middleware\EnsureStudent;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'student' => EnsureStudent::class,
+            'scolarite' => EnsureScolarite::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

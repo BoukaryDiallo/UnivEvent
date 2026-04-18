@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DiplomaRequestController as AdminDiplomaRequestController;
 use App\Http\Controllers\DiplomaDocumentController;
 use App\Http\Controllers\DiplomaRequestController;
 use Illuminate\Support\Facades\Route;
@@ -22,4 +23,12 @@ Route::middleware(['auth', 'verified', 'student'])
         Route::delete('/{diplomaRequest}/documents/{document}', [DiplomaDocumentController::class, 'destroy'])
             ->scopeBindings()
             ->name('documents.destroy');
+    });
+
+Route::middleware(['auth', 'verified', 'scolarite'])
+    ->prefix('admin/diplomas')
+    ->name('admin.diplomas.')
+    ->group(function () {
+        Route::get('/', [AdminDiplomaRequestController::class, 'index'])->name('index');
+        Route::get('/{diplomaRequest}', [AdminDiplomaRequestController::class, 'show'])->name('show');
     });

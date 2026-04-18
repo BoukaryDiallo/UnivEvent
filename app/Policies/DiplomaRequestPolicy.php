@@ -46,4 +46,10 @@ class DiplomaRequestPolicy
         return $user->id === $request->owner_id
             && $request->status === DiplomaRequestStatus::Draft;
     }
+
+    public function instruct(User $user, DiplomaRequest $request): bool
+    {
+        return $user->isScolarite()
+            && $request->status !== DiplomaRequestStatus::Draft;
+    }
 }

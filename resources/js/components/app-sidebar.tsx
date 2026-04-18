@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, GraduationCap, LayoutGrid, UserSquare2Icon } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, ClipboardCheck, FolderGit2, GraduationCap, LayoutGrid } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -14,10 +14,11 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
 import { index as diplomasIndex } from '@/routes/diplomas';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
+const buildMainNav = (isScolarite: boolean): NavItem[] => [
     {
         title: 'Dashboard',
         href: dashboard(),
@@ -28,6 +29,15 @@ const mainNavItems: NavItem[] = [
         href: diplomasIndex(),
         icon: GraduationCap,
     },
+    ...(isScolarite
+        ? [
+              {
+                  title: 'Dossiers à instruire',
+                  href: adminDiplomasIndex(),
+                  icon: ClipboardCheck,
+              } satisfies NavItem,
+          ]
+        : []),
 ];
 
 const footerNavItems: NavItem[] = [
@@ -44,6 +54,9 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { auth } = usePage().props;
+    const mainNavItems = buildMainNav(auth?.isScolarite ?? false);
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
