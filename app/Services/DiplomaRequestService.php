@@ -3,15 +3,23 @@
 namespace App\Services;
 
 use App\Enums\DiplomaRequestStatus;
+use App\Enums\DocumentType;
+use App\Models\DiplomaDocument;
 use App\Models\DiplomaRequest;
 use App\Models\DiplomaRequestEvent;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DiplomaRequestService
 {
+    public const SUBMISSION_MINIMUM_DOCUMENTS = 1;
+
     public function createDraft(User $owner, array $attributes): DiplomaRequest
     {
         return DB::transaction(function () use ($owner, $attributes) {
@@ -20,6 +28,68 @@ class DiplomaRequestService
             $this->recordEvent($request, null, DiplomaRequestStatus::Draft, $owner, 'Brouillon créé');
 
             return $request;
+        });
+    }
+
+    public function attachDocument(
+        DiplomaRequest $request,
+        UploadedFile $file,
+        DocumentType $type,
+    ): DiplomaDocument {
+        $path = $file->storeAs(
+            "diplomas/{$request->id}",
+            Str::uuid().'.'.$file->getClientOriginalExtension(),
+            'local',
+        );
+
+        return $request->documents()->create([
+            'type' => $type,
+            'path' => $path,
+            'original_name' => $file->getClientOriginalName(),
+            'mime' => $file->getClientMimeType(),
+            'size' => $file->getSize(),
+        ]);
+    }
+
+    public function removeDocument(DiplomaDocument $document): void
+    {
+        DB::transaction(function () use ($document) {
+            Storage::disk('local')->delete($document->path);
+            $document->delete();
+        });
+    }
+
+    public function streamDocument(DiplomaDocument $document): StreamedResponse
+    {
+        return Storage::disk('local')->download($document->path, $document->original_name);
+    }
+
+    public function submit(DiplomaRequest $request, User $actor): DiplomaRequest
+    {
+        return DB::transaction(function () use ($request, $actor) {
+            if ($request->status !== DiplomaRequestStatus::Draft) {
+                throw new \DomainException('La demande ne peut plus être soumise.');
+            }
+
+            if ($request->documents()->count() < self::SUBMISSION_MINIMUM_DOCUMENTS) {
+                throw ValidationException::withMessages([
+                    'documents' => sprintf(
+                        'Vous devez téléverser au moins %d pièce(s) avant de soumettre.',
+                        self::SUBMISSION_MINIMUM_DOCUMENTS,
+                    ),
+                ]);
+            }
+
+            $from = $request->status;
+
+            $request->forceFill([
+                'status' => DiplomaRequestStatus::Submitted,
+                'submitted_at' => now(),
+            ])->save();
+
+            $this->recordEvent($request, $from, DiplomaRequestStatus::Submitted, $actor, 'Demande soumise');
+
+            return $request->refresh();
         });
     }
 

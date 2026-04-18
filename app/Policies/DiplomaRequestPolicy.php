@@ -40,4 +40,10 @@ class DiplomaRequestPolicy
         return $user->id === $request->owner_id
             && $request->status === DiplomaRequestStatus::Draft;
     }
+
+    public function addDocument(User $user, DiplomaRequest $request): bool
+    {
+        return $user->id === $request->owner_id
+            && $request->status === DiplomaRequestStatus::Draft;
+    }
 }

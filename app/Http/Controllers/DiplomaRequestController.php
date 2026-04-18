@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\DiplomaRequestStatus;
+use App\Enums\DocumentType;
 use App\Http\Requests\Diplomas\StoreDiplomaRequest;
+use App\Http\Requests\Diplomas\SubmitDiplomaRequest;
 use App\Models\DiplomaRequest;
+use App\Presenters\DiplomaRequestPresenter;
 use App\Services\DiplomaRequestService;
 use App\Support\AcademicYear;
 use Illuminate\Http\RedirectResponse;
@@ -22,16 +24,7 @@ class DiplomaRequestController extends Controller
             ->where('owner_id', $request->user()->id)
             ->latest('updated_at')
             ->get()
-            ->map(fn (DiplomaRequest $r) => [
-                'id' => $r->id,
-                'tracking_code' => $r->tracking_code,
-                'diploma_type' => $r->diploma_type,
-                'academic_year' => $r->academic_year,
-                'status' => $r->status->value,
-                'status_label' => $r->status->label(),
-                'submitted_at' => $r->submitted_at?->toIso8601String(),
-                'updated_at' => $r->updated_at->toIso8601String(),
-            ]);
+            ->map(DiplomaRequestPresenter::row(...));
 
         return Inertia::render('diplomas/index', [
             'requests' => $requests,
@@ -60,40 +53,31 @@ class DiplomaRequestController extends Controller
             ->with('success', 'Brouillon créé. Vous pouvez désormais téléverser vos pièces justificatives.');
     }
 
-    public function show(DiplomaRequest $diplomaRequest): Response
+    public function show(Request $request, DiplomaRequest $diplomaRequest): Response
     {
         $this->authorize('view', $diplomaRequest);
 
         $diplomaRequest->load(['documents', 'events.actor', 'appointment.pickupSlot']);
 
+        $viewer = $request->user();
+
         return Inertia::render('diplomas/show', [
-            'request' => [
-                'id' => $diplomaRequest->id,
-                'tracking_code' => $diplomaRequest->tracking_code,
-                'diploma_type' => $diplomaRequest->diploma_type,
-                'academic_year' => $diplomaRequest->academic_year,
-                'status' => $diplomaRequest->status->value,
-                'status_label' => $diplomaRequest->status->label(),
-                'submitted_at' => $diplomaRequest->submitted_at?->toIso8601String(),
-                'rejected_reason' => $diplomaRequest->status === DiplomaRequestStatus::Rejected
-                    ? $diplomaRequest->rejected_reason
-                    : null,
-                'documents' => $diplomaRequest->documents->map(fn ($d) => [
-                    'id' => $d->id,
-                    'type' => $d->type->value,
-                    'type_label' => $d->type->label(),
-                    'original_name' => $d->original_name,
-                    'validated_at' => $d->validated_at?->toIso8601String(),
-                ]),
-                'events' => $diplomaRequest->events->sortByDesc('occurred_at')->values()->map(fn ($e) => [
-                    'id' => $e->id,
-                    'from_status' => $e->from_status?->label(),
-                    'to_status' => $e->to_status->label(),
-                    'actor_name' => $e->actor?->name,
-                    'note' => $e->note,
-                    'occurred_at' => $e->occurred_at->toIso8601String(),
-                ]),
-            ],
+            'request' => DiplomaRequestPresenter::detail($diplomaRequest, $viewer),
+            'can' => DiplomaRequestPresenter::abilities($diplomaRequest, $viewer),
+            'documentTypes' => collect(DocumentType::cases())
+                ->map(fn (DocumentType $t) => ['value' => $t->value, 'label' => $t->label()])
+                ->all(),
         ]);
+    }
+
+    public function submit(
+        SubmitDiplomaRequest $request,
+        DiplomaRequest $diplomaRequest,
+        DiplomaRequestService $service,
+    ): RedirectResponse {
+        $service->submit($diplomaRequest, $request->user());
+
+        return to_route('diplomas.show', $diplomaRequest)
+            ->with('success', 'Demande soumise. Elle est désormais en cours d\'instruction.');
     }
 }

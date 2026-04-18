@@ -1,17 +1,39 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { FormEvent, useRef } from 'react';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
+import {
+    destroy as destroyDocument,
+    download as downloadDocument,
+    store as storeDocument,
+} from '@/actions/App/Http/Controllers/DiplomaDocumentController';
+import { submit as submitRequest } from '@/actions/App/Http/Controllers/DiplomaRequestController';
 import { index as diplomasIndex } from '@/routes/diplomas';
 import type { BreadcrumbItem } from '@/types';
 import { DiplomaStatusBadge } from './status-badge';
+
+type Option = { value: string; label: string };
 
 type DocumentRow = {
     id: number;
     type: string;
     type_label: string;
     original_name: string;
+    size: number;
     validated_at: string | null;
+    can_delete: boolean;
 };
 
 type EventRow = {
@@ -36,6 +58,11 @@ type Props = {
         documents: DocumentRow[];
         events: EventRow[];
     };
+    can: {
+        addDocument: boolean;
+        submit: boolean;
+    };
+    documentTypes: Option[];
 };
 
 const DIPLOMA_TYPE_LABEL: Record<string, string> = {
@@ -47,11 +74,48 @@ const DIPLOMA_TYPE_LABEL: Record<string, string> = {
 const formatDateTime = (iso: string) =>
     new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
 
-export default function DiplomaRequestShow({ request }: Props) {
+const formatSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} o`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+};
+
+export default function DiplomaRequestShow({ request, can, documentTypes }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Retraits de diplômes', href: diplomasIndex().url },
         { title: request.tracking_code, href: '#' },
     ];
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const uploadForm = useForm<{ type: string; file: File | null }>({
+        type: documentTypes[0]?.value ?? '',
+        file: null,
+    });
+
+    const handleUpload = (e: FormEvent) => {
+        e.preventDefault();
+        uploadForm.post(storeDocument(request.id).url, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                uploadForm.reset('file');
+                if (fileInputRef.current) fileInputRef.current.value = '';
+            },
+        });
+    };
+
+    const handleDelete = (documentId: number) => {
+        if (!confirm('Supprimer cette pièce ?')) return;
+        router.delete(destroyDocument([request.id, documentId]).url, {
+            preserveScroll: true,
+        });
+    };
+
+    const handleSubmit = () => {
+        if (!confirm('Soumettre cette demande ? Vous ne pourrez plus la modifier.')) return;
+        router.post(submitRequest(request.id).url, {}, { preserveScroll: true });
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -75,17 +139,20 @@ export default function DiplomaRequestShow({ request }: Props) {
                             {request.tracking_code}
                         </p>
                     </div>
-                    <Button variant="outline" asChild>
-                        <Link href={diplomasIndex().url}>Retour à la liste</Link>
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        {can.submit && (
+                            <Button onClick={handleSubmit}>Soumettre la demande</Button>
+                        )}
+                        <Button variant="outline" asChild>
+                            <Link href={diplomasIndex().url}>Retour à la liste</Link>
+                        </Button>
+                    </div>
                 </div>
 
                 {request.rejected_reason && (
                     <Card className="border-destructive/40 bg-destructive/5">
                         <CardHeader>
-                            <CardTitle className="text-destructive">
-                                Demande rejetée
-                            </CardTitle>
+                            <CardTitle className="text-destructive">Demande rejetée</CardTitle>
                             <CardDescription className="text-destructive/80">
                                 {request.rejected_reason}
                             </CardDescription>
@@ -94,39 +161,118 @@ export default function DiplomaRequestShow({ request }: Props) {
                 )}
 
                 <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Pièces justificatives</CardTitle>
-                            <CardDescription>
-                                {request.documents.length === 0
-                                    ? 'Aucune pièce déposée pour le moment.'
-                                    : `${request.documents.length} pièce(s) déposée(s).`}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex flex-col gap-2">
-                            {request.documents.map((doc) => (
-                                <div
-                                    key={doc.id}
-                                    className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
-                                >
-                                    <div className="flex flex-col">
-                                        <span className="font-medium">{doc.type_label}</span>
-                                        <span className="text-xs text-muted-foreground">
-                                            {doc.original_name}
-                                        </span>
+                    <div className="flex flex-col gap-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Pièces justificatives</CardTitle>
+                                <CardDescription>
+                                    {request.documents.length === 0
+                                        ? 'Aucune pièce déposée pour le moment.'
+                                        : `${request.documents.length} pièce(s) déposée(s).`}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-2">
+                                {request.documents.map((doc) => (
+                                    <div
+                                        key={doc.id}
+                                        className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm"
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{doc.type_label}</span>
+                                            <span className="text-xs text-muted-foreground">
+                                                {doc.original_name} · {formatSize(doc.size)}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-muted-foreground">
+                                                {doc.validated_at ? 'Validée' : 'En attente'}
+                                            </span>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                asChild
+                                            >
+                                                <a
+                                                    href={downloadDocument([request.id, doc.id]).url}
+                                                >
+                                                    Télécharger
+                                                </a>
+                                            </Button>
+                                            {doc.can_delete && (
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() => handleDelete(doc.id)}
+                                                >
+                                                    Supprimer
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
-                                    <span className="text-xs text-muted-foreground">
-                                        {doc.validated_at ? 'Validée' : 'En attente'}
-                                    </span>
-                                </div>
-                            ))}
-                            {request.documents.length === 0 && (
-                                <p className="text-sm text-muted-foreground">
-                                    Le dépôt de pièces sera activé prochainement.
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
+                                ))}
+                            </CardContent>
+                        </Card>
+
+                        {can.addDocument && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Déposer une pièce</CardTitle>
+                                    <CardDescription>
+                                        PDF, JPG ou PNG. 5 Mo maximum par fichier.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <form
+                                        onSubmit={handleUpload}
+                                        className="flex flex-col gap-4"
+                                        encType="multipart/form-data"
+                                    >
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="type">Type de pièce</Label>
+                                            <Select
+                                                value={uploadForm.data.type}
+                                                onValueChange={(v) => uploadForm.setData('type', v)}
+                                            >
+                                                <SelectTrigger id="type" className="w-full">
+                                                    <SelectValue placeholder="Sélectionner un type" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {documentTypes.map((opt) => (
+                                                        <SelectItem key={opt.value} value={opt.value}>
+                                                            {opt.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <InputError message={uploadForm.errors.type} />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="file">Fichier</Label>
+                                            <Input
+                                                id="file"
+                                                ref={fileInputRef}
+                                                type="file"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                onChange={(e) =>
+                                                    uploadForm.setData('file', e.target.files?.[0] ?? null)
+                                                }
+                                            />
+                                            <InputError message={uploadForm.errors.file} />
+                                        </div>
+                                        <div>
+                                            <Button
+                                                type="submit"
+                                                disabled={uploadForm.processing || !uploadForm.data.file}
+                                            >
+                                                {uploadForm.processing && <Spinner />}
+                                                Téléverser
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
 
                     <Card>
                         <CardHeader>
