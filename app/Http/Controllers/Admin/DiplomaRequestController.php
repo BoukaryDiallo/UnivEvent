@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\DiplomaRequestStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Diplomas\RejectDiplomaRequest;
 use App\Models\DiplomaRequest;
 use App\Presenters\DiplomaRequestPresenter;
+use App\Services\DiplomaRequestService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -58,7 +61,7 @@ class DiplomaRequestController extends Controller
 
         $diplomaRequest->load([
             'owner:id,name,email',
-            'documents',
+            'documents.validator:id,name',
             'events.actor',
             'appointment.pickupSlot',
         ]);
@@ -66,14 +69,45 @@ class DiplomaRequestController extends Controller
         $viewer = $request->user();
 
         return Inertia::render('admin/diplomas/show', [
-            'request' => [
-                ...DiplomaRequestPresenter::detail($diplomaRequest, $viewer),
-                'owner' => [
-                    'id' => $diplomaRequest->owner->id,
-                    'name' => $diplomaRequest->owner->name,
-                    'email' => $diplomaRequest->owner->email,
-                ],
-            ],
+            'request' => DiplomaRequestPresenter::adminDetail($diplomaRequest, $viewer),
+            'can' => DiplomaRequestPresenter::adminAbilities($diplomaRequest, $viewer),
         ]);
+    }
+
+    public function validateDossier(
+        Request $request,
+        DiplomaRequest $diplomaRequest,
+        DiplomaRequestService $service,
+    ): RedirectResponse {
+        $this->authorize('validateDossier', $diplomaRequest);
+
+        $service->validateDossier($diplomaRequest, $request->user());
+
+        return to_route('admin.diplomas.show', $diplomaRequest)
+            ->with('success', 'Dossier validé.');
+    }
+
+    public function reject(
+        RejectDiplomaRequest $request,
+        DiplomaRequest $diplomaRequest,
+        DiplomaRequestService $service,
+    ): RedirectResponse {
+        $service->reject($diplomaRequest, $request->user(), $request->validated('reason'));
+
+        return to_route('admin.diplomas.show', $diplomaRequest)
+            ->with('success', 'Dossier rejeté.');
+    }
+
+    public function markReadyForPickup(
+        Request $request,
+        DiplomaRequest $diplomaRequest,
+        DiplomaRequestService $service,
+    ): RedirectResponse {
+        $this->authorize('markReadyForPickup', $diplomaRequest);
+
+        $service->markReadyForPickup($diplomaRequest, $request->user());
+
+        return to_route('admin.diplomas.show', $diplomaRequest)
+            ->with('success', 'Dossier marqué comme prêt à retirer.');
     }
 }

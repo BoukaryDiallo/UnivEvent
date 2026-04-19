@@ -64,6 +64,105 @@ class DiplomaRequestService
         return Storage::disk('local')->download($document->path, $document->original_name);
     }
 
+    public function validateDocument(DiplomaDocument $document, User $actor): DiplomaDocument
+    {
+        if ($document->validated_at !== null) {
+            return $document;
+        }
+
+        $document->forceFill([
+            'validated_at' => now(),
+            'validated_by' => $actor->id,
+        ])->save();
+
+        return $document->refresh();
+    }
+
+    public function validateDossier(DiplomaRequest $request, User $actor): DiplomaRequest
+    {
+        return DB::transaction(function () use ($request, $actor) {
+            if ($request->status !== DiplomaRequestStatus::Submitted) {
+                throw new \DomainException('Seules les demandes soumises peuvent être validées.');
+            }
+
+            if ($request->documents()->whereNull('validated_at')->exists()) {
+                throw ValidationException::withMessages([
+                    'documents' => 'Toutes les pièces doivent être validées avant de valider le dossier.',
+                ]);
+            }
+
+            $from = $request->status;
+
+            $request->forceFill([
+                'status' => DiplomaRequestStatus::DocumentsValidated,
+            ])->save();
+
+            $this->recordEvent(
+                $request,
+                $from,
+                DiplomaRequestStatus::DocumentsValidated,
+                $actor,
+                'Dossier validé',
+            );
+
+            return $request->refresh();
+        });
+    }
+
+    public function reject(DiplomaRequest $request, User $actor, string $reason): DiplomaRequest
+    {
+        return DB::transaction(function () use ($request, $actor, $reason) {
+            if (! in_array($request->status, [
+                DiplomaRequestStatus::Submitted,
+                DiplomaRequestStatus::DocumentsValidated,
+            ], true)) {
+                throw new \DomainException('La demande ne peut plus être rejetée.');
+            }
+
+            $from = $request->status;
+
+            $request->forceFill([
+                'status' => DiplomaRequestStatus::Rejected,
+                'rejected_reason' => $reason,
+            ])->save();
+
+            $this->recordEvent(
+                $request,
+                $from,
+                DiplomaRequestStatus::Rejected,
+                $actor,
+                $reason,
+            );
+
+            return $request->refresh();
+        });
+    }
+
+    public function markReadyForPickup(DiplomaRequest $request, User $actor): DiplomaRequest
+    {
+        return DB::transaction(function () use ($request, $actor) {
+            if ($request->status !== DiplomaRequestStatus::DocumentsValidated) {
+                throw new \DomainException('Le dossier doit être validé avant d\'être prêt à retirer.');
+            }
+
+            $from = $request->status;
+
+            $request->forceFill([
+                'status' => DiplomaRequestStatus::ReadyForPickup,
+            ])->save();
+
+            $this->recordEvent(
+                $request,
+                $from,
+                DiplomaRequestStatus::ReadyForPickup,
+                $actor,
+                'Prêt à retirer',
+            );
+
+            return $request->refresh();
+        });
+    }
+
     public function submit(DiplomaRequest $request, User $actor): DiplomaRequest
     {
         return DB::transaction(function () use ($request, $actor) {

@@ -1,8 +1,26 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { FormEvent, useState } from 'react';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
 import { download as downloadDocument } from '@/actions/App/Http/Controllers/DiplomaDocumentController';
+import { validateDocument as validateDocumentAction } from '@/actions/App/Http/Controllers/Admin/DiplomaDocumentController';
+import {
+    markReadyForPickup as markReadyAction,
+    reject as rejectAction,
+    validateDossier as validateDossierAction,
+} from '@/actions/App/Http/Controllers/Admin/DiplomaRequestController';
 import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
 import type { BreadcrumbItem } from '@/types';
 import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
@@ -14,6 +32,8 @@ type DocumentRow = {
     original_name: string;
     size: number;
     validated_at: string | null;
+    validated_by_name: string | null;
+    can_validate: boolean;
 };
 
 type EventRow = {
@@ -39,6 +59,11 @@ type Props = {
         events: EventRow[];
         owner: { id: number; name: string; email: string };
     };
+    can: {
+        validateDossier: boolean;
+        reject: boolean;
+        markReadyForPickup: boolean;
+    };
 };
 
 const DIPLOMA_TYPE_LABEL: Record<string, string> = {
@@ -56,12 +81,46 @@ const formatSize = (bytes: number): string => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
 };
 
-export default function AdminDiplomaRequestShow({ request }: Props) {
+export default function AdminDiplomaRequestShow({ request, can }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Administration', href: '#' },
         { title: 'Dossiers de retrait', href: adminDiplomasIndex().url },
         { title: request.tracking_code, href: '#' },
     ];
+
+    const [rejectOpen, setRejectOpen] = useState(false);
+    const rejectForm = useForm({ reason: '' });
+
+    const hasUnvalidatedDocuments = request.documents.some((d) => !d.validated_at);
+
+    const handleValidateDocument = (documentId: number) => {
+        router.post(
+            validateDocumentAction([request.id, documentId]).url,
+            {},
+            { preserveScroll: true },
+        );
+    };
+
+    const handleValidateDossier = () => {
+        if (!confirm('Valider ce dossier ? L\'étudiant pourra ensuite être informé de son statut.')) return;
+        router.post(validateDossierAction(request.id).url, {}, { preserveScroll: true });
+    };
+
+    const handleMarkReady = () => {
+        if (!confirm('Marquer ce dossier comme prêt à retirer ?')) return;
+        router.post(markReadyAction(request.id).url, {}, { preserveScroll: true });
+    };
+
+    const handleReject = (e: FormEvent) => {
+        e.preventDefault();
+        rejectForm.post(rejectAction(request.id).url, {
+            preserveScroll: true,
+            onSuccess: () => {
+                rejectForm.reset();
+                setRejectOpen(false);
+            },
+        });
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -85,9 +144,35 @@ export default function AdminDiplomaRequestShow({ request }: Props) {
                             {request.tracking_code}
                         </p>
                     </div>
-                    <Button variant="outline" asChild>
-                        <Link href={adminDiplomasIndex().url}>Retour à la file</Link>
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2">
+                        {can.validateDossier && (
+                            <Button
+                                onClick={handleValidateDossier}
+                                disabled={hasUnvalidatedDocuments}
+                                title={
+                                    hasUnvalidatedDocuments
+                                        ? 'Validez toutes les pièces avant de valider le dossier.'
+                                        : undefined
+                                }
+                            >
+                                Valider le dossier
+                            </Button>
+                        )}
+                        {can.markReadyForPickup && (
+                            <Button onClick={handleMarkReady}>Marquer prêt à retirer</Button>
+                        )}
+                        {can.reject && (
+                            <Button
+                                variant="destructive"
+                                onClick={() => setRejectOpen(true)}
+                            >
+                                Rejeter
+                            </Button>
+                        )}
+                        <Button variant="outline" asChild>
+                            <Link href={adminDiplomasIndex().url}>Retour à la file</Link>
+                        </Button>
+                    </div>
                 </div>
 
                 <Card>
@@ -141,16 +226,29 @@ export default function AdminDiplomaRequestShow({ request }: Props) {
                                         <span className="text-xs text-muted-foreground">
                                             {doc.original_name} · {formatSize(doc.size)}
                                         </span>
+                                        {doc.validated_at && (
+                                            <span className="text-xs text-emerald-600">
+                                                Validée le {formatDateTime(doc.validated_at)}
+                                                {doc.validated_by_name
+                                                    ? ` par ${doc.validated_by_name}`
+                                                    : ''}
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs text-muted-foreground">
-                                            {doc.validated_at ? 'Validée' : 'En attente'}
-                                        </span>
                                         <Button variant="outline" size="sm" asChild>
                                             <a href={downloadDocument([request.id, doc.id]).url}>
                                                 Télécharger
                                             </a>
                                         </Button>
+                                        {doc.can_validate && (
+                                            <Button
+                                                size="sm"
+                                                onClick={() => handleValidateDocument(doc.id)}
+                                            >
+                                                Valider
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -190,6 +288,50 @@ export default function AdminDiplomaRequestShow({ request }: Props) {
                     </Card>
                 </div>
             </div>
+
+            <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Rejeter le dossier</DialogTitle>
+                        <DialogDescription>
+                            L'étudiant sera informé du motif. Cette action est définitive.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleReject} className="flex flex-col gap-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="reason">Motif du rejet</Label>
+                            <textarea
+                                id="reason"
+                                rows={4}
+                                className="flex w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                value={rejectForm.data.reason}
+                                onChange={(e) => rejectForm.setData('reason', e.target.value)}
+                                required
+                                minLength={3}
+                                maxLength={500}
+                            />
+                            <InputError message={rejectForm.errors.reason} />
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setRejectOpen(false)}
+                            >
+                                Annuler
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="destructive"
+                                disabled={rejectForm.processing}
+                            >
+                                {rejectForm.processing && <Spinner />}
+                                Confirmer le rejet
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

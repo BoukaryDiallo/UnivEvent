@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DiplomaDocumentController as AdminDiplomaDocumentController;
 use App\Http\Controllers\Admin\DiplomaRequestController as AdminDiplomaRequestController;
 use App\Http\Controllers\DiplomaDocumentController;
 use App\Http\Controllers\DiplomaRequestController;
@@ -31,4 +32,13 @@ Route::middleware(['auth', 'verified', 'scolarite'])
     ->group(function () {
         Route::get('/', [AdminDiplomaRequestController::class, 'index'])->name('index');
         Route::get('/{diplomaRequest}', [AdminDiplomaRequestController::class, 'show'])->name('show');
+        Route::post('/{diplomaRequest}/validate', [AdminDiplomaRequestController::class, 'validateDossier'])
+            ->name('validate');
+        Route::post('/{diplomaRequest}/reject', [AdminDiplomaRequestController::class, 'reject'])
+            ->name('reject');
+        Route::post('/{diplomaRequest}/mark-ready', [AdminDiplomaRequestController::class, 'markReadyForPickup'])
+            ->name('mark-ready');
+        Route::post('/{diplomaRequest}/documents/{document}/validate', [AdminDiplomaDocumentController::class, 'validateDocument'])
+            ->scopeBindings()
+            ->name('documents.validate');
     });

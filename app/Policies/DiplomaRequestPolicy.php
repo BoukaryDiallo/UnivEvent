@@ -52,4 +52,25 @@ class DiplomaRequestPolicy
         return $user->isScolarite()
             && $request->status !== DiplomaRequestStatus::Draft;
     }
+
+    public function validateDossier(User $user, DiplomaRequest $request): bool
+    {
+        return $user->isScolarite()
+            && $request->status === DiplomaRequestStatus::Submitted;
+    }
+
+    public function reject(User $user, DiplomaRequest $request): bool
+    {
+        return $user->isScolarite()
+            && in_array($request->status, [
+                DiplomaRequestStatus::Submitted,
+                DiplomaRequestStatus::DocumentsValidated,
+            ], true);
+    }
+
+    public function markReadyForPickup(User $user, DiplomaRequest $request): bool
+    {
+        return $user->isScolarite()
+            && $request->status === DiplomaRequestStatus::DocumentsValidated;
+    }
 }

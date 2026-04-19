@@ -56,7 +56,40 @@ class DiplomaRequestPresenter
         ];
     }
 
-    private static function document(DiplomaDocument $document, User $viewer): array
+    public static function adminDetail(DiplomaRequest $request, User $viewer): array
+    {
+        return [
+            ...self::detail($request, $viewer),
+            'documents' => $request->documents
+                ->map(fn (DiplomaDocument $d) => self::adminDocument($d, $viewer))
+                ->all(),
+            'owner' => [
+                'id' => $request->owner->id,
+                'name' => $request->owner->name,
+                'email' => $request->owner->email,
+            ],
+        ];
+    }
+
+    public static function adminAbilities(DiplomaRequest $request, User $viewer): array
+    {
+        return [
+            'validateDossier' => $viewer->can('validateDossier', $request),
+            'reject' => $viewer->can('reject', $request),
+            'markReadyForPickup' => $viewer->can('markReadyForPickup', $request),
+        ];
+    }
+
+    private static function adminDocument(DiplomaDocument $document, User $viewer): array
+    {
+        return [
+            ...self::document($document, $viewer),
+            'can_validate' => $viewer->can('validate', $document),
+            'validated_by_name' => $document->validator?->name,
+        ];
+    }
+
+    public static function document(DiplomaDocument $document, User $viewer): array
     {
         return [
             'id' => $document->id,

@@ -18,4 +18,11 @@ class DiplomaDocumentPolicy
         return $user->id === $document->diplomaRequest->owner_id
             && $document->diplomaRequest->status === DiplomaRequestStatus::Draft;
     }
+
+    public function validate(User $user, DiplomaDocument $document): bool
+    {
+        return $user->isScolarite()
+            && $document->diplomaRequest->status === DiplomaRequestStatus::Submitted
+            && $document->validated_at === null;
+    }
 }
