@@ -73,4 +73,10 @@ class DiplomaRequestPolicy
         return $user->isScolarite()
             && $request->status === DiplomaRequestStatus::DocumentsValidated;
     }
+
+    public function book(User $user, DiplomaRequest $request): bool
+    {
+        return $user->id === $request->owner_id
+            && $request->status === DiplomaRequestStatus::ReadyForPickup;
+    }
 }

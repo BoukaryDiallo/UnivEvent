@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DiplomaRequestStatus;
 use App\Enums\DocumentType;
 use App\Http\Requests\Diplomas\StoreDiplomaRequest;
 use App\Http\Requests\Diplomas\SubmitDiplomaRequest;
 use App\Models\DiplomaRequest;
+use App\Models\PickupSlot;
 use App\Presenters\DiplomaRequestPresenter;
 use App\Services\DiplomaRequestService;
 use App\Support\AcademicYear;
@@ -61,12 +63,25 @@ class DiplomaRequestController extends Controller
 
         $viewer = $request->user();
 
+        $availableSlots = $diplomaRequest->status === DiplomaRequestStatus::ReadyForPickup
+            ? PickupSlot::query()
+                ->withCount('appointments')
+                ->where('starts_at', '>', now())
+                ->orderBy('starts_at')
+                ->get()
+                ->filter(fn (PickupSlot $s) => $s->appointments_count < $s->capacity)
+                ->values()
+                ->map(fn (PickupSlot $s) => DiplomaRequestPresenter::slot($s))
+                ->all()
+            : [];
+
         return Inertia::render('diplomas/show', [
             'request' => DiplomaRequestPresenter::detail($diplomaRequest, $viewer),
             'can' => DiplomaRequestPresenter::abilities($diplomaRequest, $viewer),
             'documentTypes' => collect(DocumentType::cases())
                 ->map(fn (DocumentType $t) => ['value' => $t->value, 'label' => $t->label()])
                 ->all(),
+            'availableSlots' => $availableSlots,
         ]);
     }
 

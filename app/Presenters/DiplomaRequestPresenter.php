@@ -6,6 +6,8 @@ use App\Enums\DiplomaRequestStatus;
 use App\Models\DiplomaDocument;
 use App\Models\DiplomaRequest;
 use App\Models\DiplomaRequestEvent;
+use App\Models\PickupAppointment;
+use App\Models\PickupSlot;
 use App\Models\User;
 
 class DiplomaRequestPresenter
@@ -45,6 +47,9 @@ class DiplomaRequestPresenter
                 ->values()
                 ->map(fn (DiplomaRequestEvent $e) => self::event($e))
                 ->all(),
+            'appointment' => $request->appointment
+                ? self::appointment($request->appointment, $viewer)
+                : null,
         ];
     }
 
@@ -53,6 +58,31 @@ class DiplomaRequestPresenter
         return [
             'addDocument' => $viewer->can('addDocument', $request),
             'submit' => $viewer->can('submit', $request),
+            'book' => $viewer->can('book', $request),
+        ];
+    }
+
+    public static function slot(PickupSlot $slot): array
+    {
+        $reserved = $slot->appointments_count ?? $slot->appointments()->count();
+
+        return [
+            'id' => $slot->id,
+            'location' => $slot->location,
+            'starts_at' => $slot->starts_at->toIso8601String(),
+            'ends_at' => $slot->ends_at->toIso8601String(),
+            'capacity' => $slot->capacity,
+            'remaining' => max(0, $slot->capacity - $reserved),
+        ];
+    }
+
+    public static function appointment(PickupAppointment $appointment, User $viewer): array
+    {
+        return [
+            'id' => $appointment->id,
+            'confirmed_at' => $appointment->confirmed_at?->toIso8601String(),
+            'can_cancel' => $viewer->can('cancel', $appointment),
+            'slot' => self::slot($appointment->pickupSlot),
         ];
     }
 

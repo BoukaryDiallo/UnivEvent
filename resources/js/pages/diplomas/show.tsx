@@ -20,6 +20,10 @@ import {
     store as storeDocument,
 } from '@/actions/App/Http/Controllers/DiplomaDocumentController';
 import { submit as submitRequest } from '@/actions/App/Http/Controllers/DiplomaRequestController';
+import {
+    destroy as destroyAppointment,
+    store as bookAppointment,
+} from '@/actions/App/Http/Controllers/PickupAppointmentController';
 import { index as diplomasIndex } from '@/routes/diplomas';
 import type { BreadcrumbItem } from '@/types';
 import { DiplomaStatusBadge } from './status-badge';
@@ -45,6 +49,22 @@ type EventRow = {
     occurred_at: string;
 };
 
+type PickupSlot = {
+    id: number;
+    location: string;
+    starts_at: string;
+    ends_at: string;
+    capacity: number;
+    remaining: number;
+};
+
+type Appointment = {
+    id: number;
+    confirmed_at: string | null;
+    can_cancel: boolean;
+    slot: PickupSlot;
+};
+
 type Props = {
     request: {
         id: number;
@@ -57,12 +77,15 @@ type Props = {
         rejected_reason: string | null;
         documents: DocumentRow[];
         events: EventRow[];
+        appointment: Appointment | null;
     };
     can: {
         addDocument: boolean;
         submit: boolean;
+        book: boolean;
     };
     documentTypes: Option[];
+    availableSlots: PickupSlot[];
 };
 
 const DIPLOMA_TYPE_LABEL: Record<string, string> = {
@@ -80,7 +103,12 @@ const formatSize = (bytes: number): string => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
 };
 
-export default function DiplomaRequestShow({ request, can, documentTypes }: Props) {
+export default function DiplomaRequestShow({
+    request,
+    can,
+    documentTypes,
+    availableSlots,
+}: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Retraits de diplômes', href: diplomasIndex().url },
         { title: request.tracking_code, href: '#' },
@@ -115,6 +143,18 @@ export default function DiplomaRequestShow({ request, can, documentTypes }: Prop
     const handleSubmit = () => {
         if (!confirm('Soumettre cette demande ? Vous ne pourrez plus la modifier.')) return;
         router.post(submitRequest(request.id).url, {}, { preserveScroll: true });
+    };
+
+    const handleBook = (slotId: number) => {
+        if (!confirm('Réserver ce créneau ?')) return;
+        router.post(bookAppointment([request.id, slotId]).url, {}, { preserveScroll: true });
+    };
+
+    const handleCancelAppointment = (appointmentId: number) => {
+        if (!confirm('Annuler ce rendez-vous ?')) return;
+        router.delete(destroyAppointment([request.id, appointmentId]).url, {
+            preserveScroll: true,
+        });
     };
 
     return (
@@ -212,6 +252,83 @@ export default function DiplomaRequestShow({ request, can, documentTypes }: Prop
                                 ))}
                             </CardContent>
                         </Card>
+
+                        {request.appointment && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Rendez-vous de retrait</CardTitle>
+                                    <CardDescription>
+                                        {new Date(request.appointment.slot.starts_at).toLocaleString(
+                                            'fr-FR',
+                                            { dateStyle: 'full', timeStyle: 'short' },
+                                        )}
+                                        {' · '}
+                                        {request.appointment.slot.location}
+                                    </CardDescription>
+                                </CardHeader>
+                                {request.appointment.can_cancel && (
+                                    <CardContent>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() =>
+                                                handleCancelAppointment(request.appointment!.id)
+                                            }
+                                        >
+                                            Annuler le rendez-vous
+                                        </Button>
+                                    </CardContent>
+                                )}
+                            </Card>
+                        )}
+
+                        {can.book && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Créneaux de retrait disponibles</CardTitle>
+                                    <CardDescription>
+                                        Votre dossier est prêt. Choisissez un créneau pour retirer
+                                        votre diplôme.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="flex flex-col gap-2">
+                                    {availableSlots.length === 0 ? (
+                                        <p className="text-sm text-muted-foreground">
+                                            Aucun créneau disponible pour le moment. Revenez plus
+                                            tard.
+                                        </p>
+                                    ) : (
+                                        availableSlots.map((slot) => (
+                                            <div
+                                                key={slot.id}
+                                                className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm"
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium">
+                                                        {new Date(slot.starts_at).toLocaleString(
+                                                            'fr-FR',
+                                                            {
+                                                                dateStyle: 'full',
+                                                                timeStyle: 'short',
+                                                            },
+                                                        )}
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {slot.location} · {slot.remaining} place(s)
+                                                        restante(s)
+                                                    </span>
+                                                </div>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => handleBook(slot.id)}
+                                                >
+                                                    Réserver
+                                                </Button>
+                                            </div>
+                                        ))
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
 
                         {can.addDocument && (
                             <Card>

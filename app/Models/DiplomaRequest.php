@@ -55,4 +55,9 @@ class DiplomaRequest extends Model
     {
         return $this->hasOne(PickupAppointment::class);
     }
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(PickupAppointment::class);
+    }
 }

@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, ClipboardCheck, FolderGit2, GraduationCap, LayoutGrid } from 'lucide-react';
+import { BookOpen, CalendarRange, ClipboardCheck, FolderGit2, GraduationCap, LayoutGrid } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
+import { index as adminPickupSlotsIndex } from '@/routes/admin/pickup-slots';
 import { index as diplomasIndex } from '@/routes/diplomas';
 import type { NavItem } from '@/types';
 
@@ -35,6 +36,11 @@ const buildMainNav = (isScolarite: boolean): NavItem[] => [
                   title: 'Dossiers à instruire',
                   href: adminDiplomasIndex(),
                   icon: ClipboardCheck,
+              } satisfies NavItem,
+              {
+                  title: 'Créneaux de retrait',
+                  href: adminPickupSlotsIndex(),
+                  icon: CalendarRange,
               } satisfies NavItem,
           ]
         : []),
