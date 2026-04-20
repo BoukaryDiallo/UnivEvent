@@ -4,6 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use App\Models\Charge;
+use App\Models\Dispo;
+use App\Models\Ecart;
+use App\Models\HistoriqueDisponibilite;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +23,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     /**
      * Get the attributes that should be cast.
@@ -44,5 +51,30 @@ class User extends Authenticatable
 
     public function isEnseignant(){
         return $this->role === 'enseignant';
+    }
+
+    public function enseignant(): HasOne
+    {
+        return $this->hasOne(Enseignant::class);
+    }
+
+    public function charge(): HasOne
+    {
+        return $this->hasOne(Charge::class);
+    }
+
+    public function dispos(): HasMany
+    {
+        return $this->hasMany(Dispo::class);
+    }
+
+    public function ecarts(): HasMany
+    {
+        return $this->hasMany(Ecart::class);
+    }
+
+    public function historiqueDisponibilites(): HasMany
+    {
+        return $this->hasMany(HistoriqueDisponibilite::class, 'enseignant_id');
     }
 }

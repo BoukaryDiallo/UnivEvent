@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Settings;
 
+use App\Models\Enseignant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -76,7 +77,43 @@ class ProfileUpdateTest extends TestCase
             ->assertRedirect(route('home'));
 
         $this->assertGuest();
-        $this->assertNull($user->fresh());
+        $this->assertSoftDeleted('users', [
+            'id' => $user->id,
+        ]);
+    }
+
+    public function test_enseignant_delete_son_compte_sans_perdre_sa_fiche(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'enseignant',
+        ]);
+
+        $enseignant = Enseignant::create([
+            'user_id' => $user->id,
+            'nom' => 'Conserve',
+            'prenom' => 'Donnees',
+            'telephone' => '70000123',
+            'specialite' => 'Informatique',
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->delete(route('profile.destroy'), [
+                'password' => 'password',
+            ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('home'));
+
+        $this->assertGuest();
+        $this->assertSoftDeleted('users', [
+            'id' => $user->id,
+        ]);
+        $this->assertSoftDeleted('enseignants', [
+            'id' => $enseignant->id,
+            'user_id' => $user->id,
+        ]);
     }
 
     public function test_correct_password_must_be_provided_to_delete_account()

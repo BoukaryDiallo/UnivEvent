@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, User } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { Bell, BookOpen, CalendarClock, CalendarRange, Eye, FolderGit2, History, LayoutGrid, NotebookPen, User } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -14,21 +14,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard, roles } from '@/routes';
-import type { NavItem } from '@/types';
-
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-
-    {
-        title: 'Rôles',
-        href: roles(),
-        icon: User,
-    },
-];
+import type { Auth, NavItem } from '@/types';
 
 const footerNavItems: NavItem[] = [
     {
@@ -44,13 +30,69 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { auth } = usePage<{ auth: Auth }>().props;
+    const role = auth.user.role;
+
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+    ];
+
+    if (role === 'admin') {
+        mainNavItems.push(
+            {
+                title: 'Roles',
+                href: roles(),
+                icon: User,
+            },
+            {
+                title: 'Consultation',
+                href: '/consultation',
+                icon: Eye,
+            },
+        );
+    }
+
+    if (role === 'enseignant') {
+        mainNavItems.push(
+            {
+                title: 'Mes disponibilites',
+                href: '/dispos',
+                icon: CalendarClock,
+            },
+            {
+                title: 'Exceptions',
+                href: '/ecarts',
+                icon: CalendarRange,
+            },
+            {
+                title: 'Reservations',
+                href: '/mes-reservations',
+                icon: NotebookPen,
+            },
+            {
+                title: 'Historique',
+                href: '/historique-disponibilites',
+                icon: History,
+            },
+            {
+                title: 'Notifications',
+                href: '/mes-notifications',
+                icon: Bell,
+            },
+        );
+    }
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={dashboard()}>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
