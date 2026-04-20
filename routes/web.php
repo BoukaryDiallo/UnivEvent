@@ -14,23 +14,25 @@ use App\Http\Controllers\FiliereController;
 use App\Http\Controllers\DepouillementController;
 use App\Http\Controllers\ResultatController;
 
-Route::get('/', function () {
-    return view('pages.admin.dashboard');
-})->name('home');
+Route::inertia('/', 'welcome', [
+    'canRegister' => Features::enabled(Features::registration()),
+])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+Route::inertia('dashboard', 'dashboard')->name('dashboard');
 });
-///////////////////////////////ROUTES POUR ELECTIONS//////////////////////////////////////////////////////
+
+Route::middleware(['auth', 'verified'])
+    ->middleware('role:admin')
+    ->group(function () {
+        Route::get('roles', [UserController::class, 'index'])->name('roles');
+    });
 
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('ufr', UfrController::class);
+});
 
-/////////////////////////////////////GESTION DES UTILISATEUR///////////////////////////////////
-
-// Creation d un compte user
-Route::get('/create_user', function () {
-    return view('pages.admin.create_user');
-})->name('create.user');
 
 /////////////////////////////////////GESTION DES ETUDIANTS///////////////////////////////////
 Route::resource('etudiants', EtudiantController::class);
@@ -61,23 +63,6 @@ Route::resource('candidatures', CandidatureController::class);
 /////////////////////////////////////GESTION DES VOTES///////////////////////////////////
 
 
-// // Liste des élections ouvertes
-// Route::get('/votes/participer', [VoteController::class, 'electionsOuvertes'])
-//     ->name('votes.elections');
-
-// // Liste des candidats d'une élection
-// Route::get('/votes/{election}/candidats', [VoteController::class, 'candidats'])
-//     ->name('votes.candidats');
-
-// // Détail d'un candidat
-// Route::get('/votes/candidat/{candidature}', [VoteController::class, 'showCandidat'])
-//     ->name('votes.candidat');
-
-// // // Enregistrement du vote
-// // Route::post('/votes/store', [VoteController::class, 'store'])
-// //     ->name('votes.store');
-
-
 Route::get('/votes/participer', [VoteController::class, 'electionsOuvertes'])
     ->name('votes.elections');
 
@@ -91,7 +76,7 @@ Route::post('/votes/enregistrer', [VoteController::class, 'store'])
     ->name('votes.store');
 
 /**
- * 🔴 LIVE
+ *  LIVE
  */
 Route::get('/votes/live', [VoteController::class, 'liveIndex'])
     ->name('votes.live.index');
@@ -134,4 +119,4 @@ Route::middleware(['auth', 'verified'])
         Route::get('roles', [UserController::class, 'index'])->name('roles');
     });
 
-require __DIR__.'/settings.php';
+require __DIR__.'/settings.php'; 

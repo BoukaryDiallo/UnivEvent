@@ -1,19 +1,21 @@
-# TODO: Add Dynamic Routes to Sidebar
+# TODO: Corriger les fichiers JS pour utiliser les routes Wayfinder
 
-## Approved Plan Steps (Breakdown):
+## Étapes complétées
+- [x] Exécuter `php artisan wayfinder:generate`
+- [x] Analyser la structure des routes générées
+- [x] Identifier les fichiers avec URLs hardcodées
+- [x] Confirmer le plan avec l'utilisateur
+- [x] Créer ce fichier TODO.md
 
-1. **[x]** Edit `routes/web.php`: Uncomment/add `Route::resource('resultats', ResultatController::class);` for Results.
+## Étapes à compléter
+1. [x] Mettre à jour `resources/js/pages/ufr/UfrList.tsx` - Remplacer hardcodes par `ufr.*`
+2. [x] Mettre à jour `resources/js/pages/departement/DepartementList.tsx`
+3. [x] Mettre à jour `resources/js/pages/etudiants/EtudiantList.tsx`
+4. Mettre à jour `resources/js/pages/filiere/FiliereList.tsx`, `FiliereCreate.tsx`, `FiliereEdit.tsx`
+5. Mettre à jour `resources/js/pages/departement/DepartementCreate.tsx`, `DepartementEdit.tsx`
+6. [x] Mettre à jour `resources/js/components/app-sidebar.tsx`
+7. Vérifier et corriger les autres pages (auth, welcome, etc.)
+8. Rebuild JS (`pnpm dev`) et tester les liens/forms
+9. Vérifier avec search_files qu'il n'y a plus de hardcodes
+10. Marquer comme complété avec attempt_completion
 
-2. **[x]** Edit `resources/views/layouts/app.blade.php`: 
-   - Replace all `href="#"` in sidebar `<a>` tags with proper Laravel route helpers (e.g., `{{ route('ufr.index') }}`).
-   - Add active class logic using `request()->routeIs('ufr.*')` for highlighting current section.
-
-3. **[x]** Test navigation:
-   - Added `php artisan route:list` verification (ResultatController missing, route commented out).
-   - All other routes confirmed: ufr.index, departement.index, filiere.index, etudiants.index, elections.index, candidatures.index, votes.index, create.user.
-
-4. **[x]** Optional: Add missing controllers/views/routes if any errors (e.g., ResultatController missing, route commented).
-
-5. **[x]** Task complete: Sidebar now has dynamic Laravel route links with active highlighting.
-
-**Status:** Ready to implement step-by-step.
