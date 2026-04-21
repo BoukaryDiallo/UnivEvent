@@ -7,6 +7,7 @@ use App\Models\Election;
 use App\Models\Candidature;
 use App\Models\ListeElectorale;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class VoteController extends Controller
 {
@@ -15,15 +16,22 @@ class VoteController extends Controller
      */
     public function electionsOuvertes()
     {
-        $etudiantId = 3;
+        // Récupérer l'étudiant de l'utilisateur connecté
+        $user = auth()->user();
+        $etudiant = $user->etudiant ?? null;
+
+        if (!$etudiant) {
+            return back()->with('error', 'Vous n\'êtes pas enregistré comme étudiant.');
+        }
 
         $elections = Election::whereIn('statut', ['ouverte', 'second_tour'])
-            ->whereHas('listesElectorales', function ($q) use ($etudiantId) {
-                $q->where('id_etudiant', $etudiantId);
+            ->whereHas('listesElectorales', function ($q) use ($etudiant) {
+                $q->where('id_etudiant', $etudiant->id);
             })
+            ->with(['ufr', 'filiere'])
             ->get();
 
-        return view('pages.elections.list_election_ouverte', compact('elections'));
+        return Inertia::render('votes/VoteElectionsOuvertes', compact('elections'));
     }
 
     /**
@@ -31,40 +39,58 @@ class VoteController extends Controller
      */
     public function candidats(Election $election)
     {
-        $etudiantId = 1;
+        // Récupérer l'étudiant de l'utilisateur connecté
+        $user = auth()->user();
+        $etudiant = $user->etudiant ?? null;
 
+        if (!$etudiant) {
+            return back()->with('error', 'Vous n\'êtes pas enregistré comme étudiant.');
+        }
+
+        // Vérifier que l'étudiant est dans la liste électorale
         $autorise = ListeElectorale::where('id_election', $election->id_election)
-            ->where('id_etudiant', $etudiantId)
+            ->where('id_etudiant', $etudiant->id)
             ->exists();
 
         if (!$autorise) {
-            return back()->with('error', 'Non autorisé.');
+            return back()->with('error', 'Non autorisé pour cette élection.');
         }
+
+        // Vérifier s'il a déjà voté
+        $dejaVote = Vote::where('id_user', $user->id)
+            ->where('id_election', $election->id_election)
+            ->where('tour', $election->tour)
+            ->exists();
 
         $candidatures = Candidature::with('user')
             ->where('id_election', $election->id_election)
             ->where('statut', 'validee')
             ->get();
 
-        return view('pages.elections.list_candidat', compact('election', 'candidatures'));
+        return Inertia::render('votes/VoteCandidats', compact('election', 'candidatures', 'dejaVote'));
     }
 
     /**
-     * 📌 DÉTAIL CANDIDAT
+     * 📌 DÉTAIL CANDIDAT - FIXED
      */
     public function showCandidat(Candidature $candidature)
     {
-        $etudiantId = 1;
+        $user = auth()->user();
+        $etudiant = $user->etudiant ?? null;
+
+        if (!$etudiant) {
+            return back()->with('error', 'Non étudiant.');
+        }
 
         $autorise = ListeElectorale::where('id_election', $candidature->id_election)
-            ->where('id_etudiant', $etudiantId)
+            ->where('id_etudiant', $etudiant->id)
             ->exists();
 
         if (!$autorise) {
             return back()->with('error', 'Non autorisé.');
         }
 
-        return view('pages.elections.candidat_show', compact('candidature'));
+        return Inertia::render('elections/CandidatShow', compact('candidature'));
     }
 
     /**
@@ -77,8 +103,12 @@ class VoteController extends Controller
             'id_candidature' => 'required|exists:candidatures,id_candidature',
         ]);
 
-        $userId = 1;
-        $etudiantId = 1;
+        $user = auth()->user();
+        $etudiant = $user->etudiant ?? null;
+
+        if (!$etudiant) {
+            return back()->with('error', 'Vous n\'êtes pas enregistré comme étudiant.');
+        }
 
         $election = Election::findOrFail($request->id_election);
 
@@ -89,21 +119,21 @@ class VoteController extends Controller
 
         // Vérifier droit de vote
         $autorise = ListeElectorale::where('id_election', $election->id_election)
-            ->where('id_etudiant', $etudiantId)
+            ->where('id_etudiant', $etudiant->id)
             ->exists();
 
         if (!$autorise) {
-            return back()->with('error', 'Non autorisé.');
+            return back()->with('error', 'Non autorisé pour cette élection.');
         }
 
         // Empêcher double vote
-        $dejaVote = Vote::where('id_user', $userId)
+        $dejaVote = Vote::where('id_user', $user->id)
             ->where('id_election', $election->id_election)
             ->where('tour', $election->tour)
             ->exists();
 
         if ($dejaVote) {
-            return back()->with('error', 'Déjà voté.');
+            return back()->with('error', 'Vous avez déjà voté pour cette élection.');
         }
 
         // Vérifier candidat valide
@@ -118,7 +148,7 @@ class VoteController extends Controller
 
         // Enregistrer vote
         Vote::create([
-            'id_user' => $userId,
+            'id_user' => $user->id,
             'id_election' => $election->id_election,
             'id_candidature' => $candidature->id_candidature,
             'tour' => $election->tour,
@@ -126,7 +156,7 @@ class VoteController extends Controller
         ]);
 
         return redirect()->route('votes.elections')
-            ->with('success', 'Vote enregistré.');
+            ->with('success', 'Votre vote a été enregistré avec succès!');
     }
 
     /**
@@ -139,8 +169,36 @@ class VoteController extends Controller
             ->latest()
             ->get();
 
-        return view('pages.resultats.live_index', compact('elections'));
+        return Inertia::render('resultats/LiveIndex', compact('elections'));
     }
+
+    /**
+     * 🔒 LISTE DES VOTES (LECTURE SEULE)
+     */
+    public function index()
+    {
+        $votes = Vote::with(['user', 'election', 'candidature.user'])
+            ->latest()
+            ->get();
+
+        return Inertia::render('votes/VoteList', [
+            'votes' => $votes
+        ]);
+    }
+
+    /**
+     * 👁️ DÉTAIL VOTE (LECTURE SEULE)
+     */
+    public function show(Vote $vote)
+    {
+        $vote->load(['user', 'election', 'candidature.user']);
+
+        return Inertia::render('votes/VoteShow', [
+            'vote' => $vote
+        ]);
+    }
+
+
 
     /**
      * 🟢 LIVE SHOW (VERSION MODERNE SANS DB::raw)
@@ -191,7 +249,7 @@ class VoteController extends Controller
                 : 0,
         ];
 
-        return view('pages.resultats.live_show', [
+        return Inertia::render('resultats/LiveShow', [
             'election'   => $electionData,
             'candidates' => $candidates
         ]);

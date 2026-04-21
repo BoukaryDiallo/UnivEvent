@@ -9,6 +9,7 @@ use App\Models\Etudiant;
 use App\Models\Filiere;
 use Illuminate\Http\Request;
 use App\Services\ListeElectoraleService;
+use Inertia\Inertia;
 
 class ElectionController extends Controller
 {
@@ -21,7 +22,7 @@ class ElectionController extends Controller
             ->latest()
             ->get();
 
-        return view('pages.elections.list_election', compact('elections'));
+        return Inertia::render('elections/ElectionList', compact('elections'));
     }
 
     /**
@@ -29,7 +30,7 @@ class ElectionController extends Controller
      */
     public function create()
     {
-        return view('pages.elections.create_election', [
+        return Inertia::render('elections/ElectionCreate', [
             'ufrs' => Ufr::all(),
             'filieres' => Filiere::all(),
         ]);
@@ -50,7 +51,7 @@ class ElectionController extends Controller
 
         $niveaux = Etudiant::getNiveaux();
 
-        return view('pages.elections.generer_liste_electorale', compact(
+        return Inertia::render('elections/GenererListeElectorale', compact(
             'election',
             'ufrs',
             'filieres',
@@ -120,7 +121,7 @@ class ElectionController extends Controller
      */
     public function prepare(Election $election)
     {
-        return view('pages.elections.prepare_election', compact('election'));
+        return Inertia::render('elections/PrepareElection', compact('election'));
     }
 
     /**
@@ -171,6 +172,20 @@ class ElectionController extends Controller
     }
 
     /**
+     * VOIR LISTE ÉLECTORALE
+     */
+    public function voirListeElectorale(Election $election)
+    {
+        $listeElectorale = $election->listesElectorales()
+            ->with(['etudiant' => function ($query) {
+                $query->with(['user', 'filiere.departement.ufr']);
+            }])
+            ->get();
+
+        return Inertia::render('elections/ListeElectorale', compact('election', 'listeElectorale'));
+    }
+
+    /**
      * OUVRIR VOTE
      */
     public function ouvrir(Election $election)
@@ -195,7 +210,7 @@ class ElectionController extends Controller
             'listesElectorales'
         ]);
 
-        return view('pages.elections.show_election', compact('election'));
+        return Inertia::render('elections/ElectionShow', compact('election'));
     }
 
     /**
@@ -203,7 +218,7 @@ class ElectionController extends Controller
      */
     public function edit(Election $election)
     {
-        return view('pages.elections.edit_election', [
+        return Inertia::render('elections/ElectionEdit', [
             'election' => $election,
             'ufrs' => Ufr::all(),
             'filieres' => Filiere::all(),
@@ -241,8 +256,7 @@ class ElectionController extends Controller
             'statut' => $request->statut,
         ]);
 
-        return redirect()->route('elections.index')
-            ->with('success', 'Élection mise à jour.');
+        return redirect()->route('elections.index');
     }
 
     /**
@@ -252,8 +266,7 @@ class ElectionController extends Controller
     {
         $election->delete();
 
-        return redirect()->route('elections.index')
-            ->with('success', 'Élection supprimée.');
+        return redirect()->route('elections.index');
     }
 
     /**

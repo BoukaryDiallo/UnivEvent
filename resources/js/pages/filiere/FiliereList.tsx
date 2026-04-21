@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Search, GraduationCap } from 'lucide-react'
+import filiereRoutes from '@/routes/filiere'
 import type { PageProps } from '@/types/app'
 
 type Filiere = {
@@ -30,7 +31,7 @@ export default function FiliereList() {
 
   const deleteFiliere = (id: number) => {
     if (confirm('Confirmer la suppression de la filière?')) {
-      router.delete(`/filiere/${id}`)
+      router.delete(filiereRoutes.destroy.url(id))
     }
   }
 
@@ -45,7 +46,7 @@ export default function FiliereList() {
             <p className="text-muted-foreground">Gestion des filières de formation</p>
           </div>
           <Button asChild>
-            <Link href="/filiere/create">
+            <Link href={filiereRoutes.create.url()}>
               + Nouvelle Filière
             </Link>
           </Button>
@@ -110,12 +111,12 @@ export default function FiliereList() {
                         <td className="py-4 px-6">
                           <div className="flex gap-2">
                             <Button variant="outline" size="sm" asChild>
-                              <Link href={`/filiere/${filiere.id_filiere}`}>
+                              <Link href={filiereRoutes.show.url(filiere.id_filiere)}>
                                 Voir
                               </Link>
                             </Button>
                             <Button variant="outline" size="sm" asChild>
-                              <Link href={`/filiere/${filiere.id_filiere}/edit`}>
+                              <Link href={filiereRoutes.edit.url(filiere.id_filiere)}>
                                 Modifier
                               </Link>
                             </Button>

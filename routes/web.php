@@ -49,6 +49,8 @@ Route::post('/elections/{election}/generer-liste',
     ->name('elections.genererListe');
 Route::get('/elections/{election}/generer-liste', [ElectionController::class, 'formGenererListe'])
     ->name('elections.genererListe.form');
+Route::get('/elections/{election}/liste-electorale', [ElectionController::class, 'voirListeElectorale'])
+    ->name('elections.listeElectorale');
 
 Route::get('/elections/{election}/ouvrir',
     [ElectionController::class, 'ouvrir'])
@@ -62,7 +64,6 @@ Route::resource('candidatures', CandidatureController::class);
 
 /////////////////////////////////////GESTION DES VOTES///////////////////////////////////
 
-
 Route::get('/votes/participer', [VoteController::class, 'electionsOuvertes'])
     ->name('votes.elections');
 
@@ -75,19 +76,21 @@ Route::get('/votes/candidat/{candidature}', [VoteController::class, 'showCandida
 Route::post('/votes/enregistrer', [VoteController::class, 'store'])
     ->name('votes.store');
 
-/**
- *  LIVE
- */
+// Routes de consultation des votes (LECTURE SEULE - pas de modification/suppression possible)
+Route::get('/votes', [VoteController::class, 'index'])
+    ->name('votes.index')
+    ->middleware('auth');
+
+Route::get('/votes/{vote}', [VoteController::class, 'show'])
+    ->name('votes.show')
+    ->middleware('auth');
+
+// LIVE routes (duplicate removed)
 Route::get('/votes/live', [VoteController::class, 'liveIndex'])
     ->name('votes.live.index');
 
 Route::get('/votes/live/{election}', [VoteController::class, 'liveShow'])
     ->name('votes.live.show');
-
-// Route::get('/elections/{election}/depouillement', [DepouillementController::class, 'depouiller'])
-//     ->name('depouillement.depouiller');
-
-// Route::resource('resultats', ResultatController::class);
 Route::get('/votes/live', [VoteController::class, 'liveIndex'])
     ->name('votes.live.index');
 

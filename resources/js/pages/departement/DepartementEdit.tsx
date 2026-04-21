@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeftIcon, SaveIcon } from 'lucide-react';
-import AppLayout from '@/layouts/AppLayout';
+import AppLayout from '@/layouts/app-layout';
+import departementRoutes from '@/routes/departement';
 import type { BreadcrumbItem } from '@/types';
 
 type Ufr = {
@@ -38,12 +39,12 @@ export default function DepartementEdit() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    put(route('departement.update', departement.id_departement));
+    put(departementRoutes.update.url(departement.id_departement));
   };
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Départements', href: '/departement' },
-    { title: 'Modifier', href: `/departement/${departement.id_departement}` },
+    { title: 'Départements', href: departementRoutes.index.url() },
+    { title: 'Modifier', href: departementRoutes.show.url(departement.id_departement) },
   ];
 
   return (
@@ -54,7 +55,7 @@ export default function DepartementEdit() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Modifier le Département</h1>
           <Button variant="outline" asChild>
-            <a href={`/departement/${departement.id_departement}`}>
+            <a href={departementRoutes.show.url(departement.id_departement)}>
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Retour
             </a>
@@ -99,7 +100,7 @@ export default function DepartementEdit() {
 
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" asChild>
-                  <a href={`/departement/${departement.id_departement}`}>
+                  <a href={departementRoutes.show.url(departement.id_departement)}>
                     Annuler
                   </a>
                 </Button>

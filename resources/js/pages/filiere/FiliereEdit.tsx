@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeftIcon, SaveIcon } from 'lucide-react';
-import AppLayout from '@/layouts/AppLayout';
+import AppLayout from '@/layouts/app-layout';
+import filiereRoutes from '@/routes/filiere';
 import type { BreadcrumbItem } from '@/types';
 
 type Departement = {
@@ -34,12 +35,12 @@ export default function FiliereEdit() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    put(route('filiere.update', filiere.id_filiere));
+    put(filiereRoutes.update.url(filiere.id_filiere));
   };
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Filières', href: '/filiere' },
-    { title: 'Modifier', href: `/filiere/${filiere.id_filiere}` },
+    { title: 'Filières', href: filiereRoutes.index.url() },
+    { title: 'Modifier', href: filiereRoutes.show.url(filiere.id_filiere) },
   ];
 
   return (
@@ -50,7 +51,7 @@ export default function FiliereEdit() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Modifier la Filière</h1>
           <Button variant="outline" asChild>
-            <a href={`/filiere/${filiere.id_filiere}`}>
+            <a href={filiereRoutes.show.url(filiere.id_filiere)}>
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Retour
             </a>
@@ -95,7 +96,7 @@ export default function FiliereEdit() {
 
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" asChild>
-                  <a href={`/filiere/${filiere.id_filiere}`}>
+                  <a href={filiereRoutes.show.url(filiere.id_filiere)}>
                     Annuler
                   </a>
                 </Button>

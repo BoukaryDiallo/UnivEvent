@@ -29,6 +29,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard, roles } from '@/routes';
+import votes from '@/routes/votes';
 import ufr from '@/routes/ufr';
 import departement from '@/routes/departement';
 import filiere from '@/routes/filiere';
@@ -52,8 +53,13 @@ const mainNavItems: NavItem[] = [
         icon: Users,
     },
     {
-        title: 'Votes',
-        href: '/votes',
+        title: 'Participer à un vote',
+        href: votes.elections.url(),
+        icon: Users,
+    },
+    {
+        title: 'Historique des votes',
+        href: votes.index.url(),
         icon: Users,
     },
     {
@@ -119,12 +125,6 @@ export function AppSidebar() {
                                 <DropdownMenuItem asChild>
                                     <Link href={filiere.index.url()} className="w-full">
                                         <GraduationCap className="mr-2 h-4 w-4" />
-                                        Filières
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href={etudiants.index.url()} className="w-full">
-                                        <Users className="mr-2 h-4 w-4" />
                                         Étudiants
                                     </Link>
                                 </DropdownMenuItem>

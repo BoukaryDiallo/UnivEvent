@@ -6,6 +6,7 @@ use App\Models\Candidature;
 use App\Models\User;
 use App\Models\Election;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CandidatureController extends Controller
 {
@@ -13,7 +14,7 @@ class CandidatureController extends Controller
     public function index()
     {
         $candidatures = Candidature::with(['user','election'])->get();
-        return view('pages.candidatures.list_candidature', compact('candidatures'));
+        return Inertia::render('candidatures/CandidatureList', compact('candidatures'));
     }
 
     // Formulaire de création
@@ -21,7 +22,7 @@ class CandidatureController extends Controller
     {
         $users = User::all();
         $elections = Election::all();
-        return view('pages.candidatures.create_candidature', compact('users','elections'));
+        return Inertia::render('candidatures/CandidatureCreate', compact('users','elections'));
     }
 
     // Enregistrer une candidature
@@ -48,14 +49,14 @@ class CandidatureController extends Controller
 
         Candidature::create($data);
 
-        return redirect()->route('candidatures.index')->with('success', 'Candidature déposée avec succès.');
+        return redirect()->route('candidatures.index');
     }
 
     // Afficher une candidature
     public function show(string $id)
     {
         $candidature = Candidature::with(['user','election'])->findOrFail($id);
-        return view('pages.candidatures.show_candidature', compact('candidature'));
+        return Inertia::render('candidatures/CandidatureShow', compact('candidature'));
     }
 
     // Formulaire de modification
@@ -64,7 +65,7 @@ class CandidatureController extends Controller
         $candidature = Candidature::findOrFail($id);
         $users = User::all();
         $elections = Election::all();
-        return view('pages.candidatures.edit_candidature', compact('candidature','users','elections'));
+        return Inertia::render('candidatures/CandidatureEdit', compact('candidature','users','elections'));
     }
 
     // Mettre à jour une candidature
@@ -86,7 +87,7 @@ class CandidatureController extends Controller
 
         $candidature->update($data);
 
-        return redirect()->route('candidatures.index')->with('success', 'Candidature mise à jour avec succès.');
+        return redirect()->route('candidatures.index');
     }
 
     // Supprimer (soft delete)
@@ -95,6 +96,6 @@ class CandidatureController extends Controller
         $candidature = Candidature::findOrFail($id);
         $candidature->delete();
 
-        return redirect()->route('candidatures.index')->with('success', 'Candidature supprimée.');
+        return redirect()->route('candidatures.index');
     }
 }

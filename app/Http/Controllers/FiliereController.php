@@ -6,6 +6,7 @@ use App\Models\Filiere;
 use App\Models\Departement;
 use App\Models\Ufr;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class FiliereController extends Controller
 {
@@ -15,7 +16,9 @@ class FiliereController extends Controller
             ->orderBy('nom')
             ->paginate(10);
 
-        return view('pages.filiere.list_filiere', compact('filieres'));
+        return Inertia::render('filiere/FiliereList', [
+            'filieres' => $filieres
+        ]);
     }
 
     public function create()
@@ -23,7 +26,7 @@ class FiliereController extends Controller
         $ufrs = Ufr::orderBy('nom')->get();
         $departements = Departement::orderBy('nom')->get();
 
-        return view('pages.filiere.create_filiere', compact('ufrs', 'departements'));
+        return Inertia::render('filiere/FiliereCreate', compact('ufrs', 'departements'));
     }
 
     public function store(Request $request)
@@ -35,15 +38,16 @@ class FiliereController extends Controller
 
         Filiere::create($data);
 
-        return redirect()->route('filiere.index')
-            ->with('success', 'Filière créée avec succès.');
+        return redirect()->route('filiere.index');
     }
 
     public function show(Filiere $filiere)
     {
         $filiere->load('departement.ufr');
 
-        return view('pages.filiere.show_filiere', compact('filiere'));
+        return Inertia::render('filiere/FiliereShow', [
+            'filiere' => $filiere
+        ]);
     }
 
     public function edit(Filiere $filiere)
@@ -51,7 +55,7 @@ class FiliereController extends Controller
         $ufrs = Ufr::orderBy('nom')->get();
         $departements = Departement::orderBy('nom')->get();
 
-        return view('pages.filiere.edit_filiere', compact('filiere', 'ufrs', 'departements'));
+        return Inertia::render('filiere/FiliereEdit', compact('filiere', 'ufrs', 'departements'));
     }
 
     public function update(Request $request, Filiere $filiere)
@@ -63,16 +67,14 @@ class FiliereController extends Controller
 
         $filiere->update($data);
 
-        return redirect()->route('filiere.show', $filiere)
-            ->with('success', 'Filière mise à jour.');
+        return redirect()->route('filiere.show', $filiere);
     }
 
     public function destroy(Filiere $filiere)
     {
         $filiere->delete();
 
-        return redirect()->route('filiere.index')
-            ->with('success', 'Filière supprimée.');
+        return redirect()->route('filiere.index');
     }
 
     public function getDepartementsByUfr($id_ufr)

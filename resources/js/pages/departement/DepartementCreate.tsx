@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeftIcon } from 'lucide-react';
-import AppLayout from '@/layouts/AppLayout'; // Assume exists like UfrCreate
-import { departement } from '@/routes'; // Will add later
+import AppLayout from '@/layouts/app-layout';
+import departement from '@/routes/departement';
 import type { BreadcrumbItem } from '@/types';
 
 type Ufr = {
@@ -29,11 +29,11 @@ export default function DepartementCreate() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    post(route('departement.store'));
+    post(departement.store.url());
   };
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Départements', href: '/departement' },
+    { title: 'Départements', href: departement.index.url() },
     { title: 'Créer' },
   ];
 
@@ -45,7 +45,7 @@ export default function DepartementCreate() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Créer un Département</h1>
           <Button variant="outline" asChild>
-            <a href="/departement">
+            <a href={departement.index.url()}>
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Retour à la liste
             </a>
@@ -89,8 +89,10 @@ export default function DepartementCreate() {
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline">
-                  Annuler
+                <Button type="button" variant="outline" asChild>
+                  <a href={departement.index.url()}>
+                    Annuler
+                  </a>
                 </Button>
                 <Button type="submit" disabled={processing}>
                   Enregistrer

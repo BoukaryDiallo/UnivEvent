@@ -2,8 +2,10 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import AppLayout from '@/layouts/AppLayout';
+import AppLayout from '@/layouts/app-layout';
 import { ArrowLeftIcon, EditIcon, Building2, GraduationCap, Users, BarChart3 } from 'lucide-react';
+import departementRoutes from '@/routes/departement';
+import filiereRoutes from '@/routes/filiere';
 import type { BreadcrumbItem } from '@/types';
 
 type Filiere = {
@@ -35,13 +37,13 @@ type Props = {
 
 export default function DepartementShow({ departement }: Props) {
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Départements', href: '/departement' },
+    { title: 'Départements', href: departementRoutes.index.url() },
     { title: departement.nom },
   ];
 
   const deleteDepartement = () => {
     if (confirm('Supprimer ce département?')) {
-      router.delete(route('departement.destroy', departement.id_departement));
+      router.delete(departementRoutes.destroy.url(departement.id_departement));
     }
   };
 
@@ -57,13 +59,13 @@ export default function DepartementShow({ departement }: Props) {
           </div>
           <div className="flex gap-2">
             <Button asChild variant="outline">
-              <Link href="/departement">
+              <Link href={departementRoutes.index.url()}>
                 <ArrowLeftIcon className="mr-2 h-4 w-4" />
                 Retour
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href={`/departement/${departement.id_departement}/edit`}>
+              <Link href={departementRoutes.edit.url(departement.id_departement)}>
                 <EditIcon className="mr-2 h-4 w-4" />
                 Modifier
               </Link>
@@ -116,7 +118,7 @@ export default function DepartementShow({ departement }: Props) {
                           )}
                           <Badge>{filiere.etudiants_count || 0} étudiants</Badge>
                           <Button variant="ghost" size="sm" asChild>
-                            <Link href={`/filiere/${filiere.id_filiere}`}>
+                            <Link href={filiereRoutes.show.url(filiere.id_filiere)}>
                               Voir
                             </Link>
                           </Button>

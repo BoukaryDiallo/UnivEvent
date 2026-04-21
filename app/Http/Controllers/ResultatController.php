@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Election;
 use App\Models\Vote;
 use App\Models\Candidature;
+use Inertia\Inertia;
 
 class ResultatController extends Controller
 {
@@ -14,7 +15,7 @@ class ResultatController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return view('pages.resultats.historique', compact('elections'));
+        return Inertia::render('resultats/Historique', compact('elections'));
     }
 
     public function show(Election $election)
@@ -27,7 +28,7 @@ class ResultatController extends Controller
         $candidates = $this->getCandidates($election, $totalVotes);
         $finalResults = $this->getFinalResults($election, $totalVotes);
 
-        return view('pages.votes.resultats_vote', [
+        return Inertia::render('resultats/ResultatsVote', [
             'election' => $this->formatElection($election, $totalVotes, $totalVoters),
             'candidates' => $candidates,
             'finalResults' => $finalResults

@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeftIcon } from 'lucide-react';
-import AppLayout from '@/layouts/AppLayout';
+import AppLayout from '@/layouts/app-layout';
+import filiere from '@/routes/filiere';
 import type { BreadcrumbItem } from '@/types';
 
 type Departement = {
@@ -28,11 +29,11 @@ export default function FiliereCreate() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    post(route('filiere.store'));
+    post(filiere.store.url());
   };
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Filières', href: '/filiere' },
+    { title: 'Filières', href: filiere.index.url() },
     { title: 'Créer' },
   ];
 
@@ -44,7 +45,7 @@ export default function FiliereCreate() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Créer une Filière</h1>
           <Button variant="outline" asChild>
-            <a href="/filiere">
+            <a href={filiere.index.url()}>
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Retour à la liste
             </a>
@@ -88,8 +89,10 @@ export default function FiliereCreate() {
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline">
-                  Annuler
+                <Button type="button" variant="outline" asChild>
+                  <a href={filiere.index.url()}>
+                    Annuler
+                  </a>
                 </Button>
                 <Button type="submit" disabled={processing}>
                   Enregistrer

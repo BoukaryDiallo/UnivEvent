@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Departement;
 use App\Models\Ufr;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class DepartementController extends Controller
 {
@@ -18,7 +19,9 @@ class DepartementController extends Controller
             ->orderBy('nom')
             ->paginate(10);
 
-        return view('pages.departement.list_departement', compact('departements'));
+        return Inertia::render('departement/DepartementList', [
+            'departements' => $departements
+        ]);
     }
 
     /**
@@ -28,7 +31,7 @@ class DepartementController extends Controller
     {
         $ufrs = Ufr::orderBy('nom')->get();
 
-        return view('pages.departement.create_departement', compact('ufrs'));
+        return Inertia::render('departement/DepartementCreate', compact('ufrs'));
     }
 
     /**
@@ -43,8 +46,7 @@ class DepartementController extends Controller
 
         Departement::create($request->only(['nom', 'id_ufr']));
 
-        return redirect()->route('departement.index')
-            ->with('success', 'Département créé avec succès.');
+        return redirect()->route('departement.index');
     }
 
     /**
@@ -54,7 +56,7 @@ class DepartementController extends Controller
     {
         $departement->load(['ufr', 'filieres']);
 
-        return view('pages.departement.show_departement', compact('departement'));
+        return Inertia::render('departement/DepartementShow', compact('departement'));
     }
 
     /**
@@ -64,7 +66,7 @@ class DepartementController extends Controller
     {
         $ufrs = Ufr::orderBy('nom')->get();
 
-        return view('pages.departement.edit_departement', compact('departement', 'ufrs'));
+        return Inertia::render('departement/DepartementEdit', compact('departement', 'ufrs'));
     }
 
     /**
@@ -79,8 +81,7 @@ class DepartementController extends Controller
 
         $departement->update($request->only(['nom', 'id_ufr']));
 
-        return redirect()->route('departement.index')
-            ->with('success', 'Département mis à jour.');
+        return redirect()->route('departement.index');
     }
 
     /**
@@ -90,7 +91,6 @@ class DepartementController extends Controller
     {
         $departement->delete();
 
-        return redirect()->route('departement.index')
-            ->with('success', 'Département supprimé.');
+        return redirect()->route('departement.index');
     }
 }

@@ -9,6 +9,7 @@ use App\Models\Departement;
 use App\Models\Filiere;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class EtudiantController extends Controller
 {
@@ -21,7 +22,9 @@ class EtudiantController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('pages.etudiants.list_etudiant', compact('etudiants'));
+        return Inertia::render('etudiants/EtudiantList', [
+            'etudiants' => $etudiants
+        ]);
     }
 
     /**
@@ -29,7 +32,7 @@ class EtudiantController extends Controller
      */
     public function create()
     {
-        return view('pages.etudiants.create_etudiant', [
+        return Inertia::render('etudiants/EtudiantCreate', [
             'users' => User::orderBy('name')->get(),
             'niveaux' => Etudiant::getNiveaux(),
             'ufrs' => Ufr::orderBy('nom')->get(),
@@ -60,8 +63,7 @@ class EtudiantController extends Controller
 
         Etudiant::create($data);
 
-        return redirect()->route('etudiants.index')
-            ->with('success', 'Étudiant créé avec succès.');
+        return redirect()->route('etudiants.index');
     }
 
     /**
@@ -72,7 +74,7 @@ class EtudiantController extends Controller
         $etudiant = Etudiant::with(['user', 'ufr', 'departement', 'filiere'])
             ->findOrFail($id);
 
-        return view('pages.etudiants.show_etudiant', compact('etudiant'));
+        return Inertia::render('etudiants/EtudiantShow', compact('etudiant'));
     }
 
     /**
@@ -82,7 +84,7 @@ class EtudiantController extends Controller
     {
         $etudiant = Etudiant::findOrFail($id);
 
-        return view('pages.etudiants.edit_etudiant', [
+        return Inertia::render('etudiants/EtudiantEdit', [
             'etudiant' => $etudiant,
             'users' => User::orderBy('name')->get(),
             'niveaux' => Etudiant::getNiveaux(),
@@ -119,8 +121,7 @@ class EtudiantController extends Controller
 
         $etudiant->update($data);
 
-        return redirect()->route('etudiants.index')
-            ->with('success', 'Étudiant mis à jour avec succès.');
+        return redirect()->route('etudiants.index');
     }
 
     /**
@@ -136,7 +137,6 @@ class EtudiantController extends Controller
 
         $etudiant->delete();
 
-        return redirect()->route('etudiants.index')
-            ->with('success', 'Étudiant supprimé avec succès.');
+        return redirect()->route('etudiants.index');
     }
 }
