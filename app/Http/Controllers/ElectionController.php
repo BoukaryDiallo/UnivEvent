@@ -7,6 +7,7 @@ use App\Models\Ufr;
 use App\Models\Departement;
 use App\Models\Etudiant;
 use App\Models\Filiere;
+use \App\Models\Vote;
 use Illuminate\Http\Request;
 use App\Services\ListeElectoraleService;
 use Inertia\Inertia;
@@ -191,11 +192,12 @@ class ElectionController extends Controller
     public function ouvrir(Election $election)
     {
         $election->update([
-            'statut' => 'ouverte',
+            'statut' => 'planifiee',
             'tour' => 1
         ]);
+        $election->fresh()->synchronizeStatus();
 
-        return back()->with('success', 'Le vote est maintenant ouvert.');
+        return back()->with('success', 'Élection planifiée. Elle s\'ouvrira automatiquement à la date de début.');
     }
 
     /**
@@ -272,8 +274,9 @@ class ElectionController extends Controller
     /**
      * CLÔTURER
      */
-    public function cloturer(Election $election)
+    public function cloturer(Request $request, Election $election)
     {
+        $election->fresh()->synchronizeStatus();
         $election->update(['statut' => 'cloturee']);
 
         return back()->with('success', 'Élection clôturée.');
@@ -284,11 +287,11 @@ class ElectionController extends Controller
      */
     public function admin(Election $election)
     {
-        // Charger toutes les données nécessaires pour l'administration
+        $election->fresh()->synchronizeStatus();
         $election->load(['ufr', 'filiere', 'candidatures.user', 'listesElectorales.etudiant']);
         
         // Statistiques
-        $totalVotes = \App\Models\Vote::where('id_election', $election->id_election)->count();
+        $totalVotes =Vote::where('id_election', $election->id_election)->count();
         $totalVoters = $election->listesElectorales()->count();
         $totalCandidatures = $election->candidatures()->count();
         
@@ -312,7 +315,8 @@ class ElectionController extends Controller
      */
     public function stats(Election $election)
     {
-        $totalVotes = \App\Models\Vote::where('id_election', $election->id_election)->count();
+        $election->fresh()->synchronizeStatus();
+        $totalVotes =Vote::where('id_election', $election->id_election)->count();
         $totalVoters = $election->listesElectorales()->count();
         $totalCandidatures = $election->candidatures()->count();
         $candidaturesValidees = $election->candidatures()
@@ -334,6 +338,7 @@ class ElectionController extends Controller
      */
     public function candidatures(Election $election)
     {
+        $election->fresh()->synchronizeStatus();
         $candidaturesValidees = $election->candidatures()
             ->where('statut', 'validee')
             ->with('user')

@@ -40,15 +40,6 @@ Route::resource('etudiants', EtudiantController::class);
 
 
 /////////////////////////////////////GESTION DES ÉLECTIONS///////////////////////////////////
-Route::get('/elections/simple-admin', function() {
-    $election = \App\Models\Election::first();
-    if (!$election) {
-        return redirect()->back()->with('error', 'Aucune élection trouvée');
-    }
-    
-    $controller = new \App\Http\Controllers\ElectionController();
-    return $controller->admin($election);
-})->name('elections.simple.admin');
 
 Route::get('/elections/test', function() {
     return Inertia::render('elections/ElectionTest');
@@ -75,12 +66,6 @@ Route::get('/elections/{election}/cloturer', [ElectionController::class, 'clotur
 
 Route::get('/elections/{election}/admin', [ElectionController::class, 'admin'])
     ->name('elections.admin');
-
-// Routes API pour les données dynamiques de l'administration
-Route::get('/api/elections/{election}/stats', [ElectionController::class, 'stats'])
-    ->name('api.elections.stats');
-Route::get('/api/elections/{election}/candidatures', [ElectionController::class, 'candidatures'])
-    ->name('api.elections.candidatures');
 
 /////////////////////////////////////GESTION DES CANDIDATURES///////////////////////////////////
 Route::resource('candidatures', CandidatureController::class);
@@ -146,3 +131,4 @@ Route::middleware(['auth', 'verified'])
     });
 
 require __DIR__.'/settings.php'; 
+// Module élections séparé

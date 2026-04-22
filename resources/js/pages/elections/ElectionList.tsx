@@ -74,7 +74,7 @@ export default function ElectionList() {
                                 </TableCell>
                                 <TableCell>
                                     <Button variant="outline" size="sm" asChild>
-                                        <a href="/elections/simple-admin" title="Administrer">
+                                        <a href={electionsAdmin.url({ election: election.id_election })} title="Administrer">
                                             Administrer 
                                         </a>
                                     </Button>

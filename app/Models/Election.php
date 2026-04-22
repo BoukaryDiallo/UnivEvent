@@ -44,8 +44,29 @@ class Election extends Model
         return $this->hasMany(Candidature::class, 'id_election');
     }
 
+    /**
+     * 🔄 Synchronise automatiquement le statut avec les dates
+     * - 'planifiee' → 'ouverte' si now() >= date_debut
+     * - 'ouverte' → 'cloturee' si now() >= date_fin
+     */
+    public function synchronizeStatus()
+    {
+        if ($this->statut === 'planifiee' && now() >= $this->date_debut) {
+            $this->update(['statut' => 'ouverte']);
+            return 'ouverte';
+        }
+
+        if ($this->statut === 'ouverte' && now() >= $this->date_fin) {
+            $this->update(['statut' => 'cloturee']);
+            return 'cloturee';
+        }
+
+        return $this->statut;
+    }
+
     public function votes()
     {
         return $this->hasMany(Vote::class, 'id_election');
     }
 }
+

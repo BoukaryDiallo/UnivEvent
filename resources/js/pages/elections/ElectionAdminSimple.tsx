@@ -41,7 +41,7 @@ export default function ElectionAdminSimple() {
 
     const handleOuvrir = () => {
         if (confirm('Êtes-vous sûr de vouloir ouvrir cette élection ?')) {
-            router.post(electionsOuvrir.url({ election: election.id_election }));
+            router.visit(electionsOuvrir.url({ election: election.id_election }));
         }
     };
 

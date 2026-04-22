@@ -8,8 +8,12 @@ use Illuminate\Support\Facades\DB;
 
 class DepouillementController extends Controller
 {
-    public function depouiller(Election $election)
+public function depouiller(Election $election)
     {
+        if ($election->statut !== 'cloturee') {
+            return back()->with('error', "L'élection doit être clôturée avant de procéder au dépouillement.");
+        }
+
         $votes = Vote::where('id_election', $election->id_election)
             ->where('tour', $election->tour);
 

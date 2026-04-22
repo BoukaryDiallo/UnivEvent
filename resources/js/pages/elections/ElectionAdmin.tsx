@@ -116,7 +116,7 @@ export default function ElectionAdmin() {
 
     const handleOuvrir = () => {
         if (confirm('Êtes-vous sûr de vouloir ouvrir cette élection ?')) {
-            router.post(electionsOuvrir.url({ election: election.id_election }));
+            router.visit(electionsOuvrir.url({ election: election.id_election }));
         }
     };
 
@@ -156,6 +156,8 @@ export default function ElectionAdmin() {
                 return <Badge variant="default" className="bg-green-500">Ouverte</Badge>;
             case 'second_tour':
                 return <Badge variant="default" className="bg-orange-500">Second tour</Badge>;
+            case 'cloturee':
+                return <Badge variant="default" className="bg-yellow-500">Clôturée</Badge>;
             case 'terminee':
                 return <Badge variant="destructive">Terminée</Badge>;
             default:
@@ -168,6 +170,7 @@ export default function ElectionAdmin() {
         { id: 'candidatures', label: 'Candidatures', icon: Users },
         { id: 'vote', label: 'Vote', icon: Vote },
         { id: 'resultats', label: 'Résultats', icon: Trophy },
+        { id: 'depouillement', label: 'Dépouillement', icon: BarChart3 },
         { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
         { id: 'live', label: 'Live', icon: Radio },
     ];
@@ -307,14 +310,11 @@ export default function ElectionAdmin() {
                                     {/* Actions disponibles uniquement quand l'élection est terminée */}
                                     {election.statut === 'terminee' && (
                                         <>
-                                            <Button onClick={handleDepouiller} className="bg-blue-600 hover:bg-blue-700">
-                                                <Trophy className="h-4 w-4 mr-2" />
-                                                Dépouiller l'élection
-                                            </Button>
-                                            <Button onClick={handleConfigurerSecondTour} variant="outline">
-                                                <TrendingUp className="h-4 w-4 mr-2" />
-                                                Configurer second tour
-                                            </Button>
+                                            <Alert className="mt-2 mb-2 bg-blue-50 border-blue-200">
+                                                <AlertDescription>
+                                                    L'élection est terminée. Les résultats sont disponibles dans l'onglet <strong>"Résultats"</strong>.
+                                                </AlertDescription>
+                                            </Alert>
                                         </>
                                     )}
 
@@ -441,6 +441,85 @@ export default function ElectionAdmin() {
                                 <Alert>
                                     <AlertDescription>
                                         Les résultats seront disponibles après la fin de l'élection.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
+
+                {activeTab === 'depouillement' && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Dépouillement de l'élection</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {election.statut === 'cloturee' ? (
+                                <div className="space-y-4">
+                                    <Alert className="bg-blue-50 border-blue-200">
+                                        <AlertDescription>
+                                            <div className="font-semibold mb-2">Statistiques actuelles</div>
+                                            <div className="grid grid-cols-3 gap-4 text-center mt-3">
+                                                <div>
+                                                    <div className="text-2xl font-bold text-blue-600">{stats.totalVotes}</div>
+                                                    <div className="text-sm text-gray-600">Votes exprimés</div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-2xl font-bold text-green-600">{stats.totalVoters}</div>
+                                                    <div className="text-sm text-gray-600">Électeurs inscrits</div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-2xl font-bold text-orange-600">{stats.participationRate}%</div>
+                                                    <div className="text-sm text-gray-600">Participation</div>
+                                                </div>
+                                            </div>
+                                        </AlertDescription>
+                                    </Alert>
+
+                                    <div className="border-t pt-4">
+                                        <h3 className="text-lg font-semibold mb-4">Actions de dépouillement</h3>
+                                        <div className="space-y-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <Button onClick={handleDepouiller} className="bg-blue-600 hover:bg-blue-700 w-full">
+                                                <Trophy className="h-4 w-4 mr-2" />
+                                                Dépouiller l'élection
+                                            </Button>
+                                            <Button onClick={handleConfigurerSecondTour} variant="outline" className="w-full">
+                                                <TrendingUp className="h-4 w-4 mr-2" />
+                                                Configurer second tour
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t pt-4">
+                                        <h3 className="text-lg font-semibold mb-3">Consulter les résultats</h3>
+                                        <Button asChild className="w-full bg-green-600 hover:bg-green-700">
+                                            <a href={resultatsShow.url({ election: election.id_election })}>
+                                                <Trophy className="h-4 w-4 mr-2" />
+                                                Voir les résultats détaillés et le vainqueur
+                                            </a>
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : election.statut === 'second_tour' ? (
+                                <div className="space-y-4">
+                                    <Alert className="bg-orange-50 border-orange-200">
+                                        <AlertDescription>
+                                            <strong>Second tour en cours !</strong><br />
+                                            L'élection est en phase de second tour. Vous pouvez consulter les résultats du premier tour.
+                                        </AlertDescription>
+                                    </Alert>
+                                    <Button asChild className="w-full">
+                                        <a href={resultatsShow.url({ election: election.id_election })}>
+                                            <Trophy className="h-4 w-4 mr-2" />
+                                            Voir les résultats du second tour
+                                        </a>
+                                    </Button>
+                                </div>
+                            ) : (
+                                <Alert className="bg-yellow-50 border-yellow-200">
+                                    <AlertDescription>
+                                        L'élection est actuellement en statut <strong>"{election.statut}"</strong>.<br />
+Le dépouillement ne peut être effectué que lorsque l'élection est <strong>clôturée</strong>.
                                     </AlertDescription>
                                 </Alert>
                             )}

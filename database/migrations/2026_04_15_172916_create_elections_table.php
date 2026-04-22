@@ -30,9 +30,11 @@ return new class extends Migration
             $table->enum('statut', [
             'brouillon',
             'liste_generee',
+            'planifiee',
             'ouverte',
-            'second_tour',
-            'terminee'
+            'cloturee',
+            'terminee',
+            'second_tour'
         ])->default('brouillon');
             $table->integer('tour')->default(1);
 

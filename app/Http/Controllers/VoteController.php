@@ -12,7 +12,7 @@ use Inertia\Inertia;
 class VoteController extends Controller
 {
     /**
-     * 📌 ÉLECTIONS OUVERTES
+     * ÉLECTIONS OUVERTES
      */
     public function electionsOuvertes()
     {
@@ -24,27 +24,36 @@ class VoteController extends Controller
             return back()->with('error', 'Vous n\'êtes pas enregistré comme étudiant.');
         }
 
-        $elections = Election::whereIn('statut', ['ouverte', 'second_tour'])
-            ->whereHas('listesElectorales', function ($q) use ($etudiant) {
+        $elections = Election::whereHas('listesElectorales', function ($q) use ($etudiant) {
                 $q->where('id_etudiant', $etudiant->id);
             })
             ->with(['ufr', 'filiere'])
-            ->get();
+            ->get()
+            ->filter(function ($election) {
+                $election->synchronizeStatus();
+                return $election->statut === 'ouverte';
+            });
 
         return Inertia::render('votes/VoteElectionsOuvertes', compact('elections'));
     }
 
     /**
-     * 📌 LISTE DES CANDIDATS
+     *  LISTE DES CANDIDATS
      */
     public function candidats(Election $election)
     {
+        $election->synchronizeStatus();
+
         // Récupérer l'étudiant de l'utilisateur connecté
         $user = auth()->user();
         $etudiant = $user->etudiant ?? null;
 
         if (!$etudiant) {
             return back()->with('error', 'Vous n\'êtes pas enregistré comme étudiant.');
+        }
+
+        if ($election->statut !== 'ouverte') {
+            return back()->with('error', 'Cette élection n\'est pas ouverte pour le vote.');
         }
 
         // Vérifier que l'étudiant est dans la liste électorale
@@ -71,7 +80,7 @@ class VoteController extends Controller
     }
 
     /**
-     * 📌 DÉTAIL CANDIDAT - FIXED
+     *  DÉTAIL CANDIDAT - FIXED
      */
     public function showCandidat(Candidature $candidature)
     {
@@ -110,11 +119,17 @@ class VoteController extends Controller
             return back()->with('error', 'Vous n\'êtes pas enregistré comme étudiant.');
         }
 
-        $election = Election::findOrFail($request->id_election);
+$election = Election::findOrFail($request->id_election);
 
-        // Vérifier statut élection
-        if (!in_array($election->statut, ['ouverte', 'second_tour'])) {
-            return back()->with('error', 'Vote fermé.');
+        $election->synchronizeStatus();
+
+        if (now()->lt($election->date_debut) || now()->gt($election->date_fin)) {
+            return back()->with('error', 'Vote non autorisé hors période.');
+        }
+        
+        // Vérifier statut élection - STRICTEMENT 'ouverte'
+        if ($election->statut !== 'ouverte') {
+            return back()->with('error', 'Vote fermé ou non ouvert.');
         }
 
         // Vérifier droit de vote
@@ -164,10 +179,13 @@ class VoteController extends Controller
      */
     public function liveIndex()
     {
-        $elections = Election::whereIn('statut', ['ouverte', 'second_tour'])
-            ->withCount('votes')
+        $elections = Election::withCount('votes')
             ->latest()
-            ->get();
+            ->get()
+            ->filter(function ($election) {
+                $election->synchronizeStatus();
+                return in_array($election->statut, ['ouverte', 'planifiee']);
+            });
 
         return Inertia::render('resultats/LiveIndex', compact('elections'));
     }
@@ -205,6 +223,8 @@ class VoteController extends Controller
      */
     public function liveShow(Election $election)
     {
+        $election->synchronizeStatus();
+
         // Total votes
         $totalVotes = Vote::where('id_election', $election->id_election)->count();
 
