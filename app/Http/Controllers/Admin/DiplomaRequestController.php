@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\DiplomaRequestStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Diplomas\DeliverDiplomaRequest;
 use App\Http\Requests\Diplomas\RejectDiplomaRequest;
 use App\Models\DiplomaRequest;
 use App\Presenters\DiplomaRequestPresenter;
 use App\Services\DiplomaRequestService;
+use App\Services\PickupService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -64,6 +66,7 @@ class DiplomaRequestController extends Controller
             'documents.validator:id,name',
             'events.actor',
             'appointment.pickupSlot',
+            'appointment.deliveredBy:id,name',
         ]);
 
         $viewer = $request->user();
@@ -109,5 +112,33 @@ class DiplomaRequestController extends Controller
 
         return to_route('admin.diplomas.show', $diplomaRequest)
             ->with('success', 'Dossier marqué comme prêt à retirer.');
+    }
+
+    public function deliver(
+        DeliverDiplomaRequest $request,
+        DiplomaRequest $diplomaRequest,
+        PickupService $service,
+    ): RedirectResponse {
+        $service->deliver(
+            $diplomaRequest,
+            $request->user(),
+            $request->file('receipt'),
+        );
+
+        return to_route('admin.diplomas.show', $diplomaRequest)
+            ->with('success', 'Diplôme acté comme remis.');
+    }
+
+    public function archive(
+        Request $request,
+        DiplomaRequest $diplomaRequest,
+        DiplomaRequestService $service,
+    ): RedirectResponse {
+        $this->authorize('archive', $diplomaRequest);
+
+        $service->archive($diplomaRequest, $request->user());
+
+        return to_route('admin.diplomas.show', $diplomaRequest)
+            ->with('success', 'Dossier archivé.');
     }
 }

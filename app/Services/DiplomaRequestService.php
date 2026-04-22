@@ -138,6 +138,32 @@ class DiplomaRequestService
         });
     }
 
+    public function archive(DiplomaRequest $request, User $actor): DiplomaRequest
+    {
+        return DB::transaction(function () use ($request, $actor) {
+            if ($request->status !== DiplomaRequestStatus::Delivered) {
+                throw new \DomainException('Seules les demandes remises peuvent être archivées.');
+            }
+
+            $from = $request->status;
+
+            $request->forceFill([
+                'status' => DiplomaRequestStatus::Archived,
+                'archived_at' => now(),
+            ])->save();
+
+            $this->recordEvent(
+                $request,
+                $from,
+                DiplomaRequestStatus::Archived,
+                $actor,
+                'Dossier archivé',
+            );
+
+            return $request->refresh();
+        });
+    }
+
     public function markReadyForPickup(DiplomaRequest $request, User $actor): DiplomaRequest
     {
         return DB::transaction(function () use ($request, $actor) {

@@ -7,7 +7,9 @@ use App\Models\DiplomaRequest;
 use App\Models\PickupAppointment;
 use App\Models\PickupSlot;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class PickupService
@@ -115,6 +117,54 @@ class PickupService
             );
 
             return $appointment;
+        });
+    }
+
+    public function deliver(
+        DiplomaRequest $request,
+        User $actor,
+        ?UploadedFile $receipt = null,
+    ): DiplomaRequest {
+        return DB::transaction(function () use ($request, $actor, $receipt) {
+            if ($request->status !== DiplomaRequestStatus::AppointmentScheduled) {
+                throw new \DomainException('Aucun rendez-vous actif à finaliser.');
+            }
+
+            $appointment = $request->appointment;
+
+            if (! $appointment) {
+                throw new \DomainException('Aucun rendez-vous associé à la demande.');
+            }
+
+            $receiptPath = $receipt
+                ? $receipt->storeAs(
+                    "diplomas/{$request->id}/receipts",
+                    Str::uuid().'.'.$receipt->getClientOriginalExtension(),
+                    'local',
+                )
+                : null;
+
+            $appointment->forceFill([
+                'delivered_at' => now(),
+                'delivered_by' => $actor->id,
+                'receipt_path' => $receiptPath,
+            ])->save();
+
+            $from = $request->status;
+
+            $request->forceFill([
+                'status' => DiplomaRequestStatus::Delivered,
+            ])->save();
+
+            $this->requests->recordEvent(
+                $request,
+                $from,
+                DiplomaRequestStatus::Delivered,
+                $actor,
+                'Diplôme remis',
+            );
+
+            return $request->refresh();
         });
     }
 

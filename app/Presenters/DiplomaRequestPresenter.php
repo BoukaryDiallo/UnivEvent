@@ -81,6 +81,8 @@ class DiplomaRequestPresenter
         return [
             'id' => $appointment->id,
             'confirmed_at' => $appointment->confirmed_at?->toIso8601String(),
+            'delivered_at' => $appointment->delivered_at?->toIso8601String(),
+            'delivered_by_name' => $appointment->deliveredBy?->name,
             'can_cancel' => $viewer->can('cancel', $appointment),
             'slot' => self::slot($appointment->pickupSlot),
         ];
@@ -107,6 +109,8 @@ class DiplomaRequestPresenter
             'validateDossier' => $viewer->can('validateDossier', $request),
             'reject' => $viewer->can('reject', $request),
             'markReadyForPickup' => $viewer->can('markReadyForPickup', $request),
+            'deliver' => $viewer->can('deliver', $request),
+            'archive' => $viewer->can('archive', $request),
         ];
     }
 

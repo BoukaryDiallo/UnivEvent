@@ -46,6 +46,10 @@ Route::middleware(['auth', 'verified', 'scolarite'])
             ->name('reject');
         Route::post('/{diplomaRequest}/mark-ready', [AdminDiplomaRequestController::class, 'markReadyForPickup'])
             ->name('mark-ready');
+        Route::post('/{diplomaRequest}/deliver', [AdminDiplomaRequestController::class, 'deliver'])
+            ->name('deliver');
+        Route::post('/{diplomaRequest}/archive', [AdminDiplomaRequestController::class, 'archive'])
+            ->name('archive');
         Route::post('/{diplomaRequest}/documents/{document}/validate', [AdminDiplomaDocumentController::class, 'validateDocument'])
             ->scopeBindings()
             ->name('documents.validate');

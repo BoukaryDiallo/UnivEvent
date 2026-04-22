@@ -79,4 +79,16 @@ class DiplomaRequestPolicy
         return $user->id === $request->owner_id
             && $request->status === DiplomaRequestStatus::ReadyForPickup;
     }
+
+    public function deliver(User $user, DiplomaRequest $request): bool
+    {
+        return $user->isScolarite()
+            && $request->status === DiplomaRequestStatus::AppointmentScheduled;
+    }
+
+    public function archive(User $user, DiplomaRequest $request): bool
+    {
+        return $user->isScolarite()
+            && $request->status === DiplomaRequestStatus::Delivered;
+    }
 }

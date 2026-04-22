@@ -17,6 +17,8 @@ import AppLayout from '@/layouts/app-layout';
 import { download as downloadDocument } from '@/actions/App/Http/Controllers/DiplomaDocumentController';
 import { validateDocument as validateDocumentAction } from '@/actions/App/Http/Controllers/Admin/DiplomaDocumentController';
 import {
+    archive as archiveAction,
+    deliver as deliverAction,
     markReadyForPickup as markReadyAction,
     reject as rejectAction,
     validateDossier as validateDossierAction,
@@ -45,6 +47,21 @@ type EventRow = {
     occurred_at: string;
 };
 
+type Appointment = {
+    id: number;
+    confirmed_at: string | null;
+    delivered_at: string | null;
+    delivered_by_name: string | null;
+    slot: {
+        id: number;
+        location: string;
+        starts_at: string;
+        ends_at: string;
+        capacity: number;
+        remaining: number;
+    };
+};
+
 type Props = {
     request: {
         id: number;
@@ -57,12 +74,15 @@ type Props = {
         rejected_reason: string | null;
         documents: DocumentRow[];
         events: EventRow[];
+        appointment: Appointment | null;
         owner: { id: number; name: string; email: string };
     };
     can: {
         validateDossier: boolean;
         reject: boolean;
         markReadyForPickup: boolean;
+        deliver: boolean;
+        archive: boolean;
     };
 };
 
@@ -90,6 +110,9 @@ export default function AdminDiplomaRequestShow({ request, can }: Props) {
 
     const [rejectOpen, setRejectOpen] = useState(false);
     const rejectForm = useForm({ reason: '' });
+
+    const [deliverOpen, setDeliverOpen] = useState(false);
+    const deliverForm = useForm<{ receipt: File | null }>({ receipt: null });
 
     const hasUnvalidatedDocuments = request.documents.some((d) => !d.validated_at);
 
@@ -120,6 +143,23 @@ export default function AdminDiplomaRequestShow({ request, can }: Props) {
                 setRejectOpen(false);
             },
         });
+    };
+
+    const handleDeliver = (e: FormEvent) => {
+        e.preventDefault();
+        deliverForm.post(deliverAction(request.id).url, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                deliverForm.reset();
+                setDeliverOpen(false);
+            },
+        });
+    };
+
+    const handleArchive = () => {
+        if (!confirm('Archiver ce dossier ? Les pièces resteront consultables.')) return;
+        router.post(archiveAction(request.id).url, {}, { preserveScroll: true });
     };
 
     return (
@@ -161,6 +201,16 @@ export default function AdminDiplomaRequestShow({ request, can }: Props) {
                         {can.markReadyForPickup && (
                             <Button onClick={handleMarkReady}>Marquer prêt à retirer</Button>
                         )}
+                        {can.deliver && (
+                            <Button onClick={() => setDeliverOpen(true)}>
+                                Acter la remise
+                            </Button>
+                        )}
+                        {can.archive && (
+                            <Button variant="secondary" onClick={handleArchive}>
+                                Archiver
+                            </Button>
+                        )}
                         {can.reject && (
                             <Button
                                 variant="destructive"
@@ -191,6 +241,32 @@ export default function AdminDiplomaRequestShow({ request, can }: Props) {
                         )}
                     </CardContent>
                 </Card>
+
+                {request.appointment && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Rendez-vous de retrait</CardTitle>
+                            <CardDescription>
+                                {new Date(request.appointment.slot.starts_at).toLocaleString(
+                                    'fr-FR',
+                                    { dateStyle: 'full', timeStyle: 'short' },
+                                )}
+                                {' · '}
+                                {request.appointment.slot.location}
+                            </CardDescription>
+                        </CardHeader>
+                        {request.appointment.delivered_at && (
+                            <CardContent className="text-sm text-emerald-600">
+                                Diplôme remis le{' '}
+                                {formatDateTime(request.appointment.delivered_at)}
+                                {request.appointment.delivered_by_name
+                                    ? ` par ${request.appointment.delivered_by_name}`
+                                    : ''}
+                                .
+                            </CardContent>
+                        )}
+                    </Card>
+                )}
 
                 {request.rejected_reason && (
                     <Card className="border-destructive/40 bg-destructive/5">
@@ -288,6 +364,49 @@ export default function AdminDiplomaRequestShow({ request, can }: Props) {
                     </Card>
                 </div>
             </div>
+
+            <Dialog open={deliverOpen} onOpenChange={setDeliverOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Acter la remise</DialogTitle>
+                        <DialogDescription>
+                            Vous pouvez joindre le reçu signé par l'étudiant (PDF/JPG/PNG, 5 Mo max).
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form
+                        onSubmit={handleDeliver}
+                        className="flex flex-col gap-4"
+                        encType="multipart/form-data"
+                    >
+                        <div className="grid gap-2">
+                            <Label htmlFor="receipt">Reçu (optionnel)</Label>
+                            <input
+                                id="receipt"
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                className="text-sm"
+                                onChange={(e) =>
+                                    deliverForm.setData('receipt', e.target.files?.[0] ?? null)
+                                }
+                            />
+                            <InputError message={deliverForm.errors.receipt} />
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setDeliverOpen(false)}
+                            >
+                                Annuler
+                            </Button>
+                            <Button type="submit" disabled={deliverForm.processing}>
+                                {deliverForm.processing && <Spinner />}
+                                Confirmer la remise
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
                 <DialogContent>
