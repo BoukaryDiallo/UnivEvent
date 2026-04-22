@@ -1,18 +1,7 @@
+// React & Inertia
 import { Link } from '@inertiajs/react';
-import {
-    BookOpen,
-    Building2,
-    ChevronDown,
-    FolderGit2,
-    GraduationCap,
-    LayoutGrid,
-    Users,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
+
+// UI Components
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -28,6 +17,29 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+
+// Custom Components
+import AppLogo from '@/components/app-logo';
+import { NavFooter } from '@/components/nav-footer';
+import { NavMain } from '@/components/nav-main';
+import { NavUser } from '@/components/nav-user';
+
+// Icons - Lucide React
+import {
+    BookOpen,
+    Building2,
+    ChevronDown,
+    FolderGit2,
+    GraduationCap,
+    LayoutGrid,
+    Users,
+    Vote,
+    Trophy,
+    Radio,
+    List,
+} from 'lucide-react';
+
+// Routes
 import { dashboard, roles } from '@/routes';
 import votes, { elections as votesElections } from '@/routes/votes';
 import candidatures from '@/routes/candidatures';
@@ -38,6 +50,9 @@ import departement from '@/routes/departement';
 import filiere from '@/routes/filiere';
 import etudiants from '@/routes/etudiants';
 import live from '@/routes/votes/live';
+
+// Utils & Types
+import { cn } from '@/lib/utils';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -51,37 +66,7 @@ const mainNavItems: NavItem[] = [
         href: roles.url(),
         icon: Users,
     },
-    {
-        title: 'Gestion des Élections',
-        icon: Users,
-        items: [
-            {
-                title: 'Liste des élections',
-                href: elections.index.url(),
-            },
-            {
-                title: 'Candidatures',
-                href: candidatures.index.url(),
-            },
-            {
-                title: 'Participer à un vote',
-                href: votesElections.url(),
-            },
-            {
-                title: 'Historique des votes',
-                href: votes.index.url(),
-            },
-            {
-                title: 'Vote en direct',
-                href: live.index.url(),
-            },
-            {
-                title: 'Résultats',
-                href: resultats.index.url(),
-            },
-        ],
-    },
-];
+    ];
 
 const footerNavItems: NavItem[] = [
     {
@@ -146,6 +131,55 @@ export function AppSidebar() {
                                     <Link href={etudiants.index.url()} className="w-full">
                                         <GraduationCap className="mr-2 h-4 w-4" />
                                         Étudiants
+                                    </Link>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <SidebarMenuButton>
+                                    <Users className="h-4 w-4" />
+                                    <span>Gestion des Élections</span>
+                                    <ChevronDown className="ml-auto h-4 w-4" />
+                                </SidebarMenuButton>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent sideOffset={12} align="start">
+                                <DropdownMenuItem asChild>
+                                    <Link href={elections.index.url()} className="w-full">
+                                        <List className="mr-2 h-4 w-4" />
+                                        Élections
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href={candidatures.index.url()} className="w-full">
+                                        <Users className="mr-2 h-4 w-4" />
+                                        Candidatures
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href={votesElections.url()} className="w-full">
+                                        <Vote className="mr-2 h-4 w-4" />
+                                        Participer au vote
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href={votes.index.url()} className="w-full">
+                                        <List className="mr-2 h-4 w-4" />
+                                        Historique des votes
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href={live.index.url()} className="w-full">
+                                        <Radio className="mr-2 h-4 w-4" />
+                                        Vote en direct
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href={resultats.index.url()} className="w-full">
+                                        <Trophy className="mr-2 h-4 w-4" />
+                                        Résultats
                                     </Link>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>

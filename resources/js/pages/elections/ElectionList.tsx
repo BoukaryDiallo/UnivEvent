@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
-import { index as electionsIndex, create as electionsCreate } from '@/routes/elections';
+import { index as electionsIndex, create as electionsCreate, admin as electionsAdmin } from '@/routes/elections';
 import type { PageProps } from '@/types/app';
 
 interface Election {
@@ -74,6 +74,12 @@ export default function ElectionList() {
                                 </TableCell>
                                 <TableCell>
                                     <Button variant="outline" size="sm" asChild>
+                                        <a href="/elections/simple-admin" title="Administrer">
+                                            Administrer 
+                                        </a>
+                                    </Button>
+                    
+                                    <Button variant="outline" size="sm" asChild className="ml-2">
                                         <a href={`/elections/${election.id_election}/edit`} title="Modifier">
                                             Modifier
                                         </a>

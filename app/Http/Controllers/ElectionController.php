@@ -306,4 +306,54 @@ class ElectionController extends Controller
             'candidaturesValidees' => $candidaturesValidees,
         ]);
     }
+
+    /**
+     * API - STATISTIQUES EN TEMPS RÉEL
+     */
+    public function stats(Election $election)
+    {
+        $totalVotes = \App\Models\Vote::where('id_election', $election->id_election)->count();
+        $totalVoters = $election->listesElectorales()->count();
+        $totalCandidatures = $election->candidatures()->count();
+        $candidaturesValidees = $election->candidatures()
+            ->where('statut', 'validee')
+            ->count();
+
+        return response()->json([
+            'totalVotes' => $totalVotes,
+            'totalVoters' => $totalVoters,
+            'totalCandidatures' => $totalCandidatures,
+            'candidaturesValidees' => $candidaturesValidees,
+            'participationRate' => $totalVoters > 0 ? round(($totalVotes / $totalVoters) * 100) : 0,
+            'timestamp' => now(),
+        ]);
+    }
+
+    /**
+     * API - CANDIDATURES VALIDÉES EN TEMPS RÉEL
+     */
+    public function candidatures(Election $election)
+    {
+        $candidaturesValidees = $election->candidatures()
+            ->where('statut', 'validee')
+            ->with('user')
+            ->get()
+            ->map(function ($candidature) {
+                return [
+                    'id_candidature' => $candidature->id_candidature,
+                    'programme' => $candidature->programme,
+                    'statut' => $candidature->statut,
+                    'user' => [
+                        'name' => $candidature->user->name,
+                        'email' => $candidature->user->email,
+                    ],
+                ];
+            });
+
+        return response()->json([
+            'data' => $candidaturesValidees,
+            'count' => $candidaturesValidees->count(),
+            'timestamp' => now(),
+        ]);
+    }
 }
