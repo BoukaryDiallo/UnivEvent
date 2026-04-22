@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import { store as votesStore } from '@/routes/votes';
 import type { PageProps } from '@/types/app';
 
 interface Election {
@@ -30,7 +31,7 @@ export default function VoteCreate() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('votes.store'));
+        post(votesStore.url());
     };
 
     return (

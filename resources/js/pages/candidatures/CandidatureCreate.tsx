@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
+import { store as candidaturesStore } from '@/routes/candidatures';
 import type { PageProps } from '@/types/app';
 
 type Props = PageProps<{
@@ -26,7 +27,7 @@ export default function CandidatureCreate() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('candidatures.store'));
+        post(candidaturesStore.url());
     };
 
     return (

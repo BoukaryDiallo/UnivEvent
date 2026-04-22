@@ -2,6 +2,7 @@ import { Head, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
+import { index as votesIndex } from '@/routes/votes';
 import type { PageProps } from '@/types/app';
 
 interface Vote {
@@ -36,7 +37,7 @@ export default function VoteShow() {
                         </ul>
                         <div className="mt-4 flex justify-end">
                             <Button variant="secondary" asChild>
-                                <a href={route('votes.index')}>Retour à la liste</a>
+                                <a href={votesIndex.url()}>Retour à la liste</a>
                             </Button>
                         </div>
                     </CardContent>

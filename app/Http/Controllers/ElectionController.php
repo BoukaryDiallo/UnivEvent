@@ -278,4 +278,32 @@ class ElectionController extends Controller
 
         return back()->with('success', 'Élection clôturée.');
     }
+
+    /**
+     * PAGE ADMINISTRATION DE L'ÉLECTION
+     */
+    public function admin(Election $election)
+    {
+        // Charger toutes les données nécessaires pour l'administration
+        $election->load(['ufr', 'filiere', 'candidatures.user', 'listesElectorales.etudiant']);
+        
+        // Statistiques
+        $totalVotes = \App\Models\Vote::where('id_election', $election->id_election)->count();
+        $totalVoters = $election->listesElectorales()->count();
+        $totalCandidatures = $election->candidatures()->count();
+        
+        // Candidatures validées
+        $candidaturesValidees = $election->candidatures()
+            ->where('statut', 'validee')
+            ->with('user')
+            ->get();
+
+        return Inertia::render('elections/ElectionAdmin', [
+            'election' => $election,
+            'totalVotes' => $totalVotes,
+            'totalVoters' => $totalVoters,
+            'totalCandidatures' => $totalCandidatures,
+            'candidaturesValidees' => $candidaturesValidees,
+        ]);
+    }
 }

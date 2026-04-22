@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
+import { destroy as candidaturesDestroy, edit as candidaturesEdit, index as candidaturesIndex } from '@/routes/candidatures';
 import type { PageProps } from '@/types/app';
 
 type Candidature = {
@@ -25,7 +26,7 @@ export default function CandidatureShow() {
 
     const handleDelete = () => {
         if (confirm('Supprimer cette candidature ?')) {
-            router.delete(route('candidatures.destroy', candidature.id_candidature));
+            router.delete(candidaturesDestroy.url({ candidature: candidature.id_candidature }));
         }
     };
 
@@ -60,13 +61,13 @@ export default function CandidatureShow() {
                         </ul>
                         <div className="mt-4 flex justify-end space-x-2">
                             <Button variant="outline" asChild>
-                                <a href={route('candidatures.edit', candidature.id_candidature)}>Modifier</a>
+                                <a href={candidaturesEdit.url({ candidature: candidature.id_candidature })}>Modifier</a>
                             </Button>
                             <Button variant="destructive" onClick={handleDelete}>
                                 Supprimer
                             </Button>
                             <Button variant="secondary" asChild>
-                                <a href={route('candidatures.index')}>Retour à la liste</a>
+                                <a href={candidaturesIndex.url()}>Retour à la liste</a>
                             </Button>
                         </div>
                     </CardContent>

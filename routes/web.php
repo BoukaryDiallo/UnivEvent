@@ -58,6 +58,9 @@ Route::get('/elections/{election}/ouvrir',
 Route::get('/elections/{election}/cloturer', [ElectionController::class, 'cloturer'])
     ->name('elections.cloturer');
 
+Route::get('/elections/{election}/admin', [ElectionController::class, 'admin'])
+    ->name('elections.admin');
+
 
 /////////////////////////////////////GESTION DES CANDIDATURES///////////////////////////////////
 Route::resource('candidatures', CandidatureController::class);

@@ -29,11 +29,15 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard, roles } from '@/routes';
-import votes from '@/routes/votes';
+import votes, { elections as votesElections } from '@/routes/votes';
+import candidatures from '@/routes/candidatures';
+import resultats from '@/routes/resultats';
+import elections from '@/routes/elections';
 import ufr from '@/routes/ufr';
 import departement from '@/routes/departement';
 import filiere from '@/routes/filiere';
 import etudiants from '@/routes/etudiants';
+import live from '@/routes/votes/live';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -48,24 +52,34 @@ const mainNavItems: NavItem[] = [
         icon: Users,
     },
     {
-        title: 'Élections',
-        href: '/elections',
+        title: 'Gestion des Élections',
         icon: Users,
-    },
-    {
-        title: 'Participer à un vote',
-        href: votes.elections.url(),
-        icon: Users,
-    },
-    {
-        title: 'Historique des votes',
-        href: votes.index.url(),
-        icon: Users,
-    },
-    {
-        title: 'Résultats',
-        href: '/resultats',
-        icon: BookOpen,
+        items: [
+            {
+                title: 'Liste des élections',
+                href: elections.index.url(),
+            },
+            {
+                title: 'Candidatures',
+                href: candidatures.index.url(),
+            },
+            {
+                title: 'Participer à un vote',
+                href: votesElections.url(),
+            },
+            {
+                title: 'Historique des votes',
+                href: votes.index.url(),
+            },
+            {
+                title: 'Vote en direct',
+                href: live.index.url(),
+            },
+            {
+                title: 'Résultats',
+                href: resultats.index.url(),
+            },
+        ],
     },
 ];
 
@@ -124,6 +138,12 @@ export function AppSidebar() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                     <Link href={filiere.index.url()} className="w-full">
+                                        <GraduationCap className="mr-2 h-4 w-4" />
+                                        Filières
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href={etudiants.index.url()} className="w-full">
                                         <GraduationCap className="mr-2 h-4 w-4" />
                                         Étudiants
                                     </Link>

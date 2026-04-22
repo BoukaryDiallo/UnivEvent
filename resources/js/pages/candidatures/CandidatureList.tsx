@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
+import { index as candidaturesIndex, create as candidaturesCreate, show as candidaturesShow, edit as candidaturesEdit, destroy as candidaturesDestroy } from '@/routes/candidatures';
 import type { PageProps } from '@/types/app';
 
 type Candidature = {
@@ -22,7 +23,7 @@ export default function CandidatureList() {
 
     const handleDelete = (id: number) => {
         if (confirm('Supprimer cette candidature ?')) {
-            router.delete(route('candidatures.destroy', id));
+            router.delete(candidaturesDestroy.url({ candidature: id }));
         }
     };
 
@@ -44,7 +45,7 @@ export default function CandidatureList() {
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-green-600">Liste des Candidatures</h2>
                     <Button asChild>
-                        <a href={route('candidatures.create')}>+ Nouvelle Candidature</a>
+                        <a href={candidaturesCreate.url()}>+ Nouvelle Candidature</a>
                     </Button>
                 </div>
                 <Table>
@@ -66,10 +67,10 @@ export default function CandidatureList() {
                                 <TableCell>{getStatusBadge(candidature.statut)}</TableCell>
                                 <TableCell>
                                     <Button variant="outline" size="sm" asChild>
-                                        <a href={route('candidatures.show', candidature.id_candidature)}>Voir</a>
+                                        <a href={candidaturesShow.url({ candidature: candidature.id_candidature })}>Voir</a>
                                     </Button>
                                     <Button variant="outline" size="sm" asChild className="ml-2">
-                                        <a href={route('candidatures.edit', candidature.id_candidature)}>Modifier</a>
+                                        <a href={candidaturesEdit.url({ candidature: candidature.id_candidature })}>Modifier</a>
                                     </Button>
                                     <Button
                                         variant="destructive"

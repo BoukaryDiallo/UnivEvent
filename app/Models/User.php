@@ -45,4 +45,12 @@ class User extends Authenticatable
     public function isEnseignant(){
         return $this->role === 'enseignant';
     }
+
+    /**
+     * Get the etudiant associated with the user.
+     */
+    public function etudiant()
+    {
+        return $this->hasOne(Etudiant::class, 'id_user');
+    }
 }

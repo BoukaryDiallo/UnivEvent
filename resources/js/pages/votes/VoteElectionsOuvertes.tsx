@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import {Alert, AlertDescription} from '@/components/ui/alert';
 import AppLayout from '@/layouts/app-layout';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { candidats as votesCandidats } from '@/routes/votes';
 import type { PageProps } from '@/types/app';
 
 interface Election {
@@ -97,7 +98,7 @@ export default function VoteElectionsOuvertes() {
                                         </div>
 
                                         <Button asChild className="w-full">
-                                            <Link href={`/votes/candidats/${election.id_election}`}>
+                                            <Link href={votesCandidats.url({ election: election.id_election })}>
                                                 Voir les candidats et voter
                                             </Link>
                                         </Button>

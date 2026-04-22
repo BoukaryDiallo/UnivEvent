@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
+import { update as candidaturesUpdate } from '@/routes/candidatures';
 import type { PageProps } from '@/types/app';
 
 type Candidature = {
@@ -28,7 +29,7 @@ export default function CandidatureEdit() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('candidatures.update', candidature.id_candidature));
+        put(candidaturesUpdate.url({ candidature: candidature.id_candidature }));
     };
 
     return (
