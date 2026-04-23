@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\DiplomaRequestStatus;
+use App\Observers\DiplomaRequestEventObserver;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -15,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'note',
     'occurred_at',
 ])]
+#[ObservedBy(DiplomaRequestEventObserver::class)]
 class DiplomaRequestEvent extends Model
 {
     protected function casts(): array
