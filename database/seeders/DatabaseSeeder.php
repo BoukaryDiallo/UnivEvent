@@ -24,5 +24,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test Admin',
             'email' => 'admin@example.com',
         ]);
+
+        $this->call(DiplomaModuleSeeder::class);
     }
 }
