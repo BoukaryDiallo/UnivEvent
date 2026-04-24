@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DiplomaDocumentController as AdminDiplomaDocumentController;
 use App\Http\Controllers\Admin\DiplomaRequestController as AdminDiplomaRequestController;
 use App\Http\Controllers\Admin\PickupSlotController as AdminPickupSlotController;
@@ -32,6 +33,13 @@ Route::middleware(['auth', 'verified', 'student'])
         Route::delete('/{diplomaRequest}/appointment/{appointment}', [PickupAppointmentController::class, 'destroy'])
             ->scopeBindings()
             ->name('appointment.destroy');
+    });
+
+Route::middleware(['auth', 'verified', 'scolarite'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     });
 
 Route::middleware(['auth', 'verified', 'scolarite'])
