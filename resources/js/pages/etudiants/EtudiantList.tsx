@@ -1,5 +1,6 @@
 import { usePage, Link, router } from '@inertiajs/react'
 import { Head } from '@inertiajs/react'
+import { useState } from 'react'
 import etudiants from '@/routes/etudiants';
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
