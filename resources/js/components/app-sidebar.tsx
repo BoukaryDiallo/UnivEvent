@@ -1,9 +1,10 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, User } from 'lucide-react';
+import { BookOpen, FolderGit2, LayoutGrid, ShieldEllipsis, User } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { useAuth } from '@/hooks/module1/useAuth';
 import {
     Sidebar,
     SidebarContent,
@@ -13,22 +14,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, roles } from '@/routes';
+import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
 
-    {
-        title: 'Rôles',
-        href: roles(),
-        icon: User,
-    },
-];
 
 const footerNavItems: NavItem[] = [
     {
@@ -44,6 +33,61 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+
+        const { hasRole, can } = useAuth();
+
+        const mainNavItems: NavItem[] = [
+            //Nous utiliserons le seul dashboard en affcihant les infos
+            // selons les rôles et permissions (recommandé) de l'utilisateur connecté
+            
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: LayoutGrid,
+            }
+            
+        ];
+
+
+
+        if (hasRole('admin') || can('manage users')) {
+            mainNavItems.push(
+                {
+                title: 'Gestion des rôles',
+                href: '/admin/users',
+                icon: User,
+            },
+            {
+                title: 'Permissions',
+                href: '/admin/permissions',
+                icon: ShieldEllipsis,
+            },
+        );
+        }
+
+
+        if (hasRole('enseignant')) {
+            mainNavItems.push(
+            /*{
+                // ajouter les liens pour les enseigants ici
+                
+            },*/
+            
+        );
+        }
+
+
+        if (hasRole('etudinant')) {
+            mainNavItems.push(
+            /*{
+                // ajouter les liens pour les etudiants ici
+                
+            },*/
+            
+            );
+        }
+
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
