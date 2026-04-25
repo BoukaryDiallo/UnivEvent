@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Search, GraduationCap } from 'lucide-react'
+import { useState } from 'react'
 import AppLayout from '@/layouts/app-layout'
 import filiereRoutes from '@/routes/filiere'
 import type { PageProps } from '@/types/app'
@@ -29,12 +30,19 @@ type Props = PageProps<{
 
 export default function FiliereList() {
   const { filieres } = usePage<Props>().props
+  const [searchTerm, setSearchTerm] = useState('')
 
   const deleteFiliere = (id: number) => {
     if (confirm('Confirmer la suppression de la filière?')) {
       router.delete(filiereRoutes.destroy.url(id))
     }
   }
+
+  const filteredFilieres = filieres.filter((filiere: Filiere) =>
+    filiere.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    filiere.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    filiere.departement?.nom.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   return (
     <AppLayout>
@@ -60,7 +68,12 @@ export default function FiliereList() {
               Filières de formation
             </CardTitle>
             <div className="relative">
-              <Input placeholder="Rechercher une filière..." className="pl-10 w-64" />
+              <Input 
+                placeholder="Rechercher une filière..." 
+                className="pl-10 w-64" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </div>
           </CardHeader>
@@ -80,8 +93,8 @@ export default function FiliereList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filieres.length > 0 ? (
-                    filieres.map((filiere: Filiere) => (
+                  {filteredFilieres.length > 0 ? (
+                    filteredFilieres.map((filiere: Filiere) => (
                       <tr key={filiere.id_filiere} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900/50">
                         <td className="py-4 px-6">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">

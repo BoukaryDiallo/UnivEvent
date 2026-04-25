@@ -35,12 +35,21 @@ type Props = PageProps<{
 
 export default function EtudiantList() {
   const { etudiants: etudiantList } = usePage<Props>().props
+  const [searchTerm, setSearchTerm] = useState('')
 
   const deleteEtudiant = (id: number) => {
     if (confirm("Confirmer la suppression de l'étudiant?")) {
       router.delete(etudiants.destroy.url(id))
     }
   }
+
+  const filteredEtudiants = etudiantList.filter((etudiant: Etudiant) =>
+    etudiant.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    etudiant.INE?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    etudiant.filiere?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    etudiant.ufr?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    etudiant.departement?.nom?.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('fr-FR')
@@ -70,7 +79,12 @@ export default function EtudiantList() {
               Étudiants
             </CardTitle>
             <div className="flex gap-2">
-              <Input placeholder="Rechercher par nom ou INE..." className="w-64" />
+              <Input 
+                placeholder="Rechercher par nom ou INE..." 
+                className="w-64" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
               <Button variant="outline" size="sm">
                 <Search className="h-4 w-4" />
               </Button>
@@ -96,8 +110,8 @@ export default function EtudiantList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {etudiantList.length > 0 ? (
-                    etudiantList.map((etudiant: Etudiant) => (
+                  {filteredEtudiants.length > 0 ? (
+                    filteredEtudiants.map((etudiant: Etudiant) => (
                       <tr key={etudiant.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900/50">
                         <td className="py-4 px-6 font-medium">{etudiant.INE}</td>
                         <td className="py-4 px-6">{etudiant.user.name}</td>

@@ -82,7 +82,8 @@ class EtudiantController extends Controller
      */
     public function edit(string $id)
     {
-        $etudiant = Etudiant::findOrFail($id);
+        $etudiant = Etudiant::with(['user', 'ufr', 'departement', 'filiere'])
+            ->findOrFail($id);
 
         return Inertia::render('etudiants/EtudiantEdit', [
             'etudiant' => $etudiant,

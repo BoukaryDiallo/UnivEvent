@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
+import { useState } from 'react'
 import type { PageProps } from '@/types/app'
 
 type Departement = {
@@ -23,6 +24,7 @@ type Props = PageProps<{
 
 export default function DepartementList() {
   const { departements } = usePage<Props>().props
+  const [searchTerm, setSearchTerm] = useState('')
 
   const { processing } = useForm()
 
@@ -31,6 +33,11 @@ export default function DepartementList() {
       router.delete(departement.destroy.url(id))
     }
   }
+
+  const filteredDepartements = departements.filter((departementItem: Departement) =>
+    departementItem.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    departementItem.ufr?.nom.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   return (
     <AppLayout>
@@ -58,7 +65,12 @@ export default function DepartementList() {
             </CardTitle>
             <div className="flex gap-2">
               <div className="relative">
-                <Input placeholder="Rechercher un département..." className="pl-10 w-64" />
+                <Input 
+                  placeholder="Rechercher un département..." 
+                  className="pl-10 w-64" 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
             </div>
@@ -79,8 +91,8 @@ export default function DepartementList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {departements.length > 0 ? (
-                    departements.map((departementItem: Departement) => (
+                  {filteredDepartements.length > 0 ? (
+                    filteredDepartements.map((departementItem: Departement) => (
                       <tr key={departementItem.id_departement} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900/50">
                         <td className="py-4 px-6">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">

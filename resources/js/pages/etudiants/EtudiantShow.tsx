@@ -1,8 +1,9 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
+import etudiants from '@/routes/etudiants';
 import type { PageProps } from '@/types/app';
 
 interface Etudiant {
@@ -24,16 +25,19 @@ interface Props extends PageProps {
 export default function EtudiantShow() {
     const { etudiant } = usePage<Props>().props;
 
+    // Vérifications de sécurité
+    if (!etudiant) {
+        return <div>Étudiant non trouvé</div>;
+    }
+
     return (
         <AppLayout>
             <Head title="Détails Étudiant" />
             <div className="container mt-5">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-blue-600 font-bold">Détails Étudiant</h2>
-                    <Button variant="secondary" asChild>
-                        <a href={route('etudiants.index')}>
-                            Retour
-                        </a>
+                    <Button variant="secondary" onClick={() => router.get(etudiants.index.url())}>
+                        Retour
                     </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -42,10 +46,10 @@ export default function EtudiantShow() {
                             <CardContent className="p-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <p><strong>Nom :</strong> {etudiant.user.name}</p>
-                                        <p><strong>INE :</strong> {etudiant.INE}</p>
+                                        <p><strong>Nom :</strong> {etudiant.user?.name || 'N/A'}</p>
+                                        <p><strong>INE :</strong> {etudiant.INE || 'N/A'}</p>
                                         <p><strong>Niveau :</strong>
-                                            <Badge variant="default" className="ml-2">{etudiant.niveau}</Badge>
+                                            <Badge variant="default" className="ml-2">{etudiant.niveau || 'N/A'}</Badge>
                                         </p>
                                     </div>
                                     <div>

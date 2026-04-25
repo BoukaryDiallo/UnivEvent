@@ -30,7 +30,7 @@ export default function EtudiantCreate() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('etudiants.store'));
+        post(etudiants.store.url());
     };
 
     return (
