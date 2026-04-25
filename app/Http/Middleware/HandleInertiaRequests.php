@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\EventNotification;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -41,6 +42,29 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'notifications' => fn () => $request->user()
+                ? [
+                    'unread_count' => EventNotification::query()
+                        ->where('user_id', $request->user()->id)
+                        ->whereNull('read_at')
+                        ->count(),
+                    'items' => EventNotification::query()
+                        ->where('user_id', $request->user()->id)
+                        ->latest()
+                        ->take(5)
+                        ->get(['id', 'type', 'title', 'message', 'evenement_id', 'read_at', 'created_at'])
+                        ->map(fn (EventNotification $notification) => [
+                            'id' => $notification->id,
+                            'type' => $notification->type,
+                            'title' => $notification->title,
+                            'message' => $notification->message,
+                            'event_id' => $notification->evenement_id,
+                            'read_at' => optional($notification->read_at)->toIso8601String(),
+                            'created_at' => optional($notification->created_at)->toIso8601String(),
+                        ])
+                        ->values(),
+                ]
+                : ['unread_count' => 0, 'items' => []],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }
