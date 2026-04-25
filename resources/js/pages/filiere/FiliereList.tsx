@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Search, GraduationCap } from 'lucide-react'
+import AppLayout from '@/layouts/app-layout'
 import filiereRoutes from '@/routes/filiere'
 import type { PageProps } from '@/types/app'
 
@@ -36,7 +37,7 @@ export default function FiliereList() {
   }
 
   return (
-    <>
+    <AppLayout>
       <Head title="Liste des Filières" />
 
       <div className="p-6 space-y-6">
@@ -141,7 +142,7 @@ export default function FiliereList() {
           </CardContent>
         </Card>
       </div>
-    </>
+    </AppLayout>
   )
 }
 

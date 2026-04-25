@@ -34,7 +34,8 @@ return new class extends Migration
             'ouverte',
             'cloturee',
             'terminee',
-            'second_tour'
+            'second_tour',
+            'second_tour_planifie',
         ])->default('brouillon');
             $table->integer('tour')->default(1);
 

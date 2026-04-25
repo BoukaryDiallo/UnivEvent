@@ -10,6 +10,7 @@ type Candidature = {
     id_candidature: number;
     programme: string;
     statut: string;
+    photo?: string;
     cnib_pdf: string;
     casier_judiciaire_pdf: string;
     attestation_inscription_pdf: string;
@@ -50,19 +51,77 @@ export default function CandidatureShow() {
                         <CardTitle className="text-center text-green-600">Détails de la Candidature</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <h4 className="text-blue-600">Candidat : {candidature.user.name}</h4>
-                        <p><strong>Élection :</strong> {candidature.election.titre}</p>
-                        <ul className="list-disc pl-5 mt-3">
-                            <li><strong>Programme :</strong> {candidature.programme || 'Non fourni'}</li>
-                            <li><strong>Statut :</strong> {getStatusBadge(candidature.statut)}</li>
-                            <li><strong>CNIB :</strong> <a href={`/storage/${candidature.cnib_pdf}`} target="_blank" className="text-blue-500">Voir PDF</a></li>
-                            <li><strong>Casier judiciaire :</strong> <a href={`/storage/${candidature.casier_judiciaire_pdf}`} target="_blank" className="text-blue-500">Voir PDF</a></li>
-                            <li><strong>Attestation d'inscription :</strong> <a href={`/storage/${candidature.attestation_inscription_pdf}`} target="_blank" className="text-blue-500">Voir PDF</a></li>
-                        </ul>
-                        <div className="mt-4 flex justify-end space-x-2">
-                            <Button variant="outline" asChild>
-                                <a href={candidaturesEdit.url({ candidature: candidature.id_candidature })}>Modifier</a>
-                            </Button>
+                        <div className="flex flex-col md:flex-row gap-6">
+                            {/* Photo du candidat */}
+                            <div className="flex-shrink-0">
+                                <div className="border-4 border-gray-200 rounded-lg overflow-hidden shadow-lg">
+                                    {candidature.photo ? (
+                                        <img
+                                            src={`/storage/${candidature.photo}`}
+                                            alt={`Photo de ${candidature.user.name}`}
+                                            className="w-48 h-48 object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-48 h-48 bg-gray-100 flex items-center justify-center">
+                                            <div className="text-center text-gray-500">
+                                                <svg className="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                </svg>
+                                                <p className="text-sm">Aucune photo</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Informations du candidat */}
+                            <div className="flex-1">
+                                <h4 className="text-2xl font-bold text-blue-600 mb-2">{candidature.user.name}</h4>
+                                <p className="text-lg text-gray-600 mb-4"><strong>Élection :</strong> {candidature.election.titre}</p>
+                                
+                                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-semibold">Statut :</span>
+                                        {getStatusBadge(candidature.statut)}
+                                    </div>
+                                    
+                                    <div>
+                                        <span className="font-semibold">Programme :</span>
+                                        <p className="mt-1 text-gray-700 whitespace-pre-wrap">
+                                            {candidature.programme || 'Non fourni'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Documents */}
+                                <div className="mt-4">
+                                    <h5 className="font-semibold mb-2">Documents :</h5>
+                                    <div className="space-y-2">
+                                        <a href={`/storage/${candidature.cnib_pdf}`} target="_blank" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800">
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0h8v12H6V4z" clipRule="evenodd" />
+                                            </svg>
+                                            CNIB
+                                        </a>
+                                        <a href={`/storage/${candidature.casier_judiciaire_pdf}`} target="_blank" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 ml-4">
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0h8v12H6V4z" clipRule="evenodd" />
+                                            </svg>
+                                            Casier judiciaire
+                                        </a>
+                                        <a href={`/storage/${candidature.attestation_inscription_pdf}`} target="_blank" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 ml-4">
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0h8v12H6V4z" clipRule="evenodd" />
+                                            </svg>
+                                            Attestation d'inscription
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="mt-6 flex justify-end space-x-2 border-t pt-4">
                             <Button variant="destructive" onClick={handleDelete}>
                                 Supprimer
                             </Button>

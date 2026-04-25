@@ -14,7 +14,7 @@ class FiliereController extends Controller
     {
         $filieres = Filiere::with(['departement.ufr'])
             ->orderBy('nom')
-            ->paginate(10);
+            ->get();
 
         return Inertia::render('filiere/FiliereList', [
             'filieres' => $filieres

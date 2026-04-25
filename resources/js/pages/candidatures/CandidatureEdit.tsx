@@ -1,11 +1,12 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
-import { update as candidaturesUpdate } from '@/routes/candidatures';
+import { update as candidaturesUpdate, show as candidaturesShow, index as candidaturesIndex } from '@/routes/candidatures';
 import type { PageProps } from '@/types/app';
 
 type Candidature = {
@@ -36,6 +37,17 @@ export default function CandidatureEdit() {
         <AppLayout>
             <Head title="Modifier une Candidature" />
             <div className="container mt-5">
+                {/* Boutons retour et annuler */}
+                <div className="mb-4 flex gap-2">
+                    <Button variant="outline" onClick={() => router.get(candidaturesIndex.url())}>
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Retour à la liste
+                    </Button>
+                    <Button variant="secondary" onClick={() => router.get(candidaturesShow.url({ candidature: candidature.id_candidature }))}>
+                        Annuler
+                    </Button>
+                </div>
+                
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-center text-green-600">Modifier une Candidature</CardTitle>
@@ -64,12 +76,15 @@ export default function CandidatureEdit() {
                             <div>
                                 <Label htmlFor="photo">Photo</Label>
                                 {candidature.photo && (
-                                    <div className="mb-2">
-                                        <img
-                                            src={`/storage/${candidature.photo}`}
-                                            alt="Photo actuelle"
-                                            className="w-20 h-20 rounded"
-                                        />
+                                    <div className="mb-3">
+                                        <p className="text-sm text-gray-600 mb-2">Photo actuelle :</p>
+                                        <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 shadow-sm">
+                                            <img
+                                                src={`/storage/${candidature.photo}`}
+                                                alt="Photo actuelle"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
                                     </div>
                                 )}
                                 <Input
@@ -92,10 +107,19 @@ export default function CandidatureEdit() {
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div className="text-end">
-                                <Button type="submit" disabled={processing}>
-                                    Mettre à jour
+                            <div className="flex justify-between">
+                                <Button variant="outline" onClick={() => router.get(candidaturesIndex.url())}>
+                                    <ArrowLeft className="h-4 w-4 mr-2" />
+                                    Retour
                                 </Button>
+                                <div className="flex gap-2">
+                                    <Button variant="secondary" onClick={() => router.get(candidaturesShow.url({ candidature: candidature.id_candidature }))}>
+                                        Annuler
+                                    </Button>
+                                    <Button type="submit" disabled={processing}>
+                                        Mettre à jour
+                                    </Button>
+                                </div>
                             </div>
                         </form>
                     </CardContent>

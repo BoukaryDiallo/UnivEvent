@@ -17,7 +17,7 @@ class DepartementController extends Controller
         $departements = Departement::with(['ufr', 'filieres'])
             ->withCount('filieres')
             ->orderBy('nom')
-            ->paginate(10);
+            ->get();
 
         return Inertia::render('departement/DepartementList', [
             'departements' => $departements

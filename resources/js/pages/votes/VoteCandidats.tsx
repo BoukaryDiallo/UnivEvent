@@ -11,7 +11,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import type { PageProps } from '@/types/app';
 
@@ -71,6 +71,14 @@ export default function VoteCandidats() {
         <AppLayout>
             <Head title={`Voter - ${election.titre}`} />
             <div className="container mt-5">
+                {/* Bouton retour */}
+                <div className="mb-4">
+                    <Button variant="outline" onClick={() => window.history.back()}>
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Retour
+                    </Button>
+                </div>
+                
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-green-600">{election.titre}</CardTitle>

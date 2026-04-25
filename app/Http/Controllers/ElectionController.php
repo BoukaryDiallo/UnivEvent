@@ -8,9 +8,11 @@ use App\Models\Departement;
 use App\Models\Etudiant;
 use App\Models\Filiere;
 use \App\Models\Vote;
+use \App\Models\Candidature;
 use Illuminate\Http\Request;
 use App\Services\ListeElectoraleService;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class ElectionController extends Controller
 {
@@ -191,6 +193,15 @@ class ElectionController extends Controller
      */
     public function ouvrir(Election $election)
     {
+        // Vérifier qu'il y a des candidatures validées avant d'ouvrir l'élection
+        $candidaturesValidees = $election->candidatures()
+            ->where('statut', 'validee')
+            ->count();
+
+        if ($candidaturesValidees === 0) {
+            return back()->with('error', 'Impossible d\'ouvrir l\'élection : aucune candidature validée n\'est associée à cette élection.');
+        }
+
         $election->update([
             'statut' => 'planifiee',
             'tour' => 1
@@ -279,7 +290,111 @@ class ElectionController extends Controller
         $election->fresh()->synchronizeStatus();
         $election->update(['statut' => 'cloturee']);
 
-        return back()->with('success', 'Élection clôturée.');
+        return back()->with('success', 'Élection clôturée avec succès.');
+    }
+
+    /**
+     * CLÔTURER LES CANDIDATURES
+     */
+    public function cloturerCandidatures(Request $request, Election $election)
+    {
+        // Vérifier que l'élection est bien en statut 'liste_generee'
+        if ($election->statut !== 'liste_generee') {
+            return back()->with('error', 'Impossible de clôturer les candidatures : l\'élection n\'est pas en phase de candidatures.');
+        }
+
+        // Mettre à jour le statut à 'planifiée'
+        $election->update(['statut' => 'planifiee']);
+
+        return back()->with('success', 'Les candidatures ont été clôturées. L\'élection est maintenant planifiée.');
+    }
+
+    /**
+     * FORMULAIRE DE CONFIGURATION DU SECOND TOUR
+     */
+    public function secondTourForm(Election $election)
+    {
+        // Vérifier que l'élection est bien en statut 'cloturee' ou 'second_tour_planifie'
+        if (!in_array($election->statut, ['cloturee', 'second_tour_planifie'])) {
+            return back()->with('error', 'Le second tour ne peut être configuré que pour une élection clôturée nécessitant un second tour.');
+        }
+
+        // Récupérer les candidats qualifiés pour le second tour
+        $candidatsQualifies = Candidature::where('id_election', $election->id_election)
+            ->where('resultat', 'second_tour')
+            ->with('user')
+            ->get();
+
+        // Si aucun candidat n'est qualifié, calculer automatiquement les 2 premiers
+        if ($candidatsQualifies->count() === 0) {
+            // Récupérer les résultats du premier tour
+            $votes = Vote::where('id_election', $election->id_election)
+                ->where('tour', 1)
+                ->select('id_candidature', DB::raw('COUNT(*) as nb_voix'))
+                ->groupBy('id_candidature')
+                ->orderByDesc('nb_voix')
+                ->take(2)
+                ->get();
+
+            if ($votes->count() < 2) {
+                return back()->with('error', 'Il faut au moins 2 candidats avec des votes pour organiser un second tour.');
+            }
+
+            // Qualifier les 2 premiers candidats
+            $top2Ids = $votes->pluck('id_candidature');
+            Candidature::where('id_election', $election->id_election)
+                ->whereIn('id_candidature', $top2Ids)
+                ->update(['resultat' => 'second_tour']);
+
+            Candidature::where('id_election', $election->id_election)
+                ->whereNotIn('id_candidature', $top2Ids)
+                ->update(['resultat' => 'eliminee']);
+
+            // Récupérer les candidats qualifiés
+            $candidatsQualifies = Candidature::where('id_election', $election->id_election)
+                ->where('resultat', 'second_tour')
+                ->with('user')
+                ->get();
+        }
+
+        if ($candidatsQualifies->count() < 2) {
+            return back()->with('error', 'Il faut au moins 2 candidats qualifiés pour organiser un second tour.');
+        }
+
+        // Utiliser le composant de création d'élection avec mode second tour
+        return Inertia::render('elections/ElectionCreate', [
+            'election' => $election,
+            'mode' => 'second_tour',
+            'candidatsQualifies' => $candidatsQualifies,
+            'ufrs' => [],
+            'filieres' => [],
+        ]);
+    }
+
+    /**
+     * ENREGISTRER LA CONFIGURATION DU SECOND TOUR
+     */
+    public function secondTourStore(Request $request, Election $election)
+    {
+        $request->validate([
+            'date_debut' => 'required|date|after:now',
+            'date_fin' => 'required|date|after:date_debut',
+        ]);
+
+        // Vérifier que l'élection est bien en statut 'cloturee' ou 'second_tour_planifie'
+        if (!in_array($election->statut, ['cloturee', 'second_tour_planifie'])) {
+            return back()->with('error', 'Le second tour ne peut être configuré que pour une élection clôturée nécessitant un second tour.');
+        }
+
+        // Mettre à jour l'élection pour le second tour
+        $election->update([
+            'date_debut' => $request->date_debut,
+            'date_fin' => $request->date_fin,
+            'statut' => 'second_tour', // Le statut passera à 'second_tour' quand la date de début arrivera
+        ]);
+
+        return redirect()->route('elections.admin', $election)
+            ->with('success', 'Le second tour a été configuré avec succès.');
     }
 
     /**
@@ -295,11 +410,20 @@ class ElectionController extends Controller
         $totalVoters = $election->listesElectorales()->count();
         $totalCandidatures = $election->candidatures()->count();
         
-        // Candidatures validées
-        $candidaturesValidees = $election->candidatures()
-            ->where('statut', 'validee')
-            ->with('user')
-            ->get();
+        // Candidatures validées (ou qualifiées pour second tour)
+        if ($election->statut === 'second_tour' && $election->tour == 2) {
+            // Au second tour, afficher uniquement les candidats qualifiés
+            $candidaturesValidees = $election->candidatures()
+                ->where('resultat', 'second_tour')
+                ->with('user')
+                ->get();
+        } else {
+            // Premier tour ou autres statuts, afficher les candidatures validées
+            $candidaturesValidees = $election->candidatures()
+                ->where('statut', 'validee')
+                ->with('user')
+                ->get();
+        }
 
         return Inertia::render('elections/ElectionAdmin', [
             'election' => $election,

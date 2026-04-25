@@ -140,7 +140,7 @@ export function AppSidebar() {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <SidebarMenuButton>
-                                    <Users className="h-4 w-4" />
+                                    <Vote className="h-4 w-4" />
                                     <span>Gestion des Élections</span>
                                     <ChevronDown className="ml-auto h-4 w-4" />
                                 </SidebarMenuButton>
@@ -153,33 +153,30 @@ export function AppSidebar() {
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
+                                    
                                     <Link href={candidatures.index.url()} className="w-full">
                                         <Users className="mr-2 h-4 w-4" />
                                         Candidatures
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href={votesElections.url()} className="w-full">
-                                        <Vote className="mr-2 h-4 w-4" />
-                                        Participer au vote
-                                    </Link>
-                                </DropdownMenuItem>
+                               
                                 <DropdownMenuItem asChild>
                                     <Link href={votes.index.url()} className="w-full">
                                         <List className="mr-2 h-4 w-4" />
                                         Historique des votes
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href={live.index.url()} className="w-full">
-                                        <Radio className="mr-2 h-4 w-4" />
-                                        Vote en direct
-                                    </Link>
-                                </DropdownMenuItem>
+                               
                                 <DropdownMenuItem asChild>
                                     <Link href={resultats.index.url()} className="w-full">
                                         <Trophy className="mr-2 h-4 w-4" />
                                         Résultats
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href="/espace-elections" className="w-full">
+                                        <BookOpen className="mr-2 h-4 w-4" />
+                                        Espace Élections
                                     </Link>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>

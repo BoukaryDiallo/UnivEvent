@@ -1,9 +1,11 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft } from 'lucide-react';
+import elections from '@/routes/elections';
 import AppLayout from '@/layouts/app-layout';
 import type { PageProps } from '@/types/app';
 
@@ -45,18 +47,28 @@ export default function ElectionEdit() {
         type: election.type,
         id_ufr: election.id_ufr?.toString() || '',
         id_filiere: election.id_filiere?.toString() || '',
-        statut: election.statut,
     });
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('elections.update', election.id_election));
+        put(elections.update.url({election: election.id_election}));
     };
 
     return (
         <AppLayout>
             <Head title="Modifier une Élection" />
             <div className="container mt-5">
+                {/* Boutons retour et annuler */}
+                <div className="mb-4 flex gap-2">
+                    <Button variant="outline" onClick={() => router.get(elections.index.url())}>
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Retour à la liste
+                    </Button>
+                    <Button variant="secondary" onClick={() => router.get(elections.show.url({ election: election.id_election }))}>
+                        Annuler
+                    </Button>
+                </div>
+                
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-center text-green-600">Modifier une Élection</CardTitle>
@@ -170,21 +182,25 @@ export default function ElectionEdit() {
                                 </div>
                             )}
                             <div>
-                                <Label htmlFor="statut">Statut</Label>
-                                <Select value={data.statut} onValueChange={(value) => setData('statut', value)}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ouverte">Ouverte</SelectItem>
-                                        <SelectItem value="fermee">Fermée</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <Label>Statut actuel</Label>
+                                <div className="mt-1 p-2 bg-gray-100 rounded border">
+                                    <span className="font-medium">{election.statut}</span>
+                                    <p className="text-sm text-gray-500 mt-1">Le statut est géré automatiquement par le système</p>
+                                </div>
                             </div>
-                            <div className="text-end">
-                                <Button type="submit" disabled={processing}>
-                                    Mettre à jour
+                            <div className="flex justify-between">
+                                <Button variant="outline" onClick={() => router.get(elections.index.url())}>
+                                    <ArrowLeft className="h-4 w-4 mr-2" />
+                                    Retour
                                 </Button>
+                                <div className="flex gap-2">
+                                    <Button variant="secondary" onClick={() => router.get(elections.show.url({ election: election.id_election }))}>
+                                        Annuler
+                                    </Button>
+                                    <Button type="submit" disabled={processing}>
+                                        Mettre à jour
+                                    </Button>
+                                </div>
                             </div>
                         </form>
                     </CardContent>

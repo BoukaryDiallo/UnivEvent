@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
-import { index as candidaturesIndex, create as candidaturesCreate, show as candidaturesShow, edit as candidaturesEdit, destroy as candidaturesDestroy } from '@/routes/candidatures';
+import { index as candidaturesIndex, show as candidaturesShow, destroy as candidaturesDestroy } from '@/routes/candidatures';
 import type { PageProps } from '@/types/app';
 
 type Candidature = {
@@ -27,6 +27,18 @@ export default function CandidatureList() {
         }
     };
 
+    const handleValider = (id: number) => {
+        if (confirm('Valider cette candidature ?')) {
+            router.post(`/candidatures/${id}/valider`);
+        }
+    };
+
+    const handleRefuser = (id: number) => {
+        if (confirm('Refuser cette candidature ?')) {
+            router.post(`/candidatures/${id}/refuser`);
+        }
+    };
+
     const getStatusBadge = (statut: string) => {
         switch (statut) {
             case 'validee':
@@ -44,9 +56,6 @@ export default function CandidatureList() {
             <div className="container mt-5">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-green-600">Liste des Candidatures</h2>
-                    <Button asChild>
-                        <a href={candidaturesCreate.url()}>+ Nouvelle Candidature</a>
-                    </Button>
                 </div>
                 <Table>
                     <TableHeader>
@@ -62,16 +71,33 @@ export default function CandidatureList() {
                         {candidatures.map((candidature) => (
                             <TableRow key={candidature.id_candidature}>
                                 <TableCell>{candidature.user.name}</TableCell>
-                                <TableCell>{candidature.election.titre}</TableCell>
+                                <TableCell>{candidature.election?.titre ?? ""}</TableCell>
                                 <TableCell>{candidature.programme?.slice(0, 50) || ''}</TableCell>
                                 <TableCell>{getStatusBadge(candidature.statut)}</TableCell>
                                 <TableCell>
                                     <Button variant="outline" size="sm" asChild>
                                         <a href={candidaturesShow.url({ candidature: candidature.id_candidature })}>Voir</a>
                                     </Button>
-                                    <Button variant="outline" size="sm" asChild className="ml-2">
-                                        <a href={candidaturesEdit.url({ candidature: candidature.id_candidature })}>Modifier</a>
-                                    </Button>
+                                    {candidature.statut === 'en_attente' && (
+                                        <>
+                                            <Button 
+                                                variant="default" 
+                                                size="sm" 
+                                                onClick={() => handleValider(candidature.id_candidature)}
+                                                className="ml-2 bg-green-600 hover:bg-green-700"
+                                            >
+                                                Valider
+                                            </Button>
+                                            <Button 
+                                                variant="destructive" 
+                                                size="sm" 
+                                                onClick={() => handleRefuser(candidature.id_candidature)}
+                                                className="ml-2"
+                                            >
+                                                Refuser
+                                            </Button>
+                                        </>
+                                    )}
                                     <Button
                                         variant="destructive"
                                         size="sm"

@@ -11,73 +11,88 @@ use App\Http\Controllers\DepouillementController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Élections (CRUD + admin)
-    Route::resource('elections', ElectionController::class);
+    
+Route::resource('elections', ElectionController::class);
+Route::get('/elections/{election}/prepare',
+    [ElectionController::class, 'prepare'])
+    ->name('elections.prepare');
 
-    // Page admin d’une élection
-    Route::get('/elections/{election}/admin', [ElectionController::class, 'admin'])
-        ->name('elections.admin');
+Route::post('/elections/{election}/generer-liste',
+    [ElectionController::class, 'genererListe'])
+    ->name('elections.genererListe');
+Route::get('/elections/{election}/generer-liste', [ElectionController::class, 'formGenererListe'])
+    ->name('elections.genererListe.form');
+Route::get('/elections/{election}/liste-electorale', [ElectionController::class, 'voirListeElectorale'])
+    ->name('elections.listeElectorale');
 
-    // Préparation d’une élection
-    Route::get('/elections/{election}/prepare', [ElectionController::class, 'prepare'])
-        ->name('elections.prepare');
+Route::get('/elections/{election}/ouvrir',
+    [ElectionController::class, 'ouvrir'])
+    ->name('elections.ouvrir');
+Route::post('/elections/{election}/cloturer', [ElectionController::class, 'cloturer'])
+    ->name('elections.cloturer');
+Route::post('/elections/{election}/cloturer-candidatures', [ElectionController::class, 'cloturerCandidatures'])
+    ->name('elections.cloturerCandidatures');
+Route::get('/elections/{election}/second-tour', [ElectionController::class, 'secondTourForm'])
+    ->name('elections.secondTour.form');
+Route::post('/elections/{election}/second-tour', [ElectionController::class, 'secondTourStore'])
+    ->name('elections.secondTour.store');
 
-    // Formulaire génération liste électorale
-    Route::get('/elections/{election}/generer-liste', [ElectionController::class, 'formGenererListe'])
-        ->name('elections.genererListe.form');
+Route::get('/elections/{election}/admin', [ElectionController::class, 'admin'])
+    ->name('elections.admin');
 
-    // Génération liste électorale
-    Route::post('/elections/{election}/generer-liste', [ElectionController::class, 'genererListe'])
-        ->name('elections.genererListe');
+/////////////////////////////////////GESTION DES CANDIDATURES///////////////////////////////////
+Route::resource('candidatures', CandidatureController::class);
+Route::post('/candidatures/{candidature}/valider', [CandidatureController::class, 'valider'])
+    ->name('candidatures.valider');
+Route::post('/candidatures/{candidature}/refuser', [CandidatureController::class, 'refuser'])
+    ->name('candidatures.refuser');
 
-    // Voir liste électorale
-    Route::get('/elections/{election}/liste-electorale', [ElectionController::class, 'voirListeElectorale'])
-        ->name('elections.listeElectorale');
+/////////////////////////////////////GESTION DES VOTES///////////////////////////////////
 
-    // Ouvrir une élection
-    Route::get('/elections/{election}/ouvrir', [ElectionController::class, 'ouvrir'])
-        ->name('elections.ouvrir');
+Route::get('/votes/participer', [VoteController::class, 'electionsOuvertes'])
+    ->name('votes.elections');
 
-    // Clôturer une élection
-    Route::post('/elections/{election}/cloturer', [ElectionController::class, 'cloturer'])
-        ->name('elections.cloturer');
+Route::get('/votes/candidats/{election}', [VoteController::class, 'candidats'])
+    ->name('votes.candidats');
 
-    // Candidatures
-    Route::resource('candidatures', CandidatureController::class);
+Route::get('/votes/candidat/{candidature}', [VoteController::class, 'showCandidat'])
+    ->name('votes.candidat.show');
 
-    // Liste des élections pour voter
-    Route::get('/votes/participer', [VoteController::class, 'electionsOuvertes'])
-        ->name('votes.elections');
+Route::post('/votes/enregistrer', [VoteController::class, 'store'])
+    ->name('votes.store');
 
-    // Liste des candidats
-    Route::get('/votes/candidats/{election}', [VoteController::class, 'candidats'])
-        ->name('votes.candidats');
+// Routes de consultation des votes (LECTURE SEULE - pas de modification/suppression possible)
+Route::get('/votes', [VoteController::class, 'index'])
+    ->name('votes.index')
+    ->middleware('auth');
 
-    // Voir un candidat
-    Route::get('/votes/candidat/{candidature}', [VoteController::class, 'showCandidat'])
-        ->name('votes.candidat.show');
+Route::get('/votes/{vote}', [VoteController::class, 'show'])
+    ->name('votes.show')
+    ->middleware('auth');
 
-    // Enregistrer un vote
-    Route::post('/votes/enregistrer', [VoteController::class, 'store'])
-        ->name('votes.store');
+// LIVE routes (duplicate removed)
+Route::get('/votes/live', [VoteController::class, 'liveIndex'])
+    ->name('votes.live.index');
 
-    // Liste live des votes
-    Route::get('/votes/live', [VoteController::class, 'liveIndex'])
-        ->name('votes.live.index');
+Route::get('/votes/live/{election}', [VoteController::class, 'liveShow'])
+    ->name('votes.live.show');
+Route::get('/votes/live', [VoteController::class, 'liveIndex'])
+    ->name('votes.live.index');
 
-    // Résultat live d’une élection
-    Route::get('/votes/live/{election}', [VoteController::class, 'liveShow'])
-        ->name('votes.live.show');
+Route::get('/votes/live/{election}', [VoteController::class, 'liveShow'])
+    ->name('votes.live.show');
 
-    // Liste des résultats
-    Route::get('/resultats', [ResultatController::class, 'index'])
-        ->name('resultats.index');
+Route::get('/resultats', [ResultatController::class, 'index'])
+    ->name('resultats.index');
 
-    // Détail d’un résultat
-    Route::get('/resultats/{election}', [ResultatController::class, 'show'])
-        ->name('resultats.show');
+Route::get('/resultats/{election}', [ResultatController::class, 'show'])
+    ->name('resultats.show');
 
-    // Dépouillement (GET/POST)
-    Route::match(['get', 'post'], '/depouillement/{election}', [DepouillementController::class, 'depouiller'])
-        ->name('depouillement.depouiller');
+Route::get('/depouillement/{election}', [DepouillementController::class, 'depouiller'])
+    ->name('depouillement.show');
+Route::post('/depouillement/{election}', [DepouillementController::class, 'depouiller'])
+    ->name('depouillement.depouiller');
+
+Route::post('/depouillement/{election}/publier', [DepouillementController::class, 'publier'])
+    ->name('depouillement.publier');
 });

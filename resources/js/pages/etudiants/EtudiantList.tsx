@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Search, User, Users, GraduationCap } from 'lucide-react'
+import AppLayout from '@/layouts/app-layout'
 import type { PageProps } from '@/types/app'
 
 type Etudiant = {
@@ -46,7 +47,7 @@ export default function EtudiantList() {
   }
 
   return (
-    <>
+    <AppLayout>
       <Head title="Liste des Étudiants" />
 
       <div className="p-6 space-y-6">
@@ -108,11 +109,21 @@ export default function EtudiantList() {
                         </td>
                         <td className="py-4 px-6 text-sm">{formatDate(etudiant.date_naissance)}</td>
                         <td className="py-4 px-6">
-                          {etudiant.photo ? (
-                            <img src={`/storage/${etudiant.photo}`} alt="" className="w-10 h-10 rounded-full object-cover border" />
-                          ) : (
-                            <User className="w-10 h-10 text-gray-400" />
-                          )}
+                          <div className="relative">
+                            {etudiant.photo ? (
+                              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 shadow-sm">
+                                <img 
+                                  src={`/storage/${etudiant.photo}`} 
+                                  alt={etudiant.user.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-12 h-12 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
+                                <User className="w-6 h-6 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex gap-2">
@@ -146,6 +157,6 @@ export default function EtudiantList() {
           </CardContent>
         </Card>
       </div>
-    </>
+    </AppLayout>
   )
 }

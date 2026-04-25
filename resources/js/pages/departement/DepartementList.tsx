@@ -1,6 +1,7 @@
 import { usePage, Link, router } from '@inertiajs/react'
 import { Head, useForm } from '@inertiajs/react'
 import Heading from '@/components/heading'
+import AppLayout from '@/layouts/app-layout'
 import departement from '@/routes/departement';
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,7 +33,7 @@ export default function DepartementList() {
   }
 
   return (
-    <>
+    <AppLayout>
       <Head title="Liste des Départements" />
 
       <div className="p-6 space-y-6">
@@ -133,6 +134,6 @@ export default function DepartementList() {
           </CardContent>
         </Card>
       </div>
-    </>
+    </AppLayout>
   )
 }

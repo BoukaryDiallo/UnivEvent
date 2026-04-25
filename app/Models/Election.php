@@ -56,7 +56,17 @@ class Election extends Model
             return 'ouverte';
         }
 
+        if ($this->statut === 'second_tour_planifie' && now() >= $this->date_debut) {
+            $this->update(['statut' => 'second_tour']);
+            return 'second_tour';
+        }
+
         if ($this->statut === 'ouverte' && now() >= $this->date_fin) {
+            $this->update(['statut' => 'cloturee']);
+            return 'cloturee';
+        }
+
+        if ($this->statut === 'second_tour' && now() >= $this->date_fin) {
             $this->update(['statut' => 'cloturee']);
             return 'cloturee';
         }

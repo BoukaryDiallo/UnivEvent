@@ -58,19 +58,25 @@ export default function EtudiantShow() {
                         </Card>
                     </div>
                     <div>
-                        <Card className="text-center p-4">
-                            {etudiant.photo ? (
-                                <img
-                                    src={`/storage/${etudiant.photo}`}
-                                    alt={etudiant.user.name}
-                                    className="rounded-full mx-auto w-32 h-32"
-                                />
-                            ) : (
-                                <div className="w-32 h-32 mx-auto rounded-full bg-gray-200 flex items-center justify-center">
-                                    <span className="text-4xl">👤</span>
+                        <Card className="text-center p-6">
+                            <div className="relative inline-block">
+                                <div className="w-32 h-32 mx-auto rounded-full border-4 border-blue-200 overflow-hidden shadow-lg bg-gray-50">
+                                    {etudiant.photo ? (
+                                        <img
+                                            src={`/storage/${etudiant.photo}`}
+                                            alt={etudiant.user.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <svg className="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                            </svg>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                            <h5 className="mt-3">{etudiant.user.name}</h5>
+                            </div>
+                            <h5 className="mt-4 text-lg font-semibold text-gray-800">{etudiant.user.name}</h5>
                         </Card>
                     </div>
                 </div>

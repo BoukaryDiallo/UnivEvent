@@ -5,6 +5,7 @@ use App\Models\Election;
 use App\Models\Vote;
 use App\Models\Candidature;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class DepouillementController extends Controller
 {
@@ -12,6 +13,42 @@ public function depouiller(Election $election)
     {
         if ($election->statut !== 'cloturee') {
             return back()->with('error', "L'élection doit être clôturée avant de procéder au dépouillement.");
+        }
+
+        $votes = Vote::where('id_election', $election->id_election)
+            ->where('tour', $election->tour);
+
+        $total = $votes->count();
+
+        // Permettre l'affichage même avec 0 vote pour consulter les résultats
+
+        $resultats = $votes->select(
+                'id_candidature',
+                DB::raw('COUNT(*) as nb_voix')
+            )
+            ->groupBy('id_candidature')
+            ->orderByDesc('nb_voix')
+            ->get();
+
+        foreach ($resultats as $r) {
+            $r->pourcentage = ($r->nb_voix * 100) / $total;
+        }
+
+        // Charger les informations des candidats
+        $resultats->load('candidature.user');
+
+        return Inertia::render('depouillement/Depouillement', [
+            'election' => $election,
+            'resultats' => $resultats,
+            'total' => $total,
+            'tour' => $election->tour
+        ]);
+    }
+
+    public function publier(Election $election)
+    {
+        if ($election->statut !== 'cloturee') {
+            return back()->with('error', "L'élection doit être clôturée avant de publier les résultats.");
         }
 
         $votes = Vote::where('id_election', $election->id_election)
@@ -48,7 +85,8 @@ public function depouiller(Election $election)
 
             $election->update(['statut' => 'terminee']);
 
-            return back()->with('success', 'Élection terminée.');
+            return redirect()->route('resultats.show', ['election' => $election->id_election])
+                ->with('success', 'Résultats publiés avec succès !');
         }
 
         if ($election->tour == 1) {
@@ -63,12 +101,14 @@ public function depouiller(Election $election)
                 ->whereNotIn('id_candidature', $top2)
                 ->update(['resultat' => 'eliminee']);
 
+            // Passer à 'second_tour_planifie' pour attendre la configuration des dates
             $election->update([
                 'tour' => 2,
-                'statut' => 'second_tour'
+                'statut' => 'second_tour_planifie'
             ]);
 
-            return back()->with('warning', 'Second tour requis.');
+            return redirect()->route('elections.admin', ['election' => $election->id_election])
+                ->with('success', 'Résultats du premier tour publiés. Veuillez configurer les dates du second tour.');
         }
 
         $winnerFinal = $resultats->first();
@@ -82,6 +122,7 @@ public function depouiller(Election $election)
 
         $election->update(['statut' => 'terminee']);
 
-        return back()->with('success', 'Élection terminée (tour 2).');
+        return redirect()->route('resultats.show', ['election' => $election->id_election])
+            ->with('success', 'Résultats publiés avec succès !');
     }
 }

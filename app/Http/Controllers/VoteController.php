@@ -71,10 +71,18 @@ class VoteController extends Controller
             ->where('tour', $election->tour)
             ->exists();
 
-        $candidatures = Candidature::with('user')
-            ->where('id_election', $election->id_election)
-            ->where('statut', 'validee')
-            ->get();
+        // Au second tour, n'afficher que les candidats qualifiés (resultat = 'second_tour')
+        if ($election->statut === 'second_tour' && $election->tour == 2) {
+            $candidatures = Candidature::with('user')
+                ->where('id_election', $election->id_election)
+                ->where('resultat', 'second_tour')
+                ->get();
+        } else {
+            $candidatures = Candidature::with('user')
+                ->where('id_election', $election->id_election)
+                ->where('statut', 'validee')
+                ->get();
+        }
 
         return Inertia::render('votes/VoteCandidats', compact('election', 'candidatures', 'dejaVote'));
     }
@@ -127,8 +135,8 @@ $election = Election::findOrFail($request->id_election);
             return back()->with('error', 'Vote non autorisé hors période.');
         }
         
-        // Vérifier statut élection - STRICTEMENT 'ouverte'
-        if ($election->statut !== 'ouverte') {
+        // Vérifier statut élection - 'ouverte' OU 'second_tour'
+        if (!in_array($election->statut, ['ouverte', 'second_tour'])) {
             return back()->with('error', 'Vote fermé ou non ouvert.');
         }
 
@@ -152,10 +160,19 @@ $election = Election::findOrFail($request->id_election);
         }
 
         // Vérifier candidat valide
-        $candidature = Candidature::where('id_candidature', $request->id_candidature)
-            ->where('id_election', $election->id_election)
-            ->where('statut', 'validee')
-            ->first();
+        if ($election->statut === 'second_tour' && $election->tour == 2) {
+            // Au second tour, vérifier que le candidat est qualifié
+            $candidature = Candidature::where('id_candidature', $request->id_candidature)
+                ->where('id_election', $election->id_election)
+                ->where('resultat', 'second_tour')
+                ->first();
+        } else {
+            // Premier tour, vérifier que le candidat est validé
+            $candidature = Candidature::where('id_candidature', $request->id_candidature)
+                ->where('id_election', $election->id_election)
+                ->where('statut', 'validee')
+                ->first();
+        }
 
         if (!$candidature) {
             return back()->with('error', 'Candidat invalide.');
@@ -184,7 +201,8 @@ $election = Election::findOrFail($request->id_election);
             ->get()
             ->filter(function ($election) {
                 $election->synchronizeStatus();
-                return in_array($election->statut, ['ouverte', 'planifiee']);
+                // N'afficher que les élections ouvertes, exclure clôturées/terminées
+                return in_array($election->statut, ['ouverte', 'planifiee', 'liste_generee']);
             });
 
         return Inertia::render('resultats/LiveIndex', compact('elections'));

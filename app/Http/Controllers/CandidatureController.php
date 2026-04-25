@@ -38,6 +38,15 @@ class CandidatureController extends Controller
             'attestation_inscription_pdf' => 'required|mimes:pdf|max:5120',
         ]);
 
+        // Vérifier que l'étudiant n'a pas déjà candidaté pour cette élection
+        $existingCandidature = Candidature::where('id_user', $request->id_user)
+            ->where('id_election', $request->id_election)
+            ->first();
+
+        if ($existingCandidature) {
+            return back()->with('error', 'Vous avez déjà soumis une candidature pour cette élection.');
+        }
+
         $data = $request->all();
 
         if ($request->hasFile('photo')) {
@@ -49,7 +58,7 @@ class CandidatureController extends Controller
 
         Candidature::create($data);
 
-        return redirect()->route('candidatures.index');
+        return redirect()->route('elections.workflow');
     }
 
     // Afficher une candidature
@@ -88,6 +97,26 @@ class CandidatureController extends Controller
         $candidature->update($data);
 
         return redirect()->route('candidatures.index');
+    }
+
+    // Valider une candidature
+    public function valider(string $id)
+    {
+        $candidature = Candidature::findOrFail($id);
+        $candidature->update(['statut' => 'validee']);
+
+        return redirect()->route('candidatures.index')
+            ->with('success', 'Candidature validée avec succès.');
+    }
+
+    // Refuser une candidature
+    public function refuser(string $id)
+    {
+        $candidature = Candidature::findOrFail($id);
+        $candidature->update(['statut' => 'rejetee']);
+
+        return redirect()->route('candidatures.index')
+            ->with('success', 'Candidature refusée avec succès.');
     }
 
     // Supprimer (soft delete)

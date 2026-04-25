@@ -20,7 +20,7 @@ class EtudiantController extends Controller
     {
         $etudiants = Etudiant::with(['user', 'ufr', 'departement', 'filiere'])
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->get();
 
         return Inertia::render('etudiants/EtudiantList', [
             'etudiants' => $etudiants
