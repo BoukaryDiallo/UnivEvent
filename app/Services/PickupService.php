@@ -62,8 +62,14 @@ class PickupService
     public function bookSlot(DiplomaRequest $request, PickupSlot $slot, User $actor): PickupAppointment
     {
         return DB::transaction(function () use ($request, $slot, $actor) {
+            $lockedRequest = DiplomaRequest::query()
+                ->whereKey($request->id)
+                ->lockForUpdate()
+                ->first();
+
             $locked = PickupSlot::query()
                 ->whereKey($slot->id)
+                ->withCount('appointments')
                 ->lockForUpdate()
                 ->first();
 
@@ -73,7 +79,7 @@ class PickupService
                 ]);
             }
 
-            if ($request->status !== DiplomaRequestStatus::ReadyForPickup) {
+            if ($lockedRequest->status !== DiplomaRequestStatus::ReadyForPickup) {
                 throw new \DomainException('La demande n\'est pas prête pour une réservation.');
             }
 
@@ -83,29 +89,29 @@ class PickupService
                 ]);
             }
 
-            if ($locked->appointments()->count() >= $locked->capacity) {
+            if ($locked->appointments_count >= $locked->capacity) {
                 throw ValidationException::withMessages([
                     'slot' => 'Ce créneau est complet.',
                 ]);
             }
 
-            if ($request->appointment()->exists()) {
+            if ($lockedRequest->appointment()->exists()) {
                 throw new \DomainException('Un rendez-vous est déjà associé à cette demande.');
             }
 
-            $appointment = $request->appointment()->create([
+            $appointment = $lockedRequest->appointment()->create([
                 'pickup_slot_id' => $locked->id,
                 'confirmed_at' => now(),
             ]);
 
-            $from = $request->status;
+            $from = $lockedRequest->status;
 
-            $request->forceFill([
+            $lockedRequest->forceFill([
                 'status' => DiplomaRequestStatus::AppointmentScheduled,
             ])->save();
 
             $this->requests->recordEvent(
-                $request,
+                $lockedRequest,
                 $from,
                 DiplomaRequestStatus::AppointmentScheduled,
                 $actor,

@@ -9,11 +9,9 @@ use Illuminate\Notifications\DatabaseNotification;
 
 class NotificationController extends Controller
 {
-    public function read(Request $request, DatabaseNotification $notification): RedirectResponse
+    public function read(DatabaseNotification $notification): RedirectResponse
     {
-        if ($notification->notifiable_id !== $request->user()->id) {
-            abort(404);
-        }
+        $this->authorize('read', $notification);
 
         $notification->markAsRead();
 

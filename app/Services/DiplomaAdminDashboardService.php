@@ -6,7 +6,7 @@ use App\Enums\DiplomaRequestStatus;
 use App\Models\DiplomaRequest;
 use App\Models\DiplomaRequestEvent;
 use App\Models\PickupSlot;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DiplomaAdminDashboardService
 {
@@ -145,12 +145,9 @@ class DiplomaAdminDashboardService
             return null;
         }
 
-        $totalSeconds = $rows->sum(function ($row) use ($startField, $endField) {
-            return now()->parse($row->{$endField})->diffInSeconds(now()->parse($row->{$startField}), absolute: true);
-        });
+        $totalSeconds = $rows->sum(fn ($row) => Carbon::parse($row->{$endField})
+            ->diffInSeconds(Carbon::parse($row->{$startField}), absolute: true));
 
-        $avgSeconds = $totalSeconds / $rows->count();
-
-        return round($avgSeconds / 86400, 1);
+        return round(($totalSeconds / $rows->count()) / 86400, 1);
     }
 }

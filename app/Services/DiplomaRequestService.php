@@ -48,7 +48,7 @@ class DiplomaRequestService
             'type' => $type,
             'path' => $path,
             'original_name' => $file->getClientOriginalName(),
-            'mime' => $file->getClientMimeType(),
+            'mime' => $file->getMimeType(),
             'size' => $file->getSize(),
         ]);
     }

@@ -15,7 +15,13 @@ class DiplomaRequestPolicy
 
     public function view(User $user, DiplomaRequest $request): bool
     {
-        return $user->id === $request->owner_id;
+        return $user->id === $request->owner_id
+            || $user->isScolarite();
+    }
+
+    public function viewAnyAdmin(User $user): bool
+    {
+        return $user->isScolarite();
     }
 
     public function create(User $user): bool

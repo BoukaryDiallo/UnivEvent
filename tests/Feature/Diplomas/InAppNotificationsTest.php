@@ -72,7 +72,7 @@ class InAppNotificationsTest extends TestCase
 
         $this->actingAs($intruder)
             ->post(route('notifications.read', $notif->id))
-            ->assertNotFound();
+            ->assertForbidden();
 
         $this->assertSame(1, $owner->fresh()->unreadNotifications()->count());
     }

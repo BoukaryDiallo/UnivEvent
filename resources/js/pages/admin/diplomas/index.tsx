@@ -34,7 +34,7 @@ type Props = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Administration', href: '#' },
-    { title: 'Dossiers de retrait', href: '/admin/diplomas' },
+    { title: 'Dossiers de retrait', href: adminDiplomasIndex().url },
 ];
 
 const DIPLOMA_TYPE_LABEL: Record<string, string> = {

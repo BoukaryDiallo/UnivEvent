@@ -19,6 +19,8 @@ class DiplomaRequestController extends Controller
 {
     public function index(Request $request): Response
     {
+        $this->authorize('viewAnyAdmin', DiplomaRequest::class);
+
         $statusFilter = $request->query('status');
         $validStatuses = collect(DiplomaRequestStatus::cases())
             ->reject(fn (DiplomaRequestStatus $s) => $s === DiplomaRequestStatus::Draft);
@@ -33,14 +35,7 @@ class DiplomaRequestController extends Controller
             ->orderByRaw('submitted_at IS NULL')
             ->latest('submitted_at')
             ->get()
-            ->map(fn (DiplomaRequest $r) => [
-                ...DiplomaRequestPresenter::row($r),
-                'owner' => [
-                    'id' => $r->owner->id,
-                    'name' => $r->owner->name,
-                    'email' => $r->owner->email,
-                ],
-            ]);
+            ->map(DiplomaRequestPresenter::adminRow(...));
 
         return Inertia::render('admin/diplomas/index', [
             'requests' => $requests,

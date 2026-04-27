@@ -10,7 +10,8 @@ class DiplomaDocumentPolicy
 {
     public function download(User $user, DiplomaDocument $document): bool
     {
-        return $user->id === $document->diplomaRequest->owner_id;
+        return $user->id === $document->diplomaRequest->owner_id
+            || $user->isScolarite();
     }
 
     public function delete(User $user, DiplomaDocument $document): bool

@@ -26,6 +26,18 @@ class DiplomaRequestPresenter
         ];
     }
 
+    public static function adminRow(DiplomaRequest $request): array
+    {
+        return [
+            ...self::row($request),
+            'owner' => [
+                'id' => $request->owner->id,
+                'name' => $request->owner->name,
+                'email' => $request->owner->email,
+            ],
+        ];
+    }
+
     public static function detail(DiplomaRequest $request, User $viewer): array
     {
         return [

@@ -26,9 +26,4 @@ enum DiplomaRequestStatus: string
             self::Rejected => 'Rejeté',
         };
     }
-
-    public function isTerminal(): bool
-    {
-        return in_array($this, [self::Delivered, self::Archived, self::Rejected], true);
-    }
 }

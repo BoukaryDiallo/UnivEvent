@@ -46,21 +46,34 @@ class HandleInertiaRequests extends Middleware
                 'isScolarite' => (bool) $user?->isScolarite(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'notifications' => $user ? [
-                'unread_count' => $user->unreadNotifications()->count(),
-                'recent' => $user->unreadNotifications()
-                    ->latest()
-                    ->limit(10)
-                    ->get()
-                    ->map(fn (DatabaseNotification $n) => [
-                        'id' => $n->id,
-                        'title' => $n->data['title'] ?? 'Notification',
-                        'tracking_code' => $n->data['tracking_code'] ?? null,
-                        'status_label' => $n->data['status_label'] ?? null,
-                        'created_at' => $n->created_at->toIso8601String(),
-                    ])
-                    ->all(),
-            ] : ['unread_count' => 0, 'recent' => []],
+            'notifications' => $user
+                ? $this->buildNotificationsShare($user)
+                : ['unread_count' => 0, 'recent' => []],
+        ];
+    }
+
+    /**
+     * @return array{unread_count: int, recent: array<int, array<string, mixed>>}
+     */
+    private function buildNotificationsShare($user): array
+    {
+        $unread = $user->unreadNotifications()->latest()->limit(10)->get();
+
+        $count = $unread->count() < 10
+            ? $unread->count()
+            : $user->unreadNotifications()->count();
+
+        return [
+            'unread_count' => $count,
+            'recent' => $unread
+                ->map(fn (DatabaseNotification $n) => [
+                    'id' => $n->id,
+                    'title' => $n->data['title'] ?? 'Notification',
+                    'tracking_code' => $n->data['tracking_code'] ?? null,
+                    'status_label' => $n->data['status_label'] ?? null,
+                    'created_at' => $n->created_at->toIso8601String(),
+                ])
+                ->all(),
         ];
     }
 }
