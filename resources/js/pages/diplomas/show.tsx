@@ -19,7 +19,10 @@ import {
     download as downloadDocument,
     store as storeDocument,
 } from '@/actions/App/Http/Controllers/DiplomaDocumentController';
-import { submit as submitRequest } from '@/actions/App/Http/Controllers/DiplomaRequestController';
+import {
+    export as exportRequest,
+    submit as submitRequest,
+} from '@/actions/App/Http/Controllers/DiplomaRequestController';
 import {
     destroy as destroyAppointment,
     store as bookAppointment,
@@ -183,6 +186,9 @@ export default function DiplomaRequestShow({
                         {can.submit && (
                             <Button onClick={handleSubmit}>Soumettre la demande</Button>
                         )}
+                        <Button variant="outline" asChild>
+                            <a href={exportRequest(request.id).url}>Exporter PDF</a>
+                        </Button>
                         <Button variant="outline" asChild>
                             <Link href={diplomasIndex().url}>Retour à la liste</Link>
                         </Button>

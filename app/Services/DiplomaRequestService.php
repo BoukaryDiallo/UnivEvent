@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DiplomaRequestService
@@ -216,6 +218,15 @@ class DiplomaRequestService
 
             return $request->refresh();
         });
+    }
+
+    public function exportPdf(DiplomaRequest $request): Response
+    {
+        $request->loadMissing(['owner', 'documents', 'events.actor', 'appointment.pickupSlot']);
+
+        $pdf = Pdf::loadView('diplomas.export', ['request' => $request])->setPaper('a4');
+
+        return $pdf->download(sprintf('dossier-%s.pdf', $request->tracking_code));
     }
 
     public function recordEvent(

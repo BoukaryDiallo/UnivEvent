@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class DiplomaRequestController extends Controller
 {
@@ -94,5 +95,12 @@ class DiplomaRequestController extends Controller
 
         return to_route('diplomas.show', $diplomaRequest)
             ->with('success', 'Demande soumise. Elle est désormais en cours d\'instruction.');
+    }
+
+    public function export(DiplomaRequest $diplomaRequest, DiplomaRequestService $service): SymfonyResponse
+    {
+        $this->authorize('view', $diplomaRequest);
+
+        return $service->exportPdf($diplomaRequest);
     }
 }
