@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -35,14 +36,31 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
-                'isScolarite' => (bool) $request->user()?->isScolarite(),
+                'user' => $user,
+                'isScolarite' => (bool) $user?->isScolarite(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'notifications' => $user ? [
+                'unread_count' => $user->unreadNotifications()->count(),
+                'recent' => $user->unreadNotifications()
+                    ->latest()
+                    ->limit(10)
+                    ->get()
+                    ->map(fn (DatabaseNotification $n) => [
+                        'id' => $n->id,
+                        'title' => $n->data['title'] ?? 'Notification',
+                        'tracking_code' => $n->data['tracking_code'] ?? null,
+                        'status_label' => $n->data['status_label'] ?? null,
+                        'created_at' => $n->created_at->toIso8601String(),
+                    ])
+                    ->all(),
+            ] : ['unread_count' => 0, 'recent' => []],
         ];
     }
 }
