@@ -22,9 +22,7 @@ abstract class TestCase extends BaseTestCase
             return;
         }
 
-        foreach (['admin', 'enseignant', 'etudiant'] as $role) {
-            \Spatie\Permission\Models\Role::findOrCreate($role);
-        }
+        $this->seed(\Database\Seeders\RbacSeeder::class);
     }
 
     protected function skipUnlessFortifyFeature(string $feature, ?string $message = null): void

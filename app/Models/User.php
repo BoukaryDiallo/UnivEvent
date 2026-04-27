@@ -31,6 +31,6 @@ class User extends Authenticatable
 
     public function isScolarite(): bool
     {
-        return $this->hasRole('admin');
+        return $this->can('diplomas.manage');
     }
 }

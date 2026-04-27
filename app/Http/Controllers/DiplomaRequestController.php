@@ -97,7 +97,7 @@ class DiplomaRequestController extends Controller
             ->with('success', 'Demande soumise. Elle est désormais en cours d\'instruction.');
     }
 
-    public function export(DiplomaRequest $diplomaRequest, DiplomaRequestService $service): SymfonyResponse
+    public function exportPdf(DiplomaRequest $diplomaRequest, DiplomaRequestService $service): SymfonyResponse
     {
         $this->authorize('view', $diplomaRequest);
 

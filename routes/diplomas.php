@@ -19,7 +19,7 @@ Route::middleware(['auth', 'verified', 'student'])
         Route::post('/', [DiplomaRequestController::class, 'store'])->name('store');
         Route::get('/{diplomaRequest}', [DiplomaRequestController::class, 'show'])->name('show');
         Route::post('/{diplomaRequest}/submit', [DiplomaRequestController::class, 'submit'])->name('submit');
-        Route::get('/{diplomaRequest}/export', [DiplomaRequestController::class, 'export'])->name('export');
+        Route::get('/{diplomaRequest}/export', [DiplomaRequestController::class, 'exportPdf'])->name('export');
 
         Route::post('/{diplomaRequest}/documents', [DiplomaDocumentController::class, 'store'])
             ->name('documents.store');

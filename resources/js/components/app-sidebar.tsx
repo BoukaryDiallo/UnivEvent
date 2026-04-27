@@ -36,7 +36,7 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { hasRole, can } = useAuth();
-    const isAdmin = hasRole('admin');
+    const canManageDiplomas = can('diplomas.manage');
 
     const mainNavItems: NavItem[] = [
         {
@@ -51,7 +51,7 @@ export function AppSidebar() {
         },
     ];
 
-    if (isAdmin) {
+    if (canManageDiplomas) {
         mainNavItems.push(
             {
                 title: 'Tableau de bord scolarité',
@@ -71,7 +71,7 @@ export function AppSidebar() {
         );
     }
 
-    if (isAdmin || can('manage users')) {
+    if (hasRole('admin') || can('manage users')) {
         mainNavItems.push(
             {
                 title: 'Gestion des rôles',

@@ -20,7 +20,7 @@ import {
     store as storeDocument,
 } from '@/actions/App/Http/Controllers/DiplomaDocumentController';
 import {
-    export as exportRequest,
+    exportPdf as exportRequest,
     submit as submitRequest,
 } from '@/actions/App/Http/Controllers/DiplomaRequestController';
 import {
