@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
@@ -54,20 +55,22 @@ export default function CandidatureEdit() {
                     </CardHeader>
                     <CardContent>
                         {Object.keys(errors).length > 0 && (
-                            <div className="alert alert-danger mb-4">
-                                <ul className="mb-0">
-                                    {Object.values(errors).map((error, index) => (
-                                        <li key={index}>{error}</li>
-                                    ))}
-                                </ul>
-                            </div>
+                            <Alert className="mb-4 border-red-200 bg-red-50">
+                                <AlertDescription>
+                                    <ul className="mb-0">
+                                        {Object.values(errors).map((error, index) => (
+                                            <li key={index}>{error}</li>
+                                        ))}
+                                    </ul>
+                                </AlertDescription>
+                            </Alert>
                         )}
                         <form onSubmit={submit} encType="multipart/form-data" className="space-y-4">
                             <div>
                                 <Label htmlFor="programme">Programme</Label>
                                 <textarea
                                     id="programme"
-                                    className="form-control"
+                                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     value={data.programme}
                                     onChange={(e) => setData('programme', e.target.value)}
                                     rows={3}

@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TabsContent } from '@/components/ui/tabs';
 import { AlertCircle, CheckCircle2, Users, Calendar, Clock, Trophy, ArrowLeft } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
@@ -12,6 +12,7 @@ import type { PageProps } from '@/types/app';
 import { Election, WorkflowData, ElectionStats, TimelinePost } from '@/types';
 import { getImageUrl } from '@/utils/image';
 import votesRoutes from '@/routes/votes';
+import WorkflowTabsLayout from '@/components/elections/WorkflowTabsLayout';
 
 interface Props extends PageProps {
     workflow?: WorkflowData;
@@ -88,12 +89,17 @@ export default function ResultatsVote() {
     return (
         <AppLayout>
             <Head title="Élections" />
-
-            <div className="container mt-4 space-y-6">
-                {/* Header avec statistiques */}
-                <div className="text-center space-y-4">
-                    <h1 className="text-3xl font-bold text-gray-900">Espace Élections</h1>
-                    <p className="text-gray-600">Suivez l'évolution des élections en temps réel</p>
+            <WorkflowTabsLayout
+                title="Espace Élections"
+                description="Suivez l'évolution des élections en temps réel"
+            >
+                {/* 🟡 Candidatures ouvertes */}
+                <TabsContent value="liste_generee" className="space-y-4">
+                    <Alert>
+                        <AlertDescription>
+                            📢 Les candidatures sont ouvertes pour ces élections. Déposez votre dossier pour devenir candidat !
+                        </AlertDescription>
+                    </Alert>
                     
                     {stats && (
                         <div className="flex justify-center gap-4 flex-wrap">
@@ -111,232 +117,202 @@ export default function ResultatsVote() {
                             </Badge>
                         </div>
                     )}
-                </div>
+                    
+                    {workflow?.liste_generee?.length > 0 ? (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {workflow.liste_generee.map((election) => (
+                                <Card key={election.id_election}>
+                                    <CardHeader>
+                                        <CardTitle className="text-lg">{election.titre}</CardTitle>
+                                        <Badge variant="secondary">{election.type}</Badge>
+                                    </CardHeader>
+                                    <CardContent className="space-y-3">
+                                        <p className="text-sm text-gray-600">{election.description}</p>
+                                        <div className="text-xs text-gray-500">
+                                            {election.ufr?.nom} {election.filiere?.nom && `• ${election.filiere.nom}`}
+                                        </div>
+                                        <Button asChild className="w-full">
+                                            <Link href="/candidatures/create">
+                                                Candidater
+                                            </Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-gray-500">
+                            Aucune élection avec candidatures ouvertes
+                        </div>
+                    )}
+                </TabsContent>
 
-                {/* Tabs par statut */}
-                <Tabs defaultValue="liste_generee" className="w-full">
-                    <TabsList className="grid w-full grid-cols-5">
-                        <TabsTrigger value="liste_generee" className="flex items-center gap-2">
-                            🟡 Candidatures
-                        </TabsTrigger>
-                        <TabsTrigger value="planifiee" className="flex items-center gap-2">
-                            🟠 Planifiées
-                        </TabsTrigger>
-                        <TabsTrigger value="ouverte" className="flex items-center gap-2">
-                            🟢 Ouvertes
-                        </TabsTrigger>
-                        <TabsTrigger value="cloturee" className="flex items-center gap-2">
-                            🔴 Clôturées
-                        </TabsTrigger>
-                        <TabsTrigger value="terminee" className="flex items-center gap-2">
-                            🏆 Terminées
-                        </TabsTrigger>
-                    </TabsList>
-
-                    {/* 🟡 Candidatures ouvertes */}
-                    <TabsContent value="liste_generee" className="space-y-4">
-                        <Alert>
-                            <AlertDescription>
-                                📢 Les candidatures sont ouvertes pour ces élections. Déposez votre dossier pour devenir candidat !
-                            </AlertDescription>
-                        </Alert>
-                        
-                        {workflow?.liste_generee?.length > 0 ? (
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {workflow.liste_generee.map((election) => (
-                                    <Card key={election.id_election}>
-                                        <CardHeader>
-                                            <CardTitle className="text-lg">{election.titre}</CardTitle>
-                                            <Badge variant="secondary">{election.type}</Badge>
-                                        </CardHeader>
-                                        <CardContent className="space-y-3">
-                                            <p className="text-sm text-gray-600">{election.description}</p>
-                                            <div className="text-xs text-gray-500">
-                                                {election.ufr?.nom} {election.filiere?.nom && `• ${election.filiere.nom}`}
-                                            </div>
-                                            <Button asChild className="w-full">
-                                                <Link href="/candidatures/create">
-                                                    Candidater
-                                                </Link>
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 text-gray-500">
-                                Aucune élection avec candidatures ouvertes
-                            </div>
-                        )}
-                    </TabsContent>
-
-                    {/* 🟠 Élections planifiées */}
-                    <TabsContent value="planifiee" className="space-y-4">
-                        <Alert>
-                            <AlertDescription>
-                                📋 Les candidatures sont fermées. Découvrez les candidats retenus pour ces élections.
-                            </AlertDescription>
-                        </Alert>
-                        
-                        {workflow?.planifiee?.length > 0 ? (
-                            <div className="space-y-4">
-                                {workflow.planifiee.map((election) => (
-                                    <Card key={election.id_election}>
-                                        <CardHeader>
-                                            <CardTitle>{election.titre}</CardTitle>
-                                            <Badge variant="outline">Planifiée</Badge>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4">
-                                            <p className="text-gray-600">{election.description}</p>
-                                            
-                                            {election.candidatures && election.candidatures.length > 0 && (
-                                                <div>
-                                                    <h4 className="font-semibold mb-2">Candidats retenus :</h4>
-                                                    <div className="grid md:grid-cols-2 gap-3">
-                                                        {election.candidatures.map((candidature) => (
-                                                            <div key={candidature.id_candidature} className="flex items-center gap-3 p-2 border rounded">
-                                                                <img 
-                                                                    src={getImageUrl(candidature.user.photo)} 
-                                                                    className="w-8 h-8 rounded-full object-cover"
-                                                                />
-                                                                <div>
-                                                                    <strong className="text-sm">{candidature.user.name}</strong>
-                                                                    {candidature.slogan && (
-                                                                        <p className="text-xs text-gray-600 italic">"{candidature.slogan}"</p>
-                                                                    )}
-                                                                </div>
+                {/* 🟠 Élections planifiées */}
+                <TabsContent value="planifiee" className="space-y-4">
+                    <Alert>
+                        <AlertDescription>
+                            📋 Les candidatures sont fermées. Découvrez les candidats retenus pour ces élections.
+                        </AlertDescription>
+                    </Alert>
+                    
+                    {workflow?.planifiee?.length > 0 ? (
+                        <div className="space-y-4">
+                            {workflow.planifiee.map((election) => (
+                                <Card key={election.id_election}>
+                                    <CardHeader>
+                                        <CardTitle>{election.titre}</CardTitle>
+                                        <Badge variant="outline">Planifiée</Badge>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <p className="text-gray-600">{election.description}</p>
+                                        
+                                        {election.candidatures && election.candidatures.length > 0 && (
+                                            <div>
+                                                <h4 className="font-semibold mb-2">Candidats retenus :</h4>
+                                                <div className="grid md:grid-cols-2 gap-3">
+                                                    {election.candidatures.map((candidature) => (
+                                                        <div key={candidature.id_candidature} className="flex items-center gap-3 p-2 border rounded">
+                                                            <img 
+                                                                src={getImageUrl(candidature.user.photo)} 
+                                                                className="w-8 h-8 rounded-full object-cover"
+                                                            />
+                                                            <div>
+                                                                <strong className="text-sm">{candidature.user.name}</strong>
+                                                                {candidature.slogan && (
+                                                                    <p className="text-xs text-gray-600 italic">"{candidature.slogan}"</p>
+                                                                )}
                                                             </div>
-                                                        ))}
-                                                    </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
-                                            )}
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 text-gray-500">
-                                Aucune élection planifiée
-                            </div>
-                        )}
-                    </TabsContent>
-
-                    {/* 🟢 Votes ouverts */}
-                    <TabsContent value="ouverte" className="space-y-4">
-                        <Alert>
-                            <AlertDescription>
-                                🗳️ Le vote est ouvert ! Participez aux élections en cours.
-                            </AlertDescription>
-                        </Alert>
-                        
-                        {workflow?.ouverte?.length > 0 ? (
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {workflow.ouverte.map((election) => (
-                                    <Card key={election.id_election} className="border-green-200">
-                                        <CardHeader>
-                                            <CardTitle className="text-lg">{election.titre}</CardTitle>
-                                            <Badge className={election.statut === 'second_tour' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
-                                                {election.statut === 'second_tour' ? 'Second tour' : 'Vote ouvert'}
-                                            </Badge>
-                                        </CardHeader>
-                                        <CardContent className="space-y-3">
-                                            <p className="text-sm text-gray-600">{election.description}</p>
-                                            <div className="text-xs text-gray-500">
-                                                Du {new Date(election.date_debut).toLocaleDateString()} au {new Date(election.date_fin).toLocaleDateString()}
                                             </div>
-                                            <Button asChild className="w-full bg-green-600 hover:bg-green-700">
-                                                <Link href={`/votes/candidats/${election.id_election}`}>
-                                                    Voter
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-gray-500">
+                            Aucune élection planifiée
+                        </div>
+                    )}
+                </TabsContent>
+
+                {/* 🟢 Votes ouverts */}
+                <TabsContent value="ouverte" className="space-y-4">
+                    <Alert>
+                        <AlertDescription>
+                            🗳️ Le vote est ouvert ! Participez aux élections en cours.
+                        </AlertDescription>
+                    </Alert>
+                    
+                    {workflow?.ouverte?.length > 0 ? (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {workflow.ouverte.map((election) => (
+                                <Card key={election.id_election} className="border-green-200">
+                                    <CardHeader>
+                                        <CardTitle className="text-lg">{election.titre}</CardTitle>
+                                        <Badge className={election.statut === 'second_tour' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
+                                            {election.statut === 'second_tour' ? 'Second tour' : 'Vote ouvert'}
+                                        </Badge>
+                                    </CardHeader>
+                                    <CardContent className="space-y-3">
+                                        <p className="text-sm text-gray-600">{election.description}</p>
+                                        <div className="text-xs text-gray-500">
+                                            Du {new Date(election.date_debut).toLocaleDateString()} au {new Date(election.date_fin).toLocaleDateString()}
+                                        </div>
+                                        <Button asChild className="w-full bg-green-600 hover:bg-green-700">
+                                            <Link href={`/votes/candidats/${election.id_election}`}>
+                                                Voter
+                                            </Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-gray-500">
+                            Aucun vote ouvert
+                        </div>
+                    )}
+                </TabsContent>
+
+                {/* 🔴 Votes clôturés */}
+                <TabsContent value="cloturee" className="space-y-4">
+                    <Alert>
+                        <AlertDescription>
+                            🔒 Les votes sont clôturés. Les résultats seront publiés prochainement.
+                        </AlertDescription>
+                    </Alert>
+                    
+                    {workflow?.cloturee?.length > 0 ? (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {workflow.cloturee.map((election) => (
+                                <Card key={election.id_election} className="border-orange-200">
+                                    <CardHeader>
+                                        <CardTitle className="text-lg">{election.titre}</CardTitle>
+                                        <Badge className="bg-orange-100 text-orange-800">Vote clôturé</Badge>
+                                    </CardHeader>
+                                    <CardContent className="space-y-3">
+                                        <p className="text-sm text-gray-600">{election.description}</p>
+                                        <div className="text-xs text-gray-500">
+                                            Clôturé le {new Date(election.date_fin).toLocaleDateString()}
+                                        </div>
+                                        <div className="text-center text-sm text-orange-600 font-medium">
+                                            📊 Résultats en attente de validation
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-gray-500">
+                            Aucun vote clôturé
+                        </div>
+                    )}
+                </TabsContent>
+
+                {/* 🏆 Résultats publiés */}
+                <TabsContent value="terminee" className="space-y-4">
+                    <Alert>
+                        <AlertDescription>
+                            🏆 Découvrez les résultats officiels des élections terminées.
+                        </AlertDescription>
+                    </Alert>
+                    
+                    {workflow?.terminee?.length > 0 ? (
+                        <div className="space-y-4">
+                            {workflow.terminee.map((election) => (
+                                <Card key={election.id_election} className="border-blue-200">
+                                    <CardHeader>
+                                        <CardTitle>{election.titre}</CardTitle>
+                                        <Badge className="bg-blue-100 text-blue-800">Résultats publiés</Badge>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <p className="text-gray-600">{election.description}</p>
+                                                <div className="text-xs text-gray-500 mt-2">
+                                                    Terminé le {new Date(election.date_fin).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                            <Button asChild variant="outline">
+                                                <Link href={`/resultats/${election.id_election}`}>
+                                                    Voir les résultats
                                                 </Link>
                                             </Button>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 text-gray-500">
-                                Aucun vote ouvert
-                            </div>
-                        )}
-                    </TabsContent>
-
-                    {/* 🔴 Votes clôturés */}
-                    <TabsContent value="cloturee" className="space-y-4">
-                        <Alert>
-                            <AlertDescription>
-                                🔒 Les votes sont clôturés. Les résultats seront publiés prochainement.
-                            </AlertDescription>
-                        </Alert>
-                        
-                        {workflow?.cloturee?.length > 0 ? (
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {workflow.cloturee.map((election) => (
-                                    <Card key={election.id_election} className="border-orange-200">
-                                        <CardHeader>
-                                            <CardTitle className="text-lg">{election.titre}</CardTitle>
-                                            <Badge className="bg-orange-100 text-orange-800">Vote clôturé</Badge>
-                                        </CardHeader>
-                                        <CardContent className="space-y-3">
-                                            <p className="text-sm text-gray-600">{election.description}</p>
-                                            <div className="text-xs text-gray-500">
-                                                Clôturé le {new Date(election.date_fin).toLocaleDateString()}
-                                            </div>
-                                            <div className="text-center text-sm text-orange-600 font-medium">
-                                                📊 Résultats en attente de validation
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 text-gray-500">
-                                Aucun vote clôturé
-                            </div>
-                        )}
-                    </TabsContent>
-
-                    {/* 🏆 Résultats publiés */}
-                    <TabsContent value="terminee" className="space-y-4">
-                        <Alert>
-                            <AlertDescription>
-                                🏆 Découvrez les résultats officiels des élections terminées.
-                            </AlertDescription>
-                        </Alert>
-                        
-                        {workflow?.terminee?.length > 0 ? (
-                            <div className="space-y-4">
-                                {workflow.terminee.map((election) => (
-                                    <Card key={election.id_election} className="border-blue-200">
-                                        <CardHeader>
-                                            <CardTitle>{election.titre}</CardTitle>
-                                            <Badge className="bg-blue-100 text-blue-800">Résultats publiés</Badge>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <p className="text-gray-600">{election.description}</p>
-                                                    <div className="text-xs text-gray-500 mt-2">
-                                                        Terminé le {new Date(election.date_fin).toLocaleDateString()}
-                                                    </div>
-                                                </div>
-                                                <Button asChild variant="outline">
-                                                    <Link href={`/resultats/${election.id_election}`}>
-                                                        Voir les résultats
-                                                    </Link>
-                                                </Button>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 text-gray-500">
-                                Aucune élection terminée
-                            </div>
-                        )}
-                    </TabsContent>
-                </Tabs>
-            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-gray-500">
+                            Aucune élection terminée
+                        </div>
+                    )}
+                </TabsContent>
+            </WorkflowTabsLayout>
         </AppLayout>
     );
 

@@ -1,12 +1,11 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 import elections from '@/routes/elections';
 import AppLayout from '@/layouts/app-layout';
+import ElectionForm from '@/components/elections/ElectionForm';
+import { TextLink } from '@/components/ui/text-link';
+import { NavigationBreadcrumb } from '@/components/ui/navigation-breadcrumb';
 import type { PageProps } from '@/types/app';
 
 interface Election {
@@ -54,157 +53,37 @@ export default function ElectionEdit() {
         put(elections.update.url({election: election.id_election}));
     };
 
+    const onCancel = () => {
+        router.get(elections.show.url({ election: election.id_election }));
+    };
+
     return (
         <AppLayout>
             <Head title="Modifier une Élection" />
             <div className="container mt-5">
-                {/* Boutons retour et annuler */}
-                <div className="mb-4 flex gap-2">
-                    <Button variant="outline" onClick={() => router.get(elections.index.url())}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Retour à la liste
-                    </Button>
-                    <Button variant="secondary" onClick={() => router.get(elections.show.url({ election: election.id_election }))}>
-                        Annuler
-                    </Button>
-                </div>
+                <NavigationBreadcrumb
+                    items={[
+                        { label: 'Élections', href: '/elections' },
+                        { label: election.titre, href: `/elections/${election.id_election}` },
+                        { label: 'Modifier', current: true }
+                    ]}
+                    className="mb-6"
+                />
                 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-center text-green-600">Modifier une Élection</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {Object.keys(errors).length > 0 && (
-                            <div className="alert alert-danger mb-4">
-                                <ul className="mb-0">
-                                    {Object.values(errors).map((error, index) => (
-                                        <li key={index}>{error}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                        <form onSubmit={submit} className="space-y-4">
-                            <div>
-                                <Label htmlFor="titre">Titre</Label>
-                                <Input
-                                    id="titre"
-                                    type="text"
-                                    value={data.titre}
-                                    onChange={(e) => setData('titre', e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="description">Description</Label>
-                                <textarea
-                                    id="description"
-                                    className="form-control"
-                                    value={data.description}
-                                    onChange={(e) => setData('description', e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="date_debut">Date de début</Label>
-                                <Input
-                                    id="date_debut"
-                                    type="datetime-local"
-                                    value={data.date_debut}
-                                    onChange={(e) => setData('date_debut', e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="date_fin">Date de fin</Label>
-                                <Input
-                                    id="date_fin"
-                                    type="datetime-local"
-                                    value={data.date_fin}
-                                    onChange={(e) => setData('date_fin', e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <Label>Type d'élection</Label>
-                                <div className="flex space-x-4">
-                                    <label className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            name="type"
-                                            value="ufr"
-                                            checked={data.type === 'ufr'}
-                                            onChange={(e) => setData('type', e.target.value)}
-                                            className="mr-2"
-                                        />
-                                        UFR
-                                    </label>
-                                    <label className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            name="type"
-                                            value="promotion"
-                                            checked={data.type === 'promotion'}
-                                            onChange={(e) => setData('type', e.target.value)}
-                                            className="mr-2"
-                                        />
-                                        Promotion
-                                    </label>
-                                </div>
-                            </div>
-                            {data.type === 'ufr' && (
-                                <div>
-                                    <Label htmlFor="id_ufr">UFR</Label>
-                                    <Select value={data.id_ufr} onValueChange={(value) => setData('id_ufr', value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="-- Sélectionner UFR --" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {ufrs.map((ufr) => (
-                                                <SelectItem key={ufr.id_ufr} value={ufr.id_ufr.toString()}>
-                                                    {ufr.nom}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            )}
-                            {data.type === 'promotion' && (
-                                <div>
-                                    <Label htmlFor="id_filiere">Filière</Label>
-                                    <Select value={data.id_filiere} onValueChange={(value) => setData('id_filiere', value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="-- Sélectionner filière --" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {filieres.map((filiere) => (
-                                                <SelectItem key={filiere.id_filiere} value={filiere.id_filiere.toString()}>
-                                                    {filiere.nom}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            )}
-                            <div>
-                                <Label>Statut actuel</Label>
-                                <div className="mt-1 p-2 bg-gray-100 rounded border">
-                                    <span className="font-medium">{election.statut}</span>
-                                    <p className="text-sm text-gray-500 mt-1">Le statut est géré automatiquement par le système</p>
-                                </div>
-                            </div>
-                            <div className="flex justify-between">
-                                <Button variant="outline" onClick={() => router.get(elections.index.url())}>
-                                    <ArrowLeft className="h-4 w-4 mr-2" />
-                                    Retour
-                                </Button>
-                                <div className="flex gap-2">
-                                    <Button variant="secondary" onClick={() => router.get(elections.show.url({ election: election.id_election }))}>
-                                        Annuler
-                                    </Button>
-                                    <Button type="submit" disabled={processing}>
-                                        Mettre à jour
-                                    </Button>
-                                </div>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
+                <ElectionForm
+                    data={data}
+                    setData={setData}
+                    errors={errors}
+                    processing={processing}
+                    onSubmit={submit}
+                    ufrs={ufrs}
+                    filieres={filieres}
+                    mode="edit"
+                    election={election}
+                    submitLabel="Mettre à jour"
+                    title="Modifier une Élection"
+                    onCancel={onCancel}
+                />
             </div>
         </AppLayout>
     );

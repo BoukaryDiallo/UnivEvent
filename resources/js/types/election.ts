@@ -65,6 +65,38 @@ export type ListeElectorale = {
     updated_at: string;
 };
 
+// Types pour les formulaires
+export type ElectionFormData = {
+    titre: string;
+    description: string;
+    date_debut: string;
+    date_fin: string;
+    type: string;
+    id_ufr: string;
+    id_filiere: string;
+};
+
+// Types pour les entités liées
+export type Ufr = {
+    id_ufr: number;
+    nom: string;
+};
+
+export type Filiere = {
+    id_filiere: number;
+    nom: string;
+};
+
+export type CandidatQualifie = {
+    id_candidature: number;
+    user: {
+        name: string;
+        photo?: string;
+    };
+    slogan?: string;
+};
+
+// Types pour les statistiques et données de workflow
 export type WorkflowData = {
     liste_generee: Election[];
     planifiee: Election[];
@@ -78,4 +110,93 @@ export type ElectionStats = {
     ouvertes: number;
     cloturees: number;
     terminees: number;
+};
+
+export type ElectionAdminStats = {
+    totalVoters: number;
+    totalVotes: number;
+    totalCandidatures: number;
+    candidaturesValidees: number;
+    participationRate: number;
+};
+
+// Types pour les composants d'administration
+export type ElectionAdminInformationsProps = {
+    election: Election;
+    onGenererListe: () => void;
+    onVoirListe: () => void;
+    onCloturerCandidatures: () => void;
+    onOuvrir: () => void;
+    onCloturer: () => void;
+};
+
+export type ElectionAdminCandidaturesProps = {
+    candidatures: Candidature[];
+    totalCandidatures: number;
+    candidaturesIndexUrl: string;
+};
+
+export type ElectionAdminVoteProps = {
+    stats: {
+        totalVoters: number;
+        totalVotes: number;
+        participationRate: number;
+    };
+    electionId: number;
+    candidatsUrl: string;
+    voteLiveUrl: string;
+};
+
+export type ElectionAdminResultatsProps = {
+    electionStatut: string;
+    resultatsUrl: string;
+};
+
+export type ElectionAdminDepouillementProps = {
+    election: Election;
+    stats: {
+        totalVotes: number;
+        totalVoters: number;
+        participationRate: number;
+    };
+    onDepouiller: () => void;
+    onVoirResultatsDepouillement: () => void;
+    onConfigurerSecondTour: () => void;
+    resultatsUrl: string;
+};
+
+export type ElectionAdminLayoutProps = {
+    election: Election;
+    children: React.ReactNode;
+    onBack: () => void;
+};
+
+export type ElectionFormProps = {
+    data: ElectionFormData;
+    setData: (field: keyof ElectionFormData, value: string) => void;
+    errors: Record<string, string>;
+    processing: boolean;
+    onSubmit: (e: React.FormEvent) => void;
+    ufrs: Ufr[];
+    filieres: Filiere[];
+    mode?: 'create' | 'edit' | 'second_tour';
+    election?: Election;
+    candidatsQualifies?: CandidatQualifie[];
+    submitLabel: string;
+    title: string;
+    onCancel: () => void;
+};
+
+// Types pour les pages de vote
+export type VoteElection = {
+    id_election: number;
+    titre: string;
+    description: string;
+    candidatures: Candidature[];
+};
+
+export type LiveElection = {
+    title: string;
+    status: string;
+    votes_count: number;
 };

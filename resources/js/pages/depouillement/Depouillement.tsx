@@ -1,14 +1,15 @@
 import { Head } from '@inertiajs/react';
-import { AppLayout } from '@/layouts/app-layout';
+import AppLayout  from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, BarChart3, TrendingUp, Users, CheckCircle, ArrowLeft } from 'lucide-react';
+import { AlertCircle, BarChart3, TrendingUp, User,Trophy, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import { useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { PageProps, Election, Candidature } from '@/types';
+import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Resultat {
     id_candidature: number;
@@ -26,6 +27,8 @@ interface Props extends PageProps {
 
 export default function Depouillement() {
     const { election, resultats, total, tour } = usePage<Props>().props;
+    const { confirm, ConfirmDialog } = useConfirmDialog();
+    const { processing, post } = useForm();
 
     const secondTourRequis =
         tour === 1 &&
@@ -37,19 +40,21 @@ export default function Depouillement() {
             ? "Êtes-vous sûr de vouloir publier les résultats du 1er tour ?"
             : "Êtes-vous sûr de vouloir publier ces résultats ? Cette action est irréversible.";
 
-        if (confirm(message)) {
-            router.post(depouillementPublier.url({ election: election.id_election }));
-        }
+        confirm({
+            title: 'Publier les résultats',
+            description: message,
+            onConfirm: () => post(`/depouillement/${election.id_election}/publier`),
+            variant: 'default'
+        });
     };
 
     const handleConfigurerSecondTour = () => {
-        if (
-            confirm(
-                "Configurer le second tour avec les deux premiers candidats ? Vous devrez définir les dates du nouveau vote."
-            )
-        ) {
-            router.get(`/elections/${election.id_election}/second-tour`);
-        }
+        confirm({
+            title: 'Configurer le second tour',
+            description: "Configurer le second tour avec les deux premiers candidats ? Vous devrez définir les dates du nouveau vote.",
+            onConfirm: () => router.get(`/elections/${election.id_election}/second-tour`),
+            variant: 'default'
+        });
     };
 
     const handleRetour = () => {
@@ -235,6 +240,7 @@ export default function Depouillement() {
                     </CardContent>
                 </Card>
             </div>
+        <ConfirmDialog />
         </AppLayout>
     );
 }

@@ -1,7 +1,9 @@
-import { usePage, Link, router } from '@inertiajs/react'
-import Heading from '@/components/heading'
-import ufr from '@/routes/ufr';
-import { Eye, Pencil, Trash2, Plus } from 'lucide-react'
+import { usePage, router } from '@inertiajs/react'
+import AppLayout from '@/layouts/app-layout'
+import CrudList from '@/components/ui/crud-list'
+import { Badge } from '@/components/ui/badge'
+import { useConfirmDialog } from '@/components/ui/confirm-dialog'
+import {destroy,index as ufrIndex,show as ufrShow,edit as ufrEdit,create as ufrCreate} from '@/routes/ufr';
 
 type Ufr = {
   id_ufr: number
@@ -11,106 +13,72 @@ type Ufr = {
 
 export default function List() {
   const { ufrs } = usePage<{ ufrs: { data: Ufr[] } }>().props
+  const { confirm, ConfirmDialog } = useConfirmDialog()
+
+  const handleDelete = (ufr: Ufr) => {
+    confirm({
+      title: 'Supprimer l\'UFR',
+      description: 'Êtes-vous sûr de vouloir supprimer cet UFR ?',
+      onConfirm: () => {
+        router.delete(destroy.url(ufr.id_ufr))
+      },
+      variant: 'destructive'
+    })
+  }
+
+  const columns = [
+    {
+      key: 'nom' as keyof Ufr,
+      label: 'Nom'
+    },
+    {
+      key: 'departements_count' as keyof Ufr,
+      label: 'Départements',
+      render: (value: number) => (
+        <Badge variant="secondary">
+          {value ?? 0}
+        </Badge>
+      )
+    }
+  ]
+
+  const actions = [
+    {
+      label: 'Voir',
+      onClick: () => {},
+      asChild: true as const,
+      href: (ufr: Ufr) => ufrShow.url(ufr.id_ufr)
+    },
+    {
+      label: 'Modifier',
+      onClick: () => {},
+      asChild: true as const,
+      href: (ufr: Ufr) => ufrEdit.url(ufr.id_ufr)
+    },
+    {
+      label: 'Supprimer',
+      onClick: handleDelete,
+      variant: 'destructive' as const
+    }
+  ]
 
   return (
-    <div className="container-fluid p-4">
-
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-4">
-        <Heading
-          title="Liste des UFR"
-          description="Gestion des unités de formation et de recherche"
-        />
-
-        <Link
-          href={ufr.create.url()}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-        >
-          <Plus size={18} />
-          Nouveau UFR
-        </Link>
-      </div>
-
-      {/* TABLE */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-
-        <div className="p-4 border-b">
-          <Heading
-            title="Unités de Formation et de Recherche"
-            variant="small"
-          />
-        </div>
-
-        <div className="p-4">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left border-b">
-                <th className="py-2">Nom</th>
-                <th className="py-2">Départements</th>
-                <th className="py-2">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {ufrs.data.length > 0 ? (
-                ufrs.data.map((ufrItem) => (
-                  <tr key={ufrItem.id_ufr} className="border-b hover:bg-gray-50">
-
-                    <td className="py-3 font-semibold">
-                      {ufrItem.nom}
-                    </td>
-
-                    <td>
-                      <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
-                        {ufrItem.departements_count ?? 0}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="flex gap-2">
-
-                        <Link
-                          href={ufr.show.url(ufrItem.id_ufr)}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-md"
-                        >
-                          <Eye size={18} />
-                        </Link>
-
-                        <Link
-                          href={ufr.edit.url(ufrItem.id_ufr)}
-                          className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-md"
-                        >
-                          <Pencil size={18} />
-                        </Link>
-
-                        <button
-                          onClick={() => {
-                            if (confirm('Supprimer cet UFR ?')) {
-                              router.delete(ufr.destroy.url(ufrItem.id_ufr))
-                            }
-                          }}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-md"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-
-                      </div>
-                    </td>
-
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={3} className="text-center py-6 text-gray-500">
-                    Aucun UFR trouvé
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-      </div>
-    </div>
+    <AppLayout>
+      <CrudList
+        data={ufrs.data}
+        columns={columns}
+        actions={actions}
+        title="Liste des UFR"
+        description="Gestion des unités de formation et de recherche"
+        createUrl={ufrCreate.url()}
+        createLabel="Nouveau UFR"
+        searchPlaceholder="Rechercher un UFR..."
+        searchFields={['nom']}
+        emptyMessage="Aucun UFR trouvé"
+        paginated={true}
+        itemsPerPage={10}
+      />
+      <ConfirmDialog />
+    </AppLayout>
   )
 }

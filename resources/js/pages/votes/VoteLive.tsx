@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { cloturer as electionsCloturer } from '@/routes/elections';
-import { depouiller as depouillementDepouiller } from '@/routes/depouillement';
+import { show as depouillementShow } from '@/routes/depouillement';
 import type { PageProps } from '@/types/app';
 
 interface Election {
@@ -38,7 +38,7 @@ export default function VoteLive() {
     };
 
     const handleDepouiller = () => {
-        router.visit(depouillementDepouiller.url({ election: election.id_election }));
+        router.visit(depouillementShow.url({ election: election.id_election }));
     };
 
     return (

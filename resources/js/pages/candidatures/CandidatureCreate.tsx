@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { store as candidaturesStore } from '@/routes/candidatures';
@@ -40,13 +42,15 @@ export default function CandidatureCreate() {
                     </CardHeader>
                     <CardContent>
                         {Object.keys(errors).length > 0 && (
-                            <div className="alert alert-danger mb-4">
-                                <ul className="mb-0">
-                                    {Object.values(errors).map((error, index) => (
-                                        <li key={index}>{error}</li>
-                                    ))}
-                                </ul>
-                            </div>
+                            <Alert className="mb-4 border-red-200 bg-red-50">
+                                <AlertDescription>
+                                    <ul className="mb-0">
+                                        {Object.values(errors).map((error, index) => (
+                                            <li key={index}>{error}</li>
+                                        ))}
+                                    </ul>
+                                </AlertDescription>
+                            </Alert>
                         )}
                         <form onSubmit={submit} encType="multipart/form-data" className="space-y-4">
                             <div>

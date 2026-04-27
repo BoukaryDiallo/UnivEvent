@@ -1,17 +1,20 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
-import { index as candidaturesIndex, show as candidaturesShow, destroy as candidaturesDestroy } from '@/routes/candidatures';
+import CrudList from '@/components/ui/crud-list';
+import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge';
+import { valider,refuser,show as candidaturesShow, destroy as candidaturesDestroy } from '@/routes/candidatures';
+import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { PageProps } from '@/types/app';
 
 type Candidature = {
     id_candidature: number;
-    programme: string;
+    programme: string | null;
     statut: string;
-    user: { name: string };
-    election: { titre: string };
+    photo?: string | null;
+    cnib_pdf?: string;
+    casier_judiciaire_pdf?: string;
+    user?: { name: string } | null;
+    election?: { titre: string } | null;
 };
 
 type Props = PageProps<{
@@ -20,98 +23,118 @@ type Props = PageProps<{
 
 export default function CandidatureList() {
     const { candidatures } = usePage<Props>().props;
+    console.log(candidatures);
+    const { confirm, ConfirmDialog } = useConfirmDialog();
 
-    const handleDelete = (id: number) => {
-        if (confirm('Supprimer cette candidature ?')) {
-            router.delete(candidaturesDestroy.url({ candidature: id }));
-        }
+    const handleDelete = (candidature: Candidature) => {
+        confirm({
+            title: 'Supprimer la candidature',
+            description: 'Êtes-vous sûr de vouloir supprimer cette candidature ?',
+            onConfirm: () => {
+                router.delete(candidaturesDestroy.url(candidature.id_candidature));
+            },
+            variant: 'destructive'
+        });
     };
 
-    const handleValider = (id: number) => {
-        if (confirm('Valider cette candidature ?')) {
-            router.post(`/candidatures/${id}/valider`);
-        }
+    const handleValider = (candidature: Candidature) => {
+        confirm({
+            title: 'Valider la candidature',
+            description: 'Êtes-vous sûr de vouloir valider cette candidature ?',
+            onConfirm: () => {
+                router.post(valider.url(candidature.id_candidature));
+            }
+        });
     };
 
-    const handleRefuser = (id: number) => {
-        if (confirm('Refuser cette candidature ?')) {
-            router.post(`/candidatures/${id}/refuser`);
-        }
+    const handleRefuser = (candidature: Candidature) => {
+        confirm({
+            title: 'Refuser la candidature',
+            description: 'Êtes-vous sûr de vouloir refuser cette candidature ?',
+            onConfirm: () => {
+                router.post(refuser.url(candidature.id_candidature));
+            },
+            variant: 'destructive'
+        });
     };
 
-    const getStatusBadge = (statut: string) => {
-        switch (statut) {
-            case 'validee':
-                return <Badge variant="default">Validée</Badge>;
-            case 'rejetee':
-                return <Badge variant="destructive">Rejetée</Badge>;
-            default:
-                return <Badge variant="secondary">En attente</Badge>;
+    const columns = [
+        {
+            key: 'user' as keyof Candidature,
+            label: 'Candidat',
+            render: (value: any, item: Candidature) => item.user?.name ?? 'Non spécifié'
+        },
+        {
+            key: 'election' as keyof Candidature,
+            label: 'Élection',
+            render: (value: any, item: Candidature) => item.election?.titre ?? 'Non spécifiée'
+        },
+        {
+            key: 'programme' as keyof Candidature,
+            label: 'Programme',
+            render: (value: string) => value?.slice(0, 50) || ''
+        },
+        {
+            key: 'statut' as keyof Candidature,
+            label: 'Statut',
+            render: (value: string) => <ElectionStatusBadge statut={value} />
         }
+    ];
+
+    const getActions = (candidature: Candidature) => {
+        const actions = [
+            {
+                label: 'Voir',
+                onClick: () => {},
+                asChild: true as const,
+                href: () => candidaturesShow.url({ candidature: candidature.id_candidature })
+            }
+        ];
+
+        if (candidature.statut === 'en_attente') {
+            actions.push(
+                {
+                    label: 'Valider',
+                    onClick: () => handleValider(candidature),
+                    variant: 'success' 
+                }
+               
+            );
+
+            actions.push(
+                {
+                    label: 'Refuser',
+                    onClick: () => handleRefuser(candidature),
+                    variant: 'primary' 
+                }
+            );
+        }
+         
+
+        actions.push({
+            label: 'Supprimer',
+            onClick: () => handleDelete(candidature),
+            variant: 'destructive' 
+        });
+
+        return actions;
     };
 
     return (
         <AppLayout>
             <Head title="Liste des Candidatures" />
-            <div className="container mt-5">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-green-600">Liste des Candidatures</h2>
-                </div>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Candidat</TableHead>
-                            <TableHead>Élection</TableHead>
-                            <TableHead>Programme</TableHead>
-                            <TableHead>Statut</TableHead>
-                            <TableHead>Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {candidatures.map((candidature) => (
-                            <TableRow key={candidature.id_candidature}>
-                                <TableCell>{candidature.user.name}</TableCell>
-                                <TableCell>{candidature.election?.titre ?? ""}</TableCell>
-                                <TableCell>{candidature.programme?.slice(0, 50) || ''}</TableCell>
-                                <TableCell>{getStatusBadge(candidature.statut)}</TableCell>
-                                <TableCell>
-                                    <Button variant="outline" size="sm" asChild>
-                                        <a href={candidaturesShow.url({ candidature: candidature.id_candidature })}>Voir</a>
-                                    </Button>
-                                    {candidature.statut === 'en_attente' && (
-                                        <>
-                                            <Button 
-                                                variant="default" 
-                                                size="sm" 
-                                                onClick={() => handleValider(candidature.id_candidature)}
-                                                className="ml-2 bg-green-600 hover:bg-green-700"
-                                            >
-                                                Valider
-                                            </Button>
-                                            <Button 
-                                                variant="destructive" 
-                                                size="sm" 
-                                                onClick={() => handleRefuser(candidature.id_candidature)}
-                                                className="ml-2"
-                                            >
-                                                Refuser
-                                            </Button>
-                                        </>
-                                    )}
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => handleDelete(candidature.id_candidature)}
-                                        className="ml-2"
-                                    >
-                                        Supprimer
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
+            <CrudList
+                data={candidatures}
+                columns={columns}
+                actions={getActions}
+                title="Liste des Candidatures"
+                description="Gestion des candidatures électorales"
+                searchPlaceholder="Rechercher une candidature..."
+                emptyMessage="Aucune candidature trouvée"
+                paginated={true}
+                itemsPerPage={10}
+            />
+            <ConfirmDialog />
         </AppLayout>
     );
 }

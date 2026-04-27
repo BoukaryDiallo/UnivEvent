@@ -13,7 +13,7 @@ class CandidatureController extends Controller
     // Liste des candidatures
     public function index()
     {
-        $candidatures = Candidature::with(['user','election'])->get();
+        $candidatures = Candidature::with(['user','election'])->orderBy('created_at', 'desc')->get();
         return Inertia::render('candidatures/CandidatureList', compact('candidatures'));
     }
 

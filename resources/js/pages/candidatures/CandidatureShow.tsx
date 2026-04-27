@@ -1,9 +1,10 @@
 import { Head, usePage, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { destroy as candidaturesDestroy, edit as candidaturesEdit, index as candidaturesIndex } from '@/routes/candidatures';
+import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge';
+import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { PageProps } from '@/types/app';
 
 type Candidature = {
@@ -24,24 +25,18 @@ type Props = PageProps<{
 
 export default function CandidatureShow() {
     const { candidature } = usePage<Props>().props;
+    const { confirm, ConfirmDialog } = useConfirmDialog();
 
     const handleDelete = () => {
-        if (confirm('Supprimer cette candidature ?')) {
-            router.delete(candidaturesDestroy.url({ candidature: candidature.id_candidature }));
-        }
+        confirm({
+            title: 'Supprimer la candidature',
+            description: 'Êtes-vous sûr de vouloir supprimer cette candidature ?',
+            onConfirm: () => router.delete(candidaturesDestroy.url({ candidature: candidature.id_candidature })),
+            variant: 'destructive'
+        });
     };
 
-    const getStatusBadge = (statut: string) => {
-        switch (statut) {
-            case 'validee':
-                return <Badge variant="default">Validée</Badge>;
-            case 'rejetee':
-                return <Badge variant="destructive">Rejetée</Badge>;
-            default:
-                return <Badge variant="secondary">En attente</Badge>;
-        }
-    };
-
+    
     return (
         <AppLayout>
             <Head title="Détails de la Candidature" />
@@ -82,7 +77,7 @@ export default function CandidatureShow() {
                                 <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                                     <div className="flex items-center gap-2">
                                         <span className="font-semibold">Statut :</span>
-                                        {getStatusBadge(candidature.statut)}
+                                        <ElectionStatusBadge statut={candidature.statut} />
                                     </div>
                                     
                                     <div>
@@ -132,6 +127,7 @@ export default function CandidatureShow() {
                     </CardContent>
                 </Card>
             </div>
+        <ConfirmDialog />
         </AppLayout>
     );
 }

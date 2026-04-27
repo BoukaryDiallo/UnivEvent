@@ -1,10 +1,14 @@
 import { Head, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, Users, Calendar, MapPin, CheckCircle } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { show as depouillementShow } from '@/routes/depouillement';
 import AppLayout from '@/layouts/app-layout';
+import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge';
 import type { PageProps } from '@/types/app';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Election {
     id_election: number;
@@ -25,17 +29,6 @@ interface Props extends PageProps {
 export default function PrepareElection() {
     const { election } = usePage<Props>().props;
 
-    const getStatusBadgeVariant = (statut: string) => {
-        switch (statut) {
-            case 'brouillon': return 'secondary';
-            case 'liste_generee': return 'default';
-            case 'ouverte': return 'default';
-            case 'second_tour': return 'destructive';
-            case 'terminee': return 'outline';
-            default: return 'secondary';
-        }
-    };
-
     return (
         <AppLayout>
             <Head title={`Préparation - ${election.titre}`} />
@@ -51,9 +44,7 @@ export default function PrepareElection() {
 
                         <div className="flex items-center gap-2">
                             <span className="font-medium">Statut :</span>
-                            <Badge variant={getStatusBadgeVariant(election.statut)}>
-                                {election.statut.charAt(0).toUpperCase() + election.statut.slice(1).replace('_', ' ')}
-                            </Badge>
+                            <ElectionStatusBadge statut={election.statut} />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -157,7 +148,7 @@ export default function PrepareElection() {
                                         </a>
                                     </Button>
                                     <Button variant="destructive" asChild>
-                                        <a href={`/depouillement/depouiller/${election.id_election}`}>
+                                        <a href={depouillementShow.url({ election: election.id_election })}>
                                             Lancer le dépouillement
                                         </a>
                                     </Button>

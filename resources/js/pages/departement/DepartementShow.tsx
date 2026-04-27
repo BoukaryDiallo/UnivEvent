@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/app-layout';
 import { ArrowLeftIcon, EditIcon, Building2, GraduationCap, Users, BarChart3 } from 'lucide-react';
 import departementRoutes from '@/routes/departement';
 import filiereRoutes from '@/routes/filiere';
+import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { BreadcrumbItem } from '@/types';
 
 type Filiere = {
@@ -35,16 +36,22 @@ type Props = {
   departement: Departement;
 }
 
-export default function DepartementShow({ departement }: Props) {
+export default function DepartementShow() {
+  const { departement } = usePage<Props>().props;
+  const { confirm, ConfirmDialog } = useConfirmDialog();
+
   const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Départements', href: departementRoutes.index.url() },
     { title: departement.nom },
   ];
 
   const deleteDepartement = () => {
-    if (confirm('Supprimer ce département?')) {
-      router.delete(departementRoutes.destroy.url(departement.id_departement));
-    }
+    confirm({
+      title: 'Supprimer le département',
+      description: 'Êtes-vous sûr de vouloir supprimer ce département ?',
+      onConfirm: () => router.delete(departementRoutes.destroy.url(departement.id_departement)),
+      variant: 'destructive'
+    });
   };
 
   return (
@@ -179,6 +186,7 @@ export default function DepartementShow({ departement }: Props) {
           </div>
         </div>
       </div>
+      <ConfirmDialog />
     </AppLayout>
   );
 }

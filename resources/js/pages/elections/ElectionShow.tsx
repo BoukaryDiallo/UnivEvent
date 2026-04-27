@@ -2,9 +2,11 @@ import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { PageProps } from '@/types/app';
 
 interface Election {
@@ -26,14 +28,18 @@ interface Props extends PageProps {
 
 export default function ElectionShow() {
     const { election } = usePage<Props>().props;
+    const { confirm, ConfirmDialog } = useConfirmDialog();
     const { data, setData, post, processing } = useForm({
         niveau: '',
     });
 
     const handleDelete = () => {
-        if (confirm('Annuler cette élection ?')) {
-            router.delete(route('elections.destroy', election.id_election));
-        }
+        confirm({
+            title: 'Annuler l\'élection',
+            description: 'Êtes-vous sûr de vouloir annuler cette élection ?',
+            onConfirm: () => router.delete(`/elections/${election.id_election}`),
+            variant: 'destructive'
+        });
     };
 
     const generateList = (e: React.FormEvent) => {
@@ -91,11 +97,13 @@ export default function ElectionShow() {
                                     </Button>
                                 </form>
                             ) : (
-                                <div className="alert alert-info">
-                                    {election.listesElectorales.length > 0
-                                        ? `✅ Liste électorale générée (${election.listesElectorales.length} électeurs)`
-                                        : 'ℹ️ Activez l\'élection pour générer la liste'}
-                                </div>
+                                <Alert className="border-blue-200 bg-blue-50">
+                                    <AlertDescription>
+                                        {election.listesElectorales.length > 0
+                                            ? `✅ Liste électorale générée (${election.listesElectorales.length} électeurs)`
+                                            : 'ℹ️ Activez l\'élection pour générer la liste'}
+                                    </AlertDescription>
+                                </Alert>
                             )}
                         </div>
                         <div className="mt-4 flex justify-end space-x-2">
@@ -112,6 +120,7 @@ export default function ElectionShow() {
                     </CardContent>
                 </Card>
             </div>
+        <ConfirmDialog />
         </AppLayout>
     );
 }
