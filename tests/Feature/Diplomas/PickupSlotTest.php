@@ -5,6 +5,7 @@ namespace Tests\Feature\Diplomas;
 use App\Models\PickupSlot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class PickupSlotTest extends TestCase
@@ -13,9 +14,8 @@ class PickupSlotTest extends TestCase
 
     private function scolarite(): User
     {
-        return User::factory()->create([
-            'email' => config('diplomas.scolarite_emails')[0] ?? 'admin@example.com',
-        ]);
+        Role::findOrCreate('admin');
+        return tap(User::factory()->create(), fn (User $u) => $u->assignRole('admin'));
     }
 
     public function test_guest_cannot_access_admin_slots(): void

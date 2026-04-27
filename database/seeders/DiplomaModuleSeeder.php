@@ -43,6 +43,10 @@ class DiplomaModuleSeeder extends Seeder
             $owner = User::where('email', $email)->first()
                 ?? User::factory()->create(['name' => $name, 'email' => $email]);
 
+            if (! $owner->hasRole('etudiant')) {
+                $owner->assignRole('etudiant');
+            }
+
             $this->seedRequest(
                 $owner,
                 $admin,

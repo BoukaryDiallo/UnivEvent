@@ -12,6 +12,19 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         $this->withoutVite();
+
+        $this->seedDefaultRoles();
+    }
+
+    private function seedDefaultRoles(): void
+    {
+        if (! \Schema::hasTable(config('permission.table_names.roles'))) {
+            return;
+        }
+
+        foreach (['admin', 'enseignant', 'etudiant'] as $role) {
+            \Spatie\Permission\Models\Role::findOrCreate($role);
+        }
     }
 
     protected function skipUnlessFortifyFeature(string $feature, ?string $message = null): void

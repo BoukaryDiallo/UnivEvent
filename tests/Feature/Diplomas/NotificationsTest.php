@@ -12,6 +12,7 @@ use App\Notifications\Diplomas\DiplomaRequestStatusChanged;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class NotificationsTest extends TestCase
@@ -28,9 +29,8 @@ class NotificationsTest extends TestCase
 
     private function scolarite(): User
     {
-        return User::factory()->create([
-            'email' => config('diplomas.scolarite_emails')[0] ?? 'admin@example.com',
-        ]);
+        Role::findOrCreate('admin');
+        return tap(User::factory()->create(), fn (User $u) => $u->assignRole('admin'));
     }
 
     public function test_creating_a_draft_does_not_notify(): void

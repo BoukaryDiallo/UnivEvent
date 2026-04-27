@@ -1,9 +1,10 @@
-import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, CalendarRange, ClipboardCheck, FolderGit2, GraduationCap, LayoutGrid, PieChart } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { BookOpen, CalendarRange, ClipboardCheck, FolderGit2, GraduationCap, LayoutGrid, PieChart, ShieldEllipsis, User } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { useAuth } from '@/hooks/module1/useAuth';
 import {
     Sidebar,
     SidebarContent,
@@ -20,38 +21,6 @@ import { index as adminPickupSlotsIndex } from '@/routes/admin/pickup-slots';
 import { index as diplomasIndex } from '@/routes/diplomas';
 import type { NavItem } from '@/types';
 
-const buildMainNav = (isScolarite: boolean): NavItem[] => [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Retraits de diplômes',
-        href: diplomasIndex(),
-        icon: GraduationCap,
-    },
-    ...(isScolarite
-        ? [
-              {
-                  title: 'Tableau de bord scolarité',
-                  href: adminDashboard(),
-                  icon: PieChart,
-              } satisfies NavItem,
-              {
-                  title: 'Dossiers à instruire',
-                  href: adminDiplomasIndex(),
-                  icon: ClipboardCheck,
-              } satisfies NavItem,
-              {
-                  title: 'Créneaux de retrait',
-                  href: adminPickupSlotsIndex(),
-                  icon: CalendarRange,
-              } satisfies NavItem,
-          ]
-        : []),
-];
-
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
@@ -66,8 +35,56 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { auth } = usePage().props;
-    const mainNavItems = buildMainNav(auth?.isScolarite ?? false);
+    const { hasRole, can } = useAuth();
+    const isAdmin = hasRole('admin');
+
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Retraits de diplômes',
+            href: diplomasIndex(),
+            icon: GraduationCap,
+        },
+    ];
+
+    if (isAdmin) {
+        mainNavItems.push(
+            {
+                title: 'Tableau de bord scolarité',
+                href: adminDashboard(),
+                icon: PieChart,
+            },
+            {
+                title: 'Dossiers à instruire',
+                href: adminDiplomasIndex(),
+                icon: ClipboardCheck,
+            },
+            {
+                title: 'Créneaux de retrait',
+                href: adminPickupSlotsIndex(),
+                icon: CalendarRange,
+            },
+        );
+    }
+
+    if (isAdmin || can('manage users')) {
+        mainNavItems.push(
+            {
+                title: 'Gestion des rôles',
+                href: '/admin/users',
+                icon: User,
+            },
+            {
+                title: 'Permissions',
+                href: '/admin/permissions',
+                icon: ShieldEllipsis,
+            },
+        );
+    }
 
     return (
         <Sidebar collapsible="icon" variant="inset">

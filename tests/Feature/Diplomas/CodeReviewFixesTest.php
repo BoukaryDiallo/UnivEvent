@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class CodeReviewFixesTest extends TestCase
@@ -19,9 +20,8 @@ class CodeReviewFixesTest extends TestCase
 
     private function scolarite(): User
     {
-        return User::factory()->create([
-            'email' => config('diplomas.scolarite_emails')[0] ?? 'admin@example.com',
-        ]);
+        Role::findOrCreate('admin');
+        return tap(User::factory()->create(), fn (User $u) => $u->assignRole('admin'));
     }
 
     public function test_scolarite_can_download_a_student_document(): void
