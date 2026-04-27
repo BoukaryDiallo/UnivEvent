@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import {
+    agenda as agendaRoute,
     create as createSlot,
     destroy as destroySlot,
     edit as editSlot,
@@ -49,9 +50,14 @@ export default function AdminPickupSlotsIndex({ slots }: Props) {
                             {slots.length} créneau(x) planifié(s).
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href={createSlot().url}>Nouveau créneau</Link>
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" asChild>
+                            <Link href={agendaRoute().url}>Voir l'agenda</Link>
+                        </Button>
+                        <Button asChild>
+                            <Link href={createSlot().url}>Nouveau créneau</Link>
+                        </Button>
+                    </div>
                 </div>
 
                 {slots.length === 0 ? (

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DiplomaDocumentController as AdminDiplomaDocumentController;
 use App\Http\Controllers\Admin\DiplomaRequestController as AdminDiplomaRequestController;
+use App\Http\Controllers\Admin\PickupAgendaController;
 use App\Http\Controllers\Admin\PickupSlotController as AdminPickupSlotController;
 use App\Http\Controllers\DiplomaDocumentController;
 use App\Http\Controllers\DiplomaRequestController;
@@ -69,6 +70,7 @@ Route::middleware(['auth', 'verified', 'scolarite'])
     ->name('admin.pickup-slots.')
     ->group(function () {
         Route::get('/', [AdminPickupSlotController::class, 'index'])->name('index');
+        Route::get('/agenda', [PickupAgendaController::class, 'index'])->name('agenda');
         Route::get('/create', [AdminPickupSlotController::class, 'create'])->name('create');
         Route::post('/', [AdminPickupSlotController::class, 'store'])->name('store');
         Route::get('/{pickupSlot}/edit', [AdminPickupSlotController::class, 'edit'])->name('edit');
