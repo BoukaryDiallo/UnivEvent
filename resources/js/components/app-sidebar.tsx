@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, CalendarClock, CalendarRange, Eye, FolderGit2, History, LayoutGrid, NotebookPen, User } from 'lucide-react';
+import { Bell, BookOpen, Calendar1, CalendarClock, CalendarRange, Eye, FolderGit2, History, LayoutGrid, NotebookPen, User } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -39,7 +39,18 @@ export function AppSidebar() {
             href: dashboard(),
             icon: LayoutGrid,
         },
+        
     ];
+
+    if (role === 'etudiant') {
+        mainNavItems.push(
+            {
+                title: 'Emploi du Temps',
+                href: '/emploie-du-temps/edt-etudiant',
+                icon: Calendar1,
+            }
+        )
+    }
 
     if (role === 'admin') {
         mainNavItems.push(
@@ -53,6 +64,12 @@ export function AppSidebar() {
                 href: '/consultation',
                 icon: Eye,
             },
+            {
+                title: 'Emploi du Temps',
+                href: '/emploie-du-temps',
+                icon: Calendar1,
+            },
+
         );
     }
 
@@ -82,6 +99,11 @@ export function AppSidebar() {
                 title: 'Notifications',
                 href: '/mes-notifications',
                 icon: Bell,
+            },
+            {
+                title: 'Mon emploi du Temps',
+                href: '/emploie-du-temps/edt-enseignant',
+                icon: Calendar1,
             },
         );
     }
