@@ -273,7 +273,7 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
                                                     Aucune seance enregistrée pour le moment.
                                                 </TableCell>
                                             ):(
-                                                <TableCell colSpan={6}
+                                                <TableCell colSpan={7}
                                                 className="text-center py-6 text-gray-500"
                                                 >
                                                     Aucune seance enregistrée pour le moment.

@@ -84,9 +84,14 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
 
             }),
 
-            onError: ((e)=>{
-                
-                toast.error('Erreur lors de la mise à jour')
+            onError: ((errors)=>{
+                if(errors.nom){
+                    toast.error(errors.nom)
+                }else if(errors.code){
+                    toast.error(errors.code)
+                }else{
+                    toast.error('Erreur lors de la mise à jour')
+                }
                 
             })
         })
@@ -95,7 +100,7 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
         
     }
 
-    async function supprimerSalle(e: React.FormEvent) {
+    async function supprimerNiveau(e: React.FormEvent) {
         e.preventDefault()
         if(!select?.id) return
 
@@ -216,13 +221,13 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
                             <Label htmlFor="nom">Cyle</Label>
                             <Input id="nom" name="nom" value={niveau.data.nom}
                                 onChange={(e)=>{niveau.setData('nom', e.target.value) }} placeholder='Ex: Licence 1' />
-                            <InputError message={niveau.errors.nom} />
+                            
                         </Field>
                         <Field>
                             <Label htmlFor="code">Code de référence</Label>
                             <Input id="code" name="code" value={niveau.data.code}
                                 onChange={(e)=>{niveau.setData('code', e.target.value) }} placeholder='Ex: Licence 1 équivaut à L1' />
-                            <InputError message={niveau.errors.code} />
+                           
                         </Field>
                         <Field>
                             <Label htmlFor="ordre">Ordre chronologique</Label>
@@ -250,7 +255,7 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
             }}>
                 
             <DialogContent className="sm:max-w-sm">
-                <form onSubmit={supprimerSalle} className='space-y-6'>
+                <form onSubmit={supprimerNiveau} className='space-y-6'>
                     <DialogHeader>
                         <DialogTitle>Suppression de la niveau</DialogTitle>
                         <DialogDescription>

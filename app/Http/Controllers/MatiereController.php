@@ -41,6 +41,8 @@ class MatiereController extends Controller
             'volume_horaire_cm' => 'required|integer|min:0',
             'volume_horaire_td' => 'required|integer|min:0',
             'volume_horaire_tp' => 'required|integer|min:0',
+        ], [
+            'code.unique' => 'Ce module existe déjà.',
         ]);
 
         Matiere::create($data);

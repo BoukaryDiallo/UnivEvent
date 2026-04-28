@@ -89,9 +89,14 @@ export default function Niveau({ matieres }: { matieres: any[] }) {
 
             }),
 
-            onError: ((e)=>{
+            onError: ((errors)=>{
+                if(errors.code){
+                    toast.error(errors.code)
+                } else if(errors.intitule){
+                    toast.error('Erreur lors de la mise à jour')
+                }
                 
-                toast.error('Erreur lors de la mise à jour')
+                
                 
             })
         })
@@ -229,13 +234,13 @@ export default function Niveau({ matieres }: { matieres: any[] }) {
                             <Label htmlFor="intitule">Module</Label>
                             <Input id="intitule" name="intitule" value={matiere.data.intitule}
                                 onChange={(e)=>{matiere.setData('intitule', e.target.value) }} placeholder='Ex: Algèbre de Bool...' />
-                            <InputError message={matiere.errors.intitule} />
+                            
                         </Field>
                         <Field>
                             <Label htmlFor="code">Code de référence</Label>
                             <Input id="code" name="code" value={matiere.data.code}
                                 onChange={(e)=>{matiere.setData('code', e.target.value) }} placeholder='Ex: NF00L1' />
-                            <InputError message={matiere.errors.code} />
+                            
                         </Field>
                         <div className='space-y-6'>
                             <Field>

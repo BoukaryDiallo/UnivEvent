@@ -149,6 +149,8 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
         return true
     }
 
+
+
     function handleCreerEdt(e: React.FormEvent){
         e.preventDefault();
         if(!validateEdt()) return
@@ -156,11 +158,17 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
             onSuccess: () => {
                 setAction(null)
                 form.reset()
-                toast.success('Emploi du temps créé')},
-
-            onError: () => toast.error('Erreur! Veuillez réessayer')
+                toast.success('Emploi du temps créé')
+            },
+            onError: (errors: any) => {
+                if (errors.conflit) {
+                    toast.error(errors.conflit)
+                } else {
+                    toast.error('Erreur! Veuillez réessayer')
+                }
+            }
         });
-    };
+    }
 
     function handleModifEdt(e: React.FormEvent){
         e.preventDefault();
@@ -171,7 +179,13 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                 form.reset()
                 toast.success('Emploi du temps mis à jour')},
 
-            onError: () => toast.error('Erreur! Veuillez réessayer')
+            onError: (errors: any) => {
+                if (errors.conflit) {
+                    toast.error(errors.conflit)
+                } else {
+                    toast.error('Erreur! Veuillez réessayer')
+                }
+            }
         });
     };
 
@@ -192,9 +206,12 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
             }),
 
-            onError: (()=>{
-                toast.error(salle.errors.nom || 'Erreur lors de l\'ajout de la salle')
-                
+            onError: ((errors)=>{
+                if(errors.conflit){
+                    toast.error(errors.conflit)
+                } else {
+                    toast.error('Erreur lors de l\'ajout de la salle')
+                }
             })
         })
         
@@ -352,8 +369,12 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
             }),
 
-            onError: (()=>{
-                toast.error('Erreur lors de l\'ajout du cours')
+            onError: ((errors)=>{
+                if(errors.code){
+                    toast.error(errors.code)
+                }else{
+                    toast.error('Erreur lors de l\'ajout du cours')
+                }
                 
             })
         })
@@ -374,8 +395,14 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
             }),
 
-            onError: (()=>{
-                toast.error('Erreur lors de l\'ajout du cours')
+            onError: ((errors)=>{
+                if(errors.nom){
+                    toast.error(errors.nom)
+                }else if(errors.code){
+                    toast.error(errors.code)
+                }else{
+                    toast.error('Erreur lors de l\'ajout du cours')
+                }
                 
             })
         })
@@ -434,7 +461,7 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
     function anneCourante() {
         const anne = anneesData.filter(a => ( a.est_courante))
         
-        return anne?.[0].libelle
+        return anne[0]?.libelle
     }
     
 
@@ -748,6 +775,7 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                                             </Button>
                                             <Button 
                                             className={`${edt?.statut === 'Archivé' ? 'hidden' : ''}`}
+                                            // disabled={edt?.data?.seances.length === 0}
                                                 variant={'outline'}
                                                 onClick={() => window.location.href = `/emploie-du-temps/${edt.id}/pdf`}
                                             >
@@ -799,7 +827,7 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                         <Label htmlFor="code">Code</Label>
                         <Input id="code" name="code" value={matiere.data.code} 
                             onChange={(e)=>{matiere.setData('code', e.target.value)}} placeholder='Code unique du cours' />
-                            <InputError message={matiere.errors.code} />
+                          
                         </Field>
 
                         
@@ -1147,14 +1175,14 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                         <Label htmlFor="intitule">Cycle</Label>
                         <Input id="nom" name="nom" value={niveau.data.nom} 
                             onChange={(e)=>{niveau.setData('nom', e.target.value)}} placeholder='Ex: Licence 1' />
-                            <InputError message={niveau.errors.nom} />
+                            
                         </Field>
 
                         <Field>
                         <Label htmlFor="code">Code de référence</Label>
                         <Input id="code" name="code" value={niveau.data.code} 
                             onChange={(e)=>{niveau.setData('code', e.target.value)}} placeholder='Ex: Licence 1 aura comme code L1' />
-                            <InputError message={niveau.errors.code} />
+                            
                         </Field>
 
                         <Field>

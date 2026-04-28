@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 
 class EmploiDuTempsController extends Controller
 {
@@ -53,7 +54,7 @@ class EmploiDuTempsController extends Controller
         $sallesSeance = Salle::all();
         $creneaux = Creneau::all();
 
-        $userEnseignants = User::where('role', 'enseignant')
+        $userEnseignants = User::role('enseignant')
             ->with('enseignant')
             ->get()
             ->map(fn($u) => [
@@ -92,47 +93,59 @@ class EmploiDuTempsController extends Controller
      */
     // faut que je revois ca apres
 
-
-    // public function vuEmploiDuTemps()
-    // {
-    //     return Inertia::render('EmploiDuTemps/Admin/creerEdt', [
-    //         'annees' => AnneeAcademique::orderBy('libelle', 'desc')->get(),
-    //         'filieres' => Filiere::all(),
-    //         'niveaux' => Niveau::orderBy('ordre')->get(),
-    //     ]);
-    // }
-
     
 
     /**
      * Store a newly created resource in storage.
      */
+    // 
+
+
+
     public function creerEmploiDuTemps(Request $request)
     {
         $data = $request->validate([
-            'titre' => 'required|string|max:150',
-            'semestre' => 'required|in:S1,S2,S3,S4,S5,S6,S7,S8,S9,S10',
+            'titre'               => 'required|string|max:150',
+            'semestre'            => 'required|in:S1,S2,S3,S4,S5,S6,S7,S8,S9,S10',
             'annee_academique_id' => 'required|integer|exists:annee_academiques,id',
-            'filiere_id' => 'required|integer|exists:filieres,id_filiere',
-            'niveau_id' => 'required|integer|exists:niveaux,id',
-            'groupe' => 'nullable|string|max:10',
-            'date_debut' => 'nullable|date',
-            'date_fin' => 'nullable|date|after_or_equal:date_debut',
+            'filiere_id'          => 'required|integer|exists:filieres,id_filiere',
+            'niveau_id'           => 'required|integer|exists:niveaux,id',
+            'groupe'              => 'nullable|string|max:10',
+            'date_debut'          => 'nullable|date',
+            'date_fin'            => 'nullable|date|after_or_equal:date_debut',
         ]);
+        $query = EmploiDuTemps::where('filiere_id', $data['filiere_id'])
+            ->where('niveau_id', $data['niveau_id'])
+            ->whereDate('date_debut', $data['date_debut'])
+            ->whereDate('date_fin', $data['date_fin']);
+
+        if (is_null($data['groupe']) || $data['groupe'] === '') {
+            $query->whereNull('groupe');
+        } else {
+            $query->where('groupe', $data['groupe']);
+        }
+
+        if ($query->exists()) {
+            return back()->withErrors([
+                'conflit' => (is_null($data['groupe']) || $data['groupe'] === '')
+                    ? "Un emploi du temps existe déjà pour cette filière, ce niveau et ces dates."
+                    : "Un emploi du temps existe déjà pour ce groupe, cette filière, ce niveau et ces dates."
+            ]);
+        }
 
         EmploiDuTemps::create([
             ...$data,
-            'statut' => 'Brouillon',
+            'statut'  => 'Brouillon',
             'user_id' => Auth::id(),
         ]);
 
-        return back()->with('success', 'Emplois du temps creé avec succes');
+        return back()->with('success', 'Emploi du temps créé avec succès.');
     }
+
 
 
     public function modifierEdt(Request $request, string $id)
     {
-
         $data = $request->validate([
             'titre' => 'required|string|max:150',
             'semestre' => 'required|in:S1,S2,S3,S4,S5,S6,S7,S8,S9,S10',
@@ -145,10 +158,30 @@ class EmploiDuTempsController extends Controller
         ]);
 
         $edt = EmploiDuTemps::findOrFail($id);
+
+        $query = EmploiDuTemps::where('filiere_id', $data['filiere_id'])
+            ->where('niveau_id', $data['niveau_id'])
+            ->whereDate('date_debut', $data['date_debut'])
+            ->whereDate('date_fin', $data['date_fin'])
+            ->where('id', '!=', $id);
+
+        if (is_null($data['groupe']) || $data['groupe'] === '') {
+            $query->whereNull('groupe');
+        } else {
+            $query->where('groupe', $data['groupe']);
+        }
+
+        if ($query->exists()) {
+            return back()->withErrors([
+                'conflit' => (is_null($data['groupe']) || $data['groupe'] === '')
+                    ? "Un emploi du temps existe déjà pour cette filière, ce niveau et ces dates."
+                    : "Un emploi du temps existe déjà pour ce groupe, cette filière, ce niveau et ces dates."
+            ]);
+        }
+
         $edt->update($data);
 
         return back()->with('success', 'Emploi du temps mis à jour');
-
     }
 
     public function vueAjoutSeance(string $id)
@@ -158,7 +191,7 @@ class EmploiDuTempsController extends Controller
         $matieres = Matiere::all();
         $salles = Salle::all();
         $creneaux = Creneau::all();
-        $userEnseignants = User::where('role', 'enseignant')->get();
+        $userEnseignants = User::role('enseignant')->get();
 
         return Inertia::render('EmploiDuTemps/Admin/seance', [
             'edt' => $edt,
@@ -284,7 +317,7 @@ class EmploiDuTempsController extends Controller
         $creneaux = Creneau::all();
         $sallesSeance = Salle::all();
         $emplois = EmploiDuTemps::with('anneeAcademique')->findOrFail($id);
-        $userEnseignants = User::where('role', 'enseignant')
+        $userEnseignants = User::role('enseignant')
             ->with('enseignant')
             ->get()
             ->map(fn($u) => [

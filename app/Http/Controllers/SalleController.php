@@ -39,6 +39,13 @@ class SalleController extends Controller
             'nom' => 'required|string|max:150|unique:salles,nom',
         ]);
 
+        $conflitSalle = Salle::where('nom', $request->nom)->first();
+        if ($conflitSalle) {
+            return back()->withErrors([
+                'conflict' => 'Cette salle existe déjà'
+            ]);
+        }
+
         Salle::create(['nom' => $request->nom]);
 
         return back()->with('success', 'Salle créée avec succès');

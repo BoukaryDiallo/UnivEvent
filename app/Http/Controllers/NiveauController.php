@@ -39,6 +39,9 @@ class NiveauController extends Controller
             'nom' => 'required|string|max:150|unique:niveaux,nom',
             'code' => 'required|string|max:150|unique:niveaux,code',
             'ordre' => 'required|integer|min:1',
+        ],[
+            'nom.unique' => 'Ce cycle de niveau existe déjà',
+            'code.unique' => 'Ce code  existe déjà',
         ]);
 
         Niveau::create($data);
