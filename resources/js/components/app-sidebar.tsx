@@ -1,9 +1,10 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, Calendar1, CalendarClock, CalendarRange, Eye, FolderGit2, History, LayoutGrid, NotebookPen, User } from 'lucide-react';
+import { Bell, BookOpen, Calendar1, CalendarClock, CalendarRange, Eye, FolderGit2, History, LayoutGrid, NotebookPen, ShieldEllipsis, User } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { useAuth } from '@/hooks/module1/useAuth';
 import {
     Sidebar,
     SidebarContent,
@@ -13,8 +14,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, roles } from '@/routes';
-import type { Auth, NavItem } from '@/types';
+import { dashboard } from '@/routes';
+import type { NavItem } from '@/types';
+
+
 
 const footerNavItems: NavItem[] = [
     {
@@ -30,83 +33,104 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { auth } = usePage<{ auth: Auth }>().props;
-    const role = auth.user.role;
+    
 
-    const mainNavItems: NavItem[] = [
-        {
-            title: 'Dashboard',
-            href: dashboard(),
-            icon: LayoutGrid,
-        },
-        
-    ];
+        const { hasRole, can } = useAuth();
 
-    if (role === 'etudiant') {
-        mainNavItems.push(
+        const mainNavItems: NavItem[] = [
+            //Nous utiliserons le seul dashboard en affcihant les infos
+            // selons les rôles et permissions (recommandé) de l'utilisateur connecté
+            
             {
-                title: 'Emploi du Temps',
-                href: '/emploie-du-temps/edt-etudiant',
-                icon: Calendar1,
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: LayoutGrid,
             }
-        )
-    }
+            
+        ];
 
-    if (role === 'admin') {
-        mainNavItems.push(
-            {
-                title: 'Roles',
-                href: roles(),
+
+        if(hasRole('admin')){
+            mainNavItems.push(
+                {
+                    title: 'Consultation',
+                    href: '/consultation',
+                    icon: Eye,
+                },
+                {
+                    title: 'Emploi du Temps',
+                    href: '/emploie-du-temps',
+                    icon: Calendar1,
+                },
+            )
+        }
+
+
+
+        if (hasRole('admin') || can('manage users')) {
+            mainNavItems.push(
+                {
+                title: 'Gestion des rôles',
+                href: '/admin/users',
                 icon: User,
             },
             {
-                title: 'Consultation',
-                href: '/consultation',
-                icon: Eye,
-            },
-            {
-                title: 'Emploi du Temps',
-                href: '/emploie-du-temps',
-                icon: Calendar1,
-            },
-
-        );
-    }
-
-    if (role === 'enseignant') {
-        mainNavItems.push(
-            {
-                title: 'Mes disponibilites',
-                href: '/dispos',
-                icon: CalendarClock,
-            },
-            {
-                title: 'Exceptions',
-                href: '/ecarts',
-                icon: CalendarRange,
-            },
-            {
-                title: 'Reservations',
-                href: '/mes-reservations',
-                icon: NotebookPen,
-            },
-            {
-                title: 'Historique',
-                href: '/historique-disponibilites',
-                icon: History,
-            },
-            {
-                title: 'Notifications',
-                href: '/mes-notifications',
-                icon: Bell,
-            },
-            {
-                title: 'Mon emploi du Temps',
-                href: '/emploie-du-temps/edt-enseignant',
-                icon: Calendar1,
+                title: 'Permissions',
+                href: '/admin/permissions',
+                icon: ShieldEllipsis,
             },
         );
-    }
+        }
+
+
+        if (hasRole('enseignant')) {
+            mainNavItems.push(
+                {
+                    title: 'Mes disponibilites',
+                    href: '/dispos',
+                    icon: CalendarClock,
+                },
+                {
+                    title: 'Exceptions',
+                    href: '/ecarts',
+                    icon: CalendarRange,
+                },
+                {
+                    title: 'Reservations',
+                    href: '/mes-reservations',
+                    icon: NotebookPen,
+                },
+                {
+                    title: 'Historique',
+                    href: '/historique-disponibilites',
+                    icon: History,
+                },
+                {
+                    title: 'Notifications',
+                    href: '/mes-notifications',
+                    icon: Bell,
+                },
+                {
+                    title: 'Mon emploi du Temps',
+                    href: '/emploie-du-temps/edt-enseignant',
+                    icon: Calendar1,
+                },
+            
+            );
+        }
+
+
+        if (hasRole('etudiant')) {
+            mainNavItems.push(
+            {
+                    title: 'Emploi du Temps',
+                    href: '/emploie-du-temps/edt-etudiant',
+                    icon: Calendar1,
+                }
+            
+            );
+        }
+
 
     return (
         <Sidebar collapsible="icon" variant="inset">
