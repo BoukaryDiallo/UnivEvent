@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->prefix('emploie-du-temps')->name('emplo
         Route::get('/{id}/vue-admin', [EmploiDuTempsController::class, 'adminSeanceEdt'])->name('vue');
         Route::post('{id}/envoyer-email', [EmploiDuTempsController::class, 'envoyerEdtParEmail'])->name('admin.envoyer-email');
         Route::post('/{id}/liberer-enseignant', [EmploiDuTempsController::class, 'libererEnseignant'])->name('seances.liberer-enseignant');
+        Route::post('/config-annee', [EmploiDuTempsController::class, 'configurerAnne'])->name('config-annee');
     });
 
     Route::middleware('role:enseignant')->group(function () {

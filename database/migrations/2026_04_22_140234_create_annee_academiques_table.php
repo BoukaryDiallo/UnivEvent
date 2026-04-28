@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('annee_academiques', function (Blueprint $table) {
             $table->id();
-            $table->string('libelle', 20)->unique();
-            $table->date('date_debut');
-            $table->date('date_fin');
+            $table->string('libelle', 9)->unique();
+            $table->string('date_debut', 4);
+            $table->string('date_fin', 4);
             $table->boolean('est_courante')->default(false);
             $table->timestamps();
         });

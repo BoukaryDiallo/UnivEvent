@@ -44,20 +44,6 @@ class EmploiDuTemps extends Model
         return $this->hasMany(Seance::class);
     }
 
-    public function exports()
-    {
-        return $this->hasMany(ExportPdf::class);
-    }
-
-    // protected static function booted()
-    // {
-    //     static::saving(function ($edt) {
-    //         if ($edt->date_fin && Carbon::parse($edt->date_fin)->isPast()) {
-    //             $edt->statut = 'Archivé';
-    //         }
-    //     });
-    // }
-
 
     protected static function booted()
     {
@@ -68,24 +54,20 @@ class EmploiDuTemps extends Model
         });
 
         static::updated(function ($edt) {
-            // Si le statut vient de passer à Archivé
             if ($edt->wasChanged('statut') && $edt->statut === 'Archivé') {
                 
-                // Récupérer toutes les séances avec une prise active
                 $seances = $edt->seances()
                     ->whereNotNull('prise_id')
                     ->with('prise')
                     ->get();
 
                 foreach ($seances as $seance) {
-                    // Libérer la prise → renseigner libere_at
                     if ($seance->prise && is_null($seance->prise->libere_at)) {
                         $seance->prise->update([
                             'libere_at' => now()
                         ]);
                     }
 
-                    // Mettre prise_id à null dans la séance
                     $seance->update(['prise_id' => null]);
                 }
             }

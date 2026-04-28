@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {Table, TableBody, TableHeader, TableHead, TableRow, TableCell} from '@/components/ui/table'
 import { Button } from '@/components/ui/button';
-import { Plus, Eye, Download, LayoutGrid, Search, Share, Trash2, Edit, PlusSquare, CheckCircle2, AlertCircle, Timer, Mail } from 'lucide-react';
+import { Plus, Eye, Download, LayoutGrid, Search, Share, Trash2, Edit, PlusSquare, CheckCircle2, AlertCircle, Timer, Mail, Calendar1 } from 'lucide-react';
 import type { BreadcrumbItem } from '@/types';
 import { dashboard, roles } from '@/routes';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
@@ -92,6 +92,11 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
         check_debut: '08:00',
         check_fin: '10:00',
     });
+
+    const an = useForm({
+        date_debut: '',
+        date_fin: ''
+    })
 
     const [search, setSearch] = useState<string>("")
 
@@ -426,7 +431,53 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
         });
     }
 
+    function anneCourante() {
+        const anne = anneesData.filter(a => ( a.est_courante))
+        
+        return anne?.[0].libelle
+    }
     
+
+    function validateAn(){
+        if(!an.data.date_debut.trim() || an.data.date_debut.length !== 4){
+            // toast.info('Date de début: Saisie invalide')
+            return false
+        }
+
+        if(!an.data.date_fin.trim() || an.data.date_fin.length !== 4){
+            // toast.info('Date de fin: Saisie invalide')
+            return false
+        }
+
+        return true
+    }
+
+
+    async function configurerAnne(e:any) {
+        e.preventDefault()
+        if(!validateAn()) return
+
+        try {
+            an.post('/emploie-du-temps/config-annee', {
+                onSuccess: (()=> {
+                    toast.success('Configuration réussie')
+                    setAction(null)
+                    an.reset()
+                }),
+
+                onError: ((errors)=> {
+                    if(errors.conflit){
+                        toast.error(errors.conflit)
+                    }else{
+                        toast.error('Erreur veuillez ressayer')
+                    }
+                    
+                })
+            })
+        } catch (error) {
+            
+        }
+    }
 
   
 
@@ -555,9 +606,14 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                         />
                         <Search className='absolute top-4 left-2 h-4 w-4 text-gray-400' />
                     </div>
-                    <Button onClick={()=>handleAjout('edt')}>
-                        <Plus />Nouvel Emploi du temps
-                    </Button>
+                    <div className='flex items-center gap-5'>
+                        <Button onClick={()=>handleAjout('annee')}>
+                            <Calendar1 />Configurer une nouvelle année
+                        </Button>
+                        <Button onClick={()=>handleAjout('edt')}>
+                            <Plus />Nouvel Emploi du temps
+                        </Button>
+                    </div>
                 </div>
 
                 <Card>
@@ -821,7 +877,7 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                                 </SelectTrigger>
                                 <SelectContent>
                                     {anneesData.map((annee: any) => (
-                                        <SelectItem key={annee.id} value={annee.id.toString()}>
+                                        <SelectItem key={annee.id} disabled={!annee.est_courante} value={annee.id.toString()}>
                                             {annee.libelle} {annee.est_courante && '(En cours)'}
                                         </SelectItem>
                                     ))}
@@ -962,7 +1018,7 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                                 </SelectTrigger>
                                 <SelectContent>
                                     {anneesData.map((annee: any) => (
-                                        <SelectItem key={annee.id} value={annee.id.toString()}>
+                                        <SelectItem key={annee.id} disabled={!annee.est_courante} value={annee.id.toString()}>
                                             {annee.libelle} {annee.est_courante && '(En cours)'}
                                         </SelectItem>
                                     ))}
@@ -1242,6 +1298,59 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                                     disabled={salle.processing || !salle.data.nom.trim()}
                                 >
                                     {salle.processing ? <Spinner /> : 'Enregistrer'}</Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                
+            </Dialog>
+
+            <Dialog open={action === 'annee'} onOpenChange={(open) => {
+                if (!open) setAction(null)
+            }}>
+                
+                    <DialogContent className="sm:max-w-sm">
+                        <form onSubmit={configurerAnne} className='space-y-6'>
+                            <DialogHeader>
+                                <DialogTitle>Configurer une nouvelle année</DialogTitle>
+                                <DialogDescription>
+                                    Ceci est une configuration irreversible. Une fois changée, elle devient automatiquement l'année en cours,
+                                     vous ne pourrez plus revenir sur l'ancienne valeur peu
+                                    importe la hierarchisation. Soyez vigilants et choisissez une année académique valide 
+                                    toujours haute que l'année courante.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <FieldGroup>
+                                <div className='flex items-center justify-between gap-5'>
+                                <Field>
+                                    <Label htmlFor="date_debut">Date de début</Label>
+                                    <Input
+                                     id="date_debut" name="date_debut" value={an.data.nom}
+                                        onChange={(e)=>{an.setData('date_debut', e.target.value)}} 
+                                        placeholder='Ex: 2025' />
+                                </Field>
+                                <Field>
+                                    <Label htmlFor="date_fin">Date de début</Label>
+                                    <Input
+                                     id="date_fin" name="date_fin" value={an.data.nom}
+                                        onChange={(e)=>{an.setData('date_fin', e.target.value)}} 
+                                        placeholder='Ex: 2026' />
+                                </Field>
+                                </div>
+
+                                <Field>
+                                    <Label htmlFor="libelle">Année courante (définie actuellement)</Label>
+                                    <Input disabled
+                                     id="libelle" name="libelle" value={anneCourante() ? anneCourante() : 'pas encore définie'} />
+                                </Field>
+                            </FieldGroup>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                <Button variant="outline">Annuler</Button>
+                                </DialogClose>
+                                <Button type="submit"
+                                    disabled={an.processing || !validateAn()}
+                                >
+                                    {an.processing ? <Spinner /> : 'Configurer'}</Button>
                             </DialogFooter>
                         </form>
                     </DialogContent>

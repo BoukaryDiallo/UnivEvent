@@ -694,6 +694,36 @@ class EmploiDuTempsController extends Controller
     // }
 
 
+    public function configurerAnne(Request $request)
+    {
+        $data = $request->validate([
+            'date_debut' => 'required|string|max:4',
+            'date_fin' => 'required|string|max:4'
+        ]);
+
+        $libelleEntrant = $data['date_debut'].'-'.$data['date_fin'];
+
+        
+        if (AnneeAcademique::where('libelle', $libelleEntrant)->exists()) {
+            return back()->withErrors([
+                'conflit' => 'Cette année académique existe déjà'
+            ]);
+        }
+
+        AnneeAcademique::where('est_courante', true)
+            ->update(['est_courante' => false]);
+
+        
+        AnneeAcademique::create([
+            ...$data,
+            'libelle' => $libelleEntrant,
+            'est_courante' => true
+        ]);
+
+        return back()->with('success', 'Configuration de l\'année réussie');
+    }
+
+
 
      public function telechargerPdf($id)
     {

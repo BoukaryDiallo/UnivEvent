@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('annee_academique_id')->constrained()->onDelete('cascade');
             $table->foreignId('filiere_id')->constrained('filieres', 'id_filiere')->onDelete('cascade');
             $table->foreignId('niveau_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('set null');
 
             $table->timestamps();
         });
