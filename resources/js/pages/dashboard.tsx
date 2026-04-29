@@ -15,7 +15,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const couleurs: Record<string, string> = {
     prefere: 'bg-emerald-500/90 hover:bg-emerald-500 transition-colors',
-    acceptable: 'bg-amber-400/90 hover:bg-amber-400 transition-colors',
     non_definie: 'bg-slate-200 hover:bg-slate-300 transition-colors dark:bg-slate-700',
     reserve: 'bg-blue-500/90 hover:bg-blue-500 transition-colors',
     vide: 'bg-muted/50',
@@ -220,10 +219,6 @@ export default function Dashboard({
                                 <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
                                     <span className="size-3 rounded-sm bg-emerald-500/90" />
                                     Préféré
-                                </span>
-                                <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span className="size-3 rounded-sm bg-amber-400/90" />
-                                    Acceptable
                                 </span>
                                 <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
                                     <span className="size-3 rounded-sm bg-slate-200 dark:bg-slate-700" />

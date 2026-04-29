@@ -360,7 +360,7 @@ class DispoMetier implements DispoContrat
             'jour' => $dispo->jour,
             'debut' => substr($dispo->debut, 0, 5),
             'fin' => substr($dispo->fin, 0, 5),
-            'niveau' => $dispo->niveau,
+            'niveau' => $this->normaliserNiveau($dispo->niveau),
             'motif' => $dispo->motif,
         ];
     }
@@ -374,7 +374,7 @@ class DispoMetier implements DispoContrat
                     'jour' => $creneau['jour'],
                     'debut' => $creneau['debut'].':00',
                     'fin' => $creneau['fin'].':00',
-                    'niveau' => $creneau['niveau'],
+                    'niveau' => $this->normaliserNiveau($creneau['niveau'] ?? null),
                     'motif' => $creneau['motif'] ?? null,
                 ]);
 
@@ -400,7 +400,7 @@ class DispoMetier implements DispoContrat
                 'jour' => $data['jour'],
                 'debut' => $data['debut'].':00',
                 'fin' => $data['fin'].':00',
-                'niveau' => $data['niveau'],
+                'niveau' => $this->normaliserNiveau($data['niveau'] ?? null),
                 'motif' => $data['motif'] ?? null,
             ]);
 
@@ -579,17 +579,12 @@ class DispoMetier implements DispoContrat
             ->where('jour', $jour)
             ->where('debut', '<=', $debut)
             ->where('fin', '>=', $fin)
-            ->get()
-            ->sortBy(fn (Dispo $dispo) => match ($dispo->niveau) {
-                'prefere' => 1,
-                'acceptable' => 2,
-                default => 3,
-            })
+            ->orderBy('debut')
             ->first();
 
         if ($dispo !== null) {
             return [
-                'niveau' => $dispo->niveau,
+                'niveau' => $this->normaliserNiveau($dispo->niveau),
                 'motif' => $dispo->motif,
             ];
         }
@@ -763,5 +758,10 @@ class DispoMetier implements DispoContrat
             6 => 'Samedi',
             7 => 'Dimanche',
         ][$jour] ?? 'Jour inconnu';
+    }
+
+    protected function normaliserNiveau(?string $niveau): string
+    {
+        return $niveau === 'acceptable' ? 'prefere' : ($niveau ?: 'prefere');
     }
 }

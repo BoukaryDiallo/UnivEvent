@@ -402,7 +402,6 @@ class DispoController extends Controller
     {
         return [
             ['id' => 'prefere', 'nom' => 'Prefere'],
-            ['id' => 'acceptable', 'nom' => 'Acceptable'],
         ];
     }
 

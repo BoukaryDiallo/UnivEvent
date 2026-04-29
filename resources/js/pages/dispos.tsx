@@ -42,6 +42,10 @@ const noms: Record<number, string> = {
     7: 'Dimanche',
 };
 
+function formatNiveau(niveau: string) {
+    return niveau === 'prefere' ? 'Prefere' : niveau;
+}
+
 export default function Dispos({
     admin,
     cible,
@@ -77,7 +81,7 @@ const ecart = useForm({
     date: '',
     debut: '',
     fin: '',
-    niveau: 'acceptable',
+    niveau: 'prefere',
     motif: '',
 });
 
@@ -375,7 +379,7 @@ const [ecartErrors, setEcartErrors] = useState<Record<string, string>>({});
                                                 <TableRow key={item.id}>
                                                     <TableCell>{noms[item.jour ?? 1]}</TableCell>
                                                     <TableCell>{item.debut} - {item.fin}</TableCell>
-                                                    <TableCell>{item.niveau}</TableCell>
+                                                    <TableCell>{formatNiveau(item.niveau)}</TableCell>
                                                     <TableCell>{item.motif ?? '-'}</TableCell>
                                                     <TableCell className="text-right">
                                                         <Button variant="outline" onClick={() => router.delete(`/dispos/${item.id}`)}>
@@ -446,7 +450,7 @@ const [ecartErrors, setEcartErrors] = useState<Record<string, string>>({});
                                                 <TableCell>{item.date}</TableCell>
                                                 <TableCell>{item.debut} - {item.fin}</TableCell>
                                                 <TableCell>{item.source}</TableCell>
-                                                <TableCell>{item.niveau}</TableCell>
+                                                <TableCell>{formatNiveau(item.niveau)}</TableCell>
                                                 <TableCell>{item.ref ?? '-'}</TableCell>
                                                 <TableCell>{item.libere_at ? 'Libérée' : 'Active'}</TableCell>
                                             </TableRow>

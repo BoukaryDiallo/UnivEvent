@@ -19,6 +19,8 @@ export default function ReservationsPage({
     resume: ResumeDispo;
     reservations: LigneReservation[];
 }) {
+    const formatNiveau = (niveau: string) => (niveau === 'prefere' ? 'Prefere' : niveau);
+
     return (
         <DispoShell title="Mes reservations" description="Consultez les creneaux deja reserves sur votre agenda." breadcrumbs={breadcrumbs} resume={resume} user={user} showResume={false}>
             <Head title="Mes reservations" />
@@ -44,7 +46,7 @@ export default function ReservationsPage({
                                     <TableCell>{item.date}</TableCell>
                                     <TableCell>{item.debut} - {item.fin}</TableCell>
                                     <TableCell>{item.source}</TableCell>
-                                    <TableCell>{item.niveau}</TableCell>
+                                    <TableCell>{formatNiveau(item.niveau)}</TableCell>
                                     <TableCell>{item.ref ?? '-'}</TableCell>
                                     <TableCell>{item.libere_at ? 'Liberee' : 'Active'}</TableCell>
                                 </TableRow>

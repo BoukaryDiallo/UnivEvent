@@ -115,7 +115,7 @@ class AlerteMetier
 
         foreach ($prises as $prise) {
             $alertes[] = $this->format(
-                $prise->niveau === 'acceptable' ? 'attention' : 'info',
+                'info',
                 'Creneau reserve',
                 'Une reservation '.$prise->source.' est active le '.$prise->date?->format('Y-m-d').' de '.substr($prise->debut, 0, 5).' a '.substr($prise->fin, 0, 5).'.',
                 '/mes-reservations'
