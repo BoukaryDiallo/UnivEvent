@@ -22,13 +22,23 @@ class ActiviteController extends Controller
     /**
      * Afficher le formulaire de création d'une nouvelle ressource.
      */
-    public function create()
+    public function create(Request $request)
     {
         if (Auth::user()->isAdmin()) {
             abort(403, 'Les administrateurs ne peuvent pas créer d\'activités.');
         }
-        $clubs = \App\Models\Club::where('statut', 'actif')->get();
-        return Inertia::render('Activites/Create', ['clubs' => $clubs]);
+
+        $preSelectedClubId = $request->query('club_id');
+        
+        // Filter clubs to only show those where the user is the responsible
+        $clubs = \App\Models\Club::where('statut', 'actif')
+            ->where('responsable_id', Auth::id())
+            ->get();
+
+        return Inertia::render('Activites/Create', [
+            'clubs' => $clubs,
+            'preSelectedClubId' => $preSelectedClubId
+        ]);
     }
 
     /**

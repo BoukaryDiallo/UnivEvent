@@ -124,6 +124,112 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
         form.submit();
     };
 
+    const handleValiderLocal = (id: number) => {
+        if (confirm('Voulez-vous approuver cette demande de local ?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/demandes-local/${id}/valider`;
+            
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'PUT';
+            
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '_token';
+            tokenInput.value = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+            
+            form.appendChild(methodInput);
+            form.appendChild(tokenInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    };
+
+    const handleRejectLocal = (id: number) => {
+        const commentaire = prompt('Motif du rejet :');
+        if (commentaire) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/demandes-local/${id}/rejeter`;
+            
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'PUT';
+            
+            const motifInput = document.createElement('input');
+            motifInput.type = 'hidden';
+            motifInput.name = 'commentaire';
+            motifInput.value = commentaire;
+            
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '_token';
+            tokenInput.value = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+            
+            form.appendChild(methodInput);
+            form.appendChild(motifInput);
+            form.appendChild(tokenInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    };
+
+    const handleValiderBudget = (id: number) => {
+        if (confirm('Voulez-vous approuver cette demande de budget ?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/demandes-budget/${id}/valider`;
+            
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'PUT';
+            
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '_token';
+            tokenInput.value = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+            
+            form.appendChild(methodInput);
+            form.appendChild(tokenInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    };
+
+    const handleRejectBudget = (id: number) => {
+        const commentaire = prompt('Motif du rejet :');
+        if (commentaire) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/demandes-budget/${id}/rejeter`;
+            
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'PUT';
+            
+            const motifInput = document.createElement('input');
+            motifInput.type = 'hidden';
+            motifInput.name = 'commentaire';
+            motifInput.value = commentaire;
+            
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '_token';
+            tokenInput.value = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+            
+            form.appendChild(methodInput);
+            form.appendChild(motifInput);
+            form.appendChild(tokenInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Gestion des clubs" />
@@ -430,6 +536,7 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
                                             <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Salle</th>
                                             <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Date</th>
                                             <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Statut</th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-slate-200">
@@ -449,11 +556,31 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
                                                         {demande.statut}
                                                     </span>
                                                 </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {demande.statut === 'en_attente' && (
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => handleValiderLocal(demande.id)}
+                                                                className="inline-flex items-center justify-center w-9 h-9 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                                                                title="Approuver"
+                                                            >
+                                                                <CheckCircle className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleRejectLocal(demande.id)}
+                                                                className="inline-flex items-center justify-center w-9 h-9 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+                                                                title="Rejeter"
+                                                            >
+                                                                <XCircle className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </td>
                                             </tr>
                                         ))}
                                         {!demandesLocal || demandesLocal.length === 0 && (
                                             <tr>
-                                                <td colSpan={4} className="px-6 py-16 text-center">
+                                                <td colSpan={5} className="px-6 py-16 text-center">
                                                     <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                                         <MapPin className="w-8 h-8 text-slate-400" />
                                                     </div>
@@ -483,6 +610,7 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
                                             <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Club</th>
                                             <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Montant</th>
                                             <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Statut</th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-slate-200">
@@ -501,11 +629,31 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
                                                         {demande.statut}
                                                     </span>
                                                 </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {demande.statut === 'en_attente' && (
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => handleValiderBudget(demande.id)}
+                                                                className="inline-flex items-center justify-center w-9 h-9 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                                                                title="Approuver"
+                                                            >
+                                                                <CheckCircle className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleRejectBudget(demande.id)}
+                                                                className="inline-flex items-center justify-center w-9 h-9 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+                                                                title="Rejeter"
+                                                            >
+                                                                <XCircle className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </td>
                                             </tr>
                                         ))}
                                         {!demandesBudget || demandesBudget.length === 0 && (
                                             <tr>
-                                                <td colSpan={3} className="px-6 py-16 text-center">
+                                                <td colSpan={4} className="px-6 py-16 text-center">
                                                     <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                                         <Wallet className="w-8 h-8 text-slate-400" />
                                                     </div>

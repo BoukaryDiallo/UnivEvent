@@ -2,15 +2,15 @@
 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GestionController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
 Route::inertia('/', 'welcome', [
-    'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
 Route::middleware(['auth'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Administration
     Route::middleware(['role:admin'])->group(function () {

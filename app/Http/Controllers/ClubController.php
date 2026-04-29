@@ -17,12 +17,25 @@ class ClubController extends Controller
     public function index()
     {
         $userId = Auth::id();
-        $clubs = Club::with(['responsable', 'adhesions' => function($query) use ($userId) {
+        $user = Auth::user();
+
+        $query = Club::with(['responsable', 'adhesions' => function($query) use ($userId) {
             $query->where('user_id', $userId);
-        }])->where(function($query) use ($userId) {
-            $query->where('statut', '!=', 'en_attente')
-                  ->orWhere('responsable_id', $userId);
-        })->get();
+        }]);
+
+        // Masquer les clubs 'en attente' (sauf si on est le responsable)
+        $query->where(function($q) use ($userId) {
+            $q->where('statut', '!=', 'en_attente')
+              ->orWhere('responsable_id', $userId);
+        });
+
+        // Masquer les clubs 'dissous' pour les non-admins
+        if (!$user->isAdmin()) {
+            $query->where('statut', '!=', 'dissous');
+        }
+
+        $clubs = $query->get();
+
         return Inertia::render('Clubs/Index', ['clubs' => $clubs]);
     }
 

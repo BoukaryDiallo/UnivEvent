@@ -20,16 +20,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 interface Props {
-  clubs: Array<{ id: number; nom: string }>
+  clubs: Array<{ id: number; nom: string }>;
+  preSelectedClubId?: string;
 }
 
-export default function ActiviteCreate({ clubs }: Props) {
+export default function ActiviteCreate({ clubs, preSelectedClubId }: Props) {
   const { data, setData, post, processing, errors } = useForm({
     titre: '',
     description: '',
     date_debut: '',
     date_fin: '',
-    club_id: '',
+    club_id: preSelectedClubId || '',
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -103,25 +104,27 @@ export default function ActiviteCreate({ clubs }: Props) {
               {errors.date_fin && <p className="mt-1 text-sm text-red-600">{errors.date_fin}</p>}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Club
-              </label>
-              <select
-                value={data.club_id}
-                onChange={(e) => setData('club_id', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                required
-              >
-                <option value="">Sélectionner un club</option>
-                {clubs.map((club) => (
-                  <option key={club.id} value={club.id}>
-                    {club.nom}
-                  </option>
-                ))}
-              </select>
-              {errors.club_id && <p className="mt-1 text-sm text-red-600">{errors.club_id}</p>}
-            </div>
+            {!preSelectedClubId && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Club
+                </label>
+                <select
+                  value={data.club_id}
+                  onChange={(e) => setData('club_id', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  required
+                >
+                  <option value="">Sélectionner un club</option>
+                  {clubs.map((club) => (
+                    <option key={club.id} value={club.id}>
+                      {club.nom}
+                    </option>
+                  ))}
+                </select>
+                {errors.club_id && <p className="mt-1 text-sm text-red-600">{errors.club_id}</p>}
+              </div>
+            )}
 
             <div className="flex items-center justify-end gap-4">
               <Link
