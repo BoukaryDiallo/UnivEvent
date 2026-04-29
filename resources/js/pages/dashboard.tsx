@@ -1,8 +1,8 @@
-import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Head, Link, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
+import { Building2, Calendar as CalendarIcon, Users, ArrowRight, Zap, TrendingUp, Activity, Star } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -12,23 +12,130 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
+    const { auth } = usePage().props as any;
+    const user = auth?.user;
+    const isAdmin = user?.role === 'admin';
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+            <div className="flex h-full flex-1 flex-col gap-8 rounded-xl p-8 bg-slate-50">
+                {/* Welcome Section */}
+                <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative z-10 p-10">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                <Zap className="w-8 h-8 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-4xl font-bold tracking-tight text-slate-900">Bienvenue</h1>
+                                <p className="text-base text-slate-500 font-medium mt-1">
+                                    Plateforme de gestion des clubs et activités universitaires
+                                </p>
+                            </div>
+                        </div>
+                        <div className="mt-8 flex gap-4">
+                            {isAdmin && (
+                                <Link
+                                    href="/gestion"
+                                    className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg font-semibold"
+                                >
+                                    <Activity className="w-5 h-5" />
+                                    Accéder à la gestion
+                                    <ArrowRight className="w-5 h-5" />
+                                </Link>
+                            )}
+                            <Link
+                                href="/clubs"
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-900 border-2 border-slate-200 rounded-xl hover:bg-slate-50 transition-all duration-300 font-semibold"
+                            >
+                                <Building2 className="w-5 h-5" />
+                                Voir les clubs
+                            </Link>
+                        </div>
                     </div>
                 </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="group bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-xl hover:border-indigo-200 transition-all duration-300">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                <Building2 className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="flex items-center gap-1 text-emerald-600 text-sm font-semibold">
+                                <TrendingUp className="w-4 h-4" />
+                                <span>+12%</span>
+                            </div>
+                        </div>
+                        <h3 className="text-2xl font-bold text-slate-900">Clubs Actifs</h3>
+                        <p className="text-slate-500 mt-1 text-sm">Gérez et organisez vos clubs</p>
+                    </div>
+
+                    <div className="group bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-xl hover:border-emerald-200 transition-all duration-300">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                <CalendarIcon className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="flex items-center gap-1 text-emerald-600 text-sm font-semibold">
+                                <TrendingUp className="w-4 h-4" />
+                                <span>+8%</span>
+                            </div>
+                        </div>
+                        <h3 className="text-2xl font-bold text-slate-900">Activités</h3>
+                        <p className="text-slate-500 mt-1 text-sm">Planifiez vos événements</p>
+                    </div>
+
+                    <div className="group bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-xl hover:border-amber-200 transition-all duration-300">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                <Users className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="flex items-center gap-1 text-emerald-600 text-sm font-semibold">
+                                <TrendingUp className="w-4 h-4" />
+                                <span>+20%</span>
+                            </div>
+                        </div>
+                        <h3 className="text-2xl font-bold text-slate-900">Membres</h3>
+                        <p className="text-slate-500 mt-1 text-sm">Communauté active</p>
+                    </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Actions rapides</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {(isAdmin || user?.is_responsable) && (
+                            <Link
+                                href="/demandes-local/create"
+                                className="flex items-center gap-4 p-4 bg-amber-50 border border-amber-200 rounded-xl hover:shadow-md transition-all duration-300 group"
+                            >
+                                <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Star className="w-5 h-5 text-white" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-slate-900">Réserver un local</h4>
+                                    <p className="text-sm text-slate-500">Demander une salle</p>
+                                </div>
+                            </Link>
+                        )}
+
+                        {isAdmin && (
+                            <Link
+                                href="/gestion"
+                                className="flex items-center gap-4 p-4 bg-purple-50 border border-purple-200 rounded-xl hover:shadow-md transition-all duration-300 group"
+                            >
+                                <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Activity className="w-5 h-5 text-white" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-slate-900">Administration</h4>
+                                    <p className="text-sm text-slate-500">Gérer la plateforme</p>
+                                </div>
+                            </Link>
+                        )}
+                    </div>
                 </div>
             </div>
         </AppLayout>

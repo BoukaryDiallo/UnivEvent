@@ -4,20 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class DemandeBudget extends Model
+class NotificationClub extends Model
 {
-    protected $table = 'demandes_budget';
+    protected $table = 'notifications_clubs';
 
     protected $fillable = [
         'club_id',
-        'montant_demande',
-        'justificatif',
-        'statut',
-        'commentaire',
+        'type_notif',
+        'message',
+        'lu',
+        'date_envoi',
     ];
 
     protected $casts = [
-        'montant_demande' => 'decimal:2',
+        'lu' => 'boolean',
+        'date_envoi' => 'datetime',
     ];
 
     public function club()

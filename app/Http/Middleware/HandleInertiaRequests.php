@@ -35,12 +35,31 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $unreadCount = 0;
+        if ($request->user()) {
+            $user = $request->user();
+            if ($user->isAdmin()) {
+                $unreadCount = \App\Models\NotificationClub::where('lu', false)->count();
+            } else {
+                $unreadCount = \App\Models\NotificationClub::where('club_id', $user->club_id)
+                    ->where('lu', false)
+                    ->count();
+            }
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? [
+                    'id' => $request->user()->id,
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
+                    'role' => $request->user()->role,
+                    'is_responsable' => $request->user()->isResponsable(),
+                ] : null,
             ],
+            'unreadNotifications' => $unreadCount,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

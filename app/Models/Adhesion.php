@@ -7,15 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Adhesion extends Model
 {
     protected $fillable = [
-        'etudiant_id',
+        'user_id',
         'club_id',
         'date_adhesion',
         'statut',
+        'role_dans_club',
     ];
 
-    public function etudiant()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'etudiant_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function club()

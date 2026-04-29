@@ -11,12 +11,12 @@ class Club extends Model
         'type',
         'statut',
         'description',
-        'president_id',
+        'responsable_id',
     ];
 
-    public function president()
+    public function responsable()
     {
-        return $this->belongsTo(User::class, 'president_id');
+        return $this->belongsTo(User::class, 'responsable_id');
     }
 
     public function adhesions()
@@ -44,5 +44,15 @@ class Club extends Model
     public function demandesBudget()
     {
         return $this->hasMany(DemandeBudget::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(NotificationClub::class, 'club_id');
+    }
+
+    public function forumMessages()
+    {
+        return $this->hasMany(ForumMessage::class)->orderBy('created_at', 'desc');
     }
 }

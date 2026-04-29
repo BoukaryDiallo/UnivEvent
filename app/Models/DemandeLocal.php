@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DemandeLocal extends Model
 {
+    protected $table = 'demandes_local';
+
     protected $fillable = [
         'club_id',
         'salle_souhaitee',

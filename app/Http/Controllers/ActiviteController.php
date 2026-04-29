@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activite;
+use App\Models\NotificationClub;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ActiviteController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Afficher la liste des ressources.
      */
     public function index()
     {
@@ -18,24 +20,34 @@ class ActiviteController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Afficher le formulaire de création d'une nouvelle ressource.
      */
     public function create()
     {
-        //
+        if (Auth::user()->isAdmin()) {
+            abort(403, 'Les administrateurs ne peuvent pas créer d\'activités.');
+        }
+        $clubs = \App\Models\Club::where('statut', 'actif')->get();
+        return Inertia::render('Activites/Create', ['clubs' => $clubs]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Stocker une nouvelle ressource créée dans le stockage.
      */
     public function store(Request $request)
     {
-        $activite = Activite::create($request->all());
-        return redirect()->route('activites.index')->with('success', 'Activité créée avec succès');
+        if (Auth::user()->isAdmin()) {
+            abort(403, 'Les administrateurs ne peuvent pas créer d\'activités.');
+        }
+        $data = $request->all();
+        $data['created_by'] = Auth::id();
+        $data['statut'] = 'brouillon';
+        $activite = Activite::create($data);
+        return redirect()->route('clubs.show', $data['club_id'])->with('success', 'Activité créée avec succès');
     }
 
     /**
-     * Display the specified resource.
+     * Afficher la ressource spécifiée.
      */
     public function show(string $id)
     {
@@ -44,7 +56,7 @@ class ActiviteController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Afficher le formulaire d'édition de la ressource spécifiée.
      */
     public function edit(string $id)
     {
@@ -52,7 +64,7 @@ class ActiviteController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Mettre à jour la ressource spécifiée dans le stockage.
      */
     public function update(Request $request, string $id)
     {
@@ -62,7 +74,7 @@ class ActiviteController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Supprimer la ressource spécifiée du stockage.
      */
     public function destroy(string $id)
     {
@@ -73,8 +85,18 @@ class ActiviteController extends Controller
 
     public function publish(string $id)
     {
-        $activite = Activite::findOrFail($id);
+        $activite = Activite::with('club')->findOrFail($id);
         $activite->update(['statut' => 'publié']);
+
+        // Notifier tous les membres du club
+        NotificationClub::create([
+            'club_id' => $activite->club_id,
+            'type_notif' => 'activite',
+            'message' => 'Nouvelle activité publiée: ' . $activite->titre,
+            'lu' => false,
+            'date_envoi' => now(),
+        ]);
+
         return redirect()->back()->with('success', 'Activité publiée');
     }
 

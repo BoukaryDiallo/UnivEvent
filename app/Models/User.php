@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use App\Models\Club;
 
 #[Fillable(['name', 'email', 'password', 'role', 'est_actif'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
@@ -44,5 +45,10 @@ class User extends Authenticatable
 
     public function isEnseignant(){
         return $this->role === 'enseignant';
+    }
+
+    public function isResponsable()
+    {
+        return Club::where('responsable_id', $this->id)->exists();
     }
 }
