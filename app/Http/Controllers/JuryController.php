@@ -12,6 +12,7 @@ use App\Services\EventAuthorizationService;
 use App\Services\EventNotificationService;
 use App\Services\JuryWorkflowService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class JuryController extends Controller
 {
@@ -61,7 +62,7 @@ class JuryController extends Controller
             'competition_status' => ! empty($validated['lock_criteria']) ? 'configuration' : $evenement->competition_status,
         ]);
 
-        EventStatusUpdated::dispatch(
+        $this->dispatchEventStatusUpdated(
             $evenement->fresh(['juryPanel.criteria', 'juryPanel.deliberations.participant', 'juryPanel.deliberations.requester', 'juryPanel.deliberations.resolver']),
             $request->user(),
             'Configuration jury mise a jour.',
@@ -76,7 +77,7 @@ class JuryController extends Controller
 
         $this->workflow->openScoring($this->workflow->ensurePanel($evenement));
 
-        EventStatusUpdated::dispatch($evenement->fresh('juryPanel.criteria'), $request->user(), 'Notation ouverte.');
+        $this->dispatchEventStatusUpdated($evenement->fresh('juryPanel.criteria'), $request->user(), 'Notation ouverte.');
 
         return back();
     }
@@ -87,7 +88,7 @@ class JuryController extends Controller
 
         $this->workflow->closeScoring($this->workflow->ensurePanel($evenement));
 
-        EventStatusUpdated::dispatch($evenement->fresh('juryPanel.criteria'), $request->user(), 'Notation fermee.');
+        $this->dispatchEventStatusUpdated($evenement->fresh('juryPanel.criteria'), $request->user(), 'Notation fermee.');
 
         return back();
     }
@@ -112,7 +113,7 @@ class JuryController extends Controller
             (bool) ($validated['submit'] ?? false),
         );
 
-        JuryScoresUpdated::dispatch(
+        $this->dispatchJuryScoresUpdated(
             $evenement->fresh(['juryPanel.criteria', 'juryPanel.deliberations.participant', 'juryPanel.deliberations.requester', 'juryPanel.deliberations.resolver']),
             $request->user(),
             $participantId,
@@ -147,7 +148,7 @@ class JuryController extends Controller
             }
         }
 
-        EventStatusUpdated::dispatch(
+        $this->dispatchEventStatusUpdated(
             $evenement->fresh(['juryPanel.criteria', 'juryPanel.deliberations.participant', 'juryPanel.deliberations.requester', 'juryPanel.deliberations.resolver']),
             $request->user(),
             'Revision demandee.',
@@ -190,7 +191,7 @@ class JuryController extends Controller
             }
         }
 
-        EventResultsPublished::dispatch(
+        $this->dispatchEventResultsPublished(
             $evenement->fresh([
                 'juryPanel.criteria',
                 'juryPanel.deliberations.participant',
@@ -216,12 +217,54 @@ class JuryController extends Controller
             'resolved_at' => now(),
         ]);
 
-        EventStatusUpdated::dispatch(
+        $this->dispatchEventStatusUpdated(
             $evenement->fresh(['juryPanel.criteria', 'juryPanel.deliberations.participant', 'juryPanel.deliberations.requester', 'juryPanel.deliberations.resolver']),
             $request->user(),
             'Revision resolue.',
         );
 
         return back();
+    }
+
+    private function dispatchEventStatusUpdated(Evenement $evenement, $actor, string $message): void
+    {
+        try {
+            EventStatusUpdated::dispatch($evenement, $actor, $message);
+        } catch (\Throwable $exception) {
+            Log::warning('Jury event status broadcast failed.', [
+                'evenement_id' => $evenement->id,
+                'actor_id' => $actor?->id,
+                'message' => $message,
+                'error' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    private function dispatchJuryScoresUpdated(Evenement $evenement, $actor, int $participantId, bool $submitted): void
+    {
+        try {
+            JuryScoresUpdated::dispatch($evenement, $actor, $participantId, $submitted);
+        } catch (\Throwable $exception) {
+            Log::warning('Jury scores broadcast failed.', [
+                'evenement_id' => $evenement->id,
+                'actor_id' => $actor?->id,
+                'participant_id' => $participantId,
+                'submitted' => $submitted,
+                'error' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    private function dispatchEventResultsPublished(Evenement $evenement, $actor): void
+    {
+        try {
+            EventResultsPublished::dispatch($evenement, $actor);
+        } catch (\Throwable $exception) {
+            Log::warning('Event results broadcast failed.', [
+                'evenement_id' => $evenement->id,
+                'actor_id' => $actor?->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 }

@@ -41,6 +41,34 @@ class EvenementRole extends Model
         'meta' => 'array',
     ];
 
+    public function getPermissionsAttribute(): array
+    {
+        return [
+            'can_manage_messages' => (bool) $this->can_manage_messages,
+            'can_manage_comments' => (bool) $this->can_manage_comments,
+            'can_edit_event' => (bool) $this->can_edit_event,
+            'can_change_visibility' => (bool) $this->can_change_visibility,
+            'can_manage_participants' => (bool) $this->can_manage_participants,
+            'can_assign_jury' => (bool) $this->can_assign_jury,
+            'can_assign_organizers' => (bool) $this->can_assign_organizers,
+            'can_manage_certificates' => (bool) $this->can_manage_certificates,
+            'can_manage_results' => (bool) $this->can_manage_results,
+        ];
+    }
+
+    public function setPermissionsAttribute(array $permissions): void
+    {
+        $this->attributes['can_manage_messages'] = (bool) ($permissions['can_manage_messages'] ?? false);
+        $this->attributes['can_manage_comments'] = (bool) ($permissions['can_manage_comments'] ?? false);
+        $this->attributes['can_edit_event'] = (bool) ($permissions['can_edit_event'] ?? false);
+        $this->attributes['can_change_visibility'] = (bool) ($permissions['can_change_visibility'] ?? false);
+        $this->attributes['can_manage_participants'] = (bool) ($permissions['can_manage_participants'] ?? false);
+        $this->attributes['can_assign_jury'] = (bool) ($permissions['can_assign_jury'] ?? false);
+        $this->attributes['can_assign_organizers'] = (bool) ($permissions['can_assign_organizers'] ?? false);
+        $this->attributes['can_manage_certificates'] = (bool) ($permissions['can_manage_certificates'] ?? false);
+        $this->attributes['can_manage_results'] = (bool) ($permissions['can_manage_results'] ?? false);
+    }
+
     public function evenement()
     {
         return $this->belongsTo(Evenement::class);

@@ -10,6 +10,7 @@ use App\Services\CertificateGenerator;
 use App\Services\EventAuthorizationService;
 use App\Services\EventNotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class CertificatController extends Controller
@@ -152,7 +153,15 @@ class CertificatController extends Controller
             ],
         );
 
-        EventCertificateGenerated::dispatch($evenement->fresh(), $certificat);
+        try {
+            EventCertificateGenerated::dispatch($evenement->fresh(), $certificat);
+        } catch (\Throwable $exception) {
+            Log::warning('Certificate broadcast failed.', [
+                'evenement_id' => $evenement->id,
+                'certificat_id' => $certificat->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
 
         return response()->json([
             'success' => true,

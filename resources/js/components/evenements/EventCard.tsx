@@ -140,7 +140,7 @@ export function EventCard({ evenement, onJoinSuccess, compact = false }: EventCa
                                         });
                                     }}
                                 >
-                                    Interesse
+                                    Liker
                                 </Button>
                                 <Button
                                     type="button"

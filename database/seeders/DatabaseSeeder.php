@@ -16,19 +16,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminSeeder::class,
             UserRolesSeeder::class,
-            EvenementSeeder::class,
         ]);
-
-        User::factory(12)->create();
-
-        User::updateOrCreate(
-            ['email' => 'test1@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => bcrypt('password1234!'),
-                'role' => 'etudiant',
-                'est_actif' => true,
-            ],
-        );
     }
 }

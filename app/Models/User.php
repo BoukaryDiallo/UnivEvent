@@ -94,6 +94,11 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     */
 
+    public function evenementsCrees()
+    {
+        return $this->hasMany(Evenement::class, 'cree_par');
+    }
+
     public function inscriptions()
     {
         return $this->hasMany(InscriptionEvenement::class, 'utilisateur_id');

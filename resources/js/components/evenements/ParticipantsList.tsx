@@ -3,7 +3,7 @@ import { Check, Mail, ShieldCheck, UserX2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { refuser, valider } from '@/routes/inscriptions';
-import type { EventParticipant, ParticipationStatus } from '@/types';
+import type { BackendParticipationStatus, EventParticipant, ParticipationStatus } from '@/types';
 import { UserAvatar } from './UserAvatar';
 
 type ParticipantsListProps = {
@@ -12,10 +12,12 @@ type ParticipantsListProps = {
     onToast?: (message: string) => void;
 };
 
-const badgeMap: Record<ParticipationStatus, string> = {
+const badgeMap: Record<ParticipationStatus | BackendParticipationStatus, string> = {
     interesse: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-200',
     participe: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-200',
     refuse: 'bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-200',
+    en_attente: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-200',
+    accepte: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-200',
 };
 
 export function ParticipantsList({ participants, canManage = false, onToast }: ParticipantsListProps) {
@@ -63,7 +65,11 @@ export function ParticipantsList({ participants, canManage = false, onToast }: P
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                         <span className={cn('rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]', badgeMap[participant.statut])}>
-                            {participant.statut === 'interesse' ? 'Interesse' : participant.statut === 'participe' ? 'Je participe' : 'Refuse'}
+                            {participant.statut === 'interesse' || participant.statut === 'en_attente'
+                                ? 'Interesse'
+                                : participant.statut === 'participe' || participant.statut === 'accepte'
+                                  ? 'Je participe'
+                                  : 'Refuse'}
                         </span>
                         {canManage ? (
                             <>

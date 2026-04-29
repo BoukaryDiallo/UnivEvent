@@ -1,9 +1,0 @@
-php artisan make:factory EvenementFactory
-php artisan make:factory InscriptionEvenementFactory
-php artisan make:factory ProgrammeFactory
-php artisan make:factory ResultatFactory
-php artisan make:factory CertificatFactory
-php artisan make:seeder EvenementSeeder
-php artisan tinker
-\App\Models\Evenement::factory()->count(10)->create();
-php artisan serve

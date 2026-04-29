@@ -1,7 +1,9 @@
 import { useForm } from '@inertiajs/react';
-import { ImagePlus, ListChecks, Layers3, Sparkles, Eye } from 'lucide-react';
-
+import { ImagePlus, ListChecks, Layers3, Sparkles, Eye, Search, Shield } from 'lucide-react';
+import { useState } from 'react';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -11,15 +13,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-
+import { cn } from '@/lib/utils';
 import type {
     EventAssignmentPermissions,
     EventAssignmentRole,
     EventFormMeta,
     EventFormValues,
 } from '@/types';
-
+import { EventBadge } from '../EventBadge';
+import { EventProgramEditor } from '../EventProgramEditor';
 import { RichTextEditor } from '../RichTextEditor';
+
 
 export const formWizardSteps = [
     { key: 'basics', label: 'Informations', icon: Sparkles },
@@ -202,6 +206,125 @@ export function EventBasicsStep({ form, meta }: EventBasicsStepProps) {
                     <InputError message={form.errors.lien_live} />
                 </div>
             </div>
+        </div>
+    );
+}
+
+export function EventAccessStep({ form, meta }: EventBasicsStepProps) {
+    const [search, setSearch] = useState('');
+    
+    const filteredUsers = meta.assignableUsers.filter(u => 
+        u.name?.toLowerCase().includes(search.toLowerCase()) || 
+        u.email?.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const applyBulkPermissions = (role: EventAssignmentRole, permissions: Partial<EventAssignmentPermissions>) => {
+        const currentEntries = form.data.assigned_users[role];
+        const updated = currentEntries.map((entry) => ({
+            ...entry,
+            permissions: { ...entry.permissions, ...permissions }
+        }));
+        form.setData('assigned_users', { ...form.data.assigned_users, [role]: updated });
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-3xl dark:bg-slate-900/50">
+                <Search className="size-5 text-slate-400" />
+                <Input 
+                    placeholder="Rechercher un utilisateur pour l'affecter..." 
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="border-none bg-transparent focus-visible:ring-0"
+                />
+            </div>
+            
+            <div className="grid gap-6">
+                {meta.assignmentRoles.map((role) => (
+                    <div key={role.value} className="space-y-4 rounded-4xl border p-6 bg-white dark:bg-slate-950/70">
+                        <div className="flex justify-between items-center">
+                            <h3 className="font-bold flex items-center gap-2">
+                                <Shield className="size-4 text-sky-500" /> {role.label}
+                            </h3>
+                            {form.data.assigned_users[role.value].length > 1 && (
+                                <Button variant="ghost" size="sm" onClick={() => applyBulkPermissions(role.value, { can_edit_event: true })}>
+                                    Donner accès édition à tous
+                                </Button>
+                            )}
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            {filteredUsers.slice(0, 6).map(user => (
+                                <UserAssignmentCard 
+                                    key={user.id} 
+                                    user={user} 
+                                    role={role.value} 
+                                    form={form} 
+                                />
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function UserAssignmentCard({ user, role, form }: any) {
+    const entry = form.data.assigned_users[role].find((item: any) => item.user_id === user.id);
+    const isSelected = !!entry;
+
+    return (
+        <div className={cn(
+            "p-4 rounded-2xl border transition-all cursor-pointer",
+            isSelected ? "border-sky-500 bg-sky-50 dark:bg-sky-900/20" : "hover:border-slate-300"
+        )} onClick={() => {
+            const current = form.data.assigned_users[role];
+            const next = isSelected 
+                ? current.filter((i: any) => i.user_id !== user.id)
+                : [...current, { user_id: user.id, permissions: defaultPermissionsForRole(role) }];
+            form.setData('assigned_users', { ...form.data.assigned_users, [role]: next });
+        }}>
+            <div className="flex items-center gap-3">
+                <Checkbox checked={isSelected} />
+                <div>
+                    <p className="text-sm font-medium">{user.name}</p>
+                    <p className="text-xs text-slate-500">{user.email}</p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function EventProgramStep({ form }: { form: any }) {
+    return (
+        <div className="rounded-4xl border bg-white p-6 dark:bg-slate-950/70">
+            <EventProgramEditor 
+                programmes={form.data.programmes} 
+                eventStart={form.data.date_debut} 
+                onChange={(p) => form.setData('programmes', p)} 
+            />
+        </div>
+    );
+}
+
+export function EventMediaStep({ form }: { form: any }) {
+    return (
+        <div className="rounded-4xl border bg-white p-8 text-center dark:bg-slate-950/70">
+            <Label className="text-lg mb-4 block">Bannière de l'événement</Label>
+            <Input type="file" onChange={e => form.setData('media', e.target.files?.[0])} />
+            <p className="text-sm text-slate-500 mt-4">Images recommandées : 1600x900px</p>
+        </div>
+    );
+}
+
+export function EventPreviewStep({ form }: { form: any }) {
+    return (
+        <div className="space-y-6">
+            <div className="p-8 border-2 border-dashed rounded-4xl text-center bg-sky-50/50 dark:bg-sky-900/10">
+                <h2 className="text-2xl font-bold">{form.data.titre || 'Sans titre'}</h2>
+                <EventBadge type={form.data.type} className="mt-2" />
+            </div>
+            <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: form.data.description }} />
         </div>
     );
 }

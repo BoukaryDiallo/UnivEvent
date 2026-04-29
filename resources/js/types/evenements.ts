@@ -2,6 +2,7 @@ export type EventRole = 'tous' | 'etudiant' | 'enseignant' | 'admin' | string;
 export type EventType = 'conference' | 'concours';
 export type EventStatus = 'brouillon' | 'publie' | 'en_cours' | 'cloture' | 'archive';
 export type ParticipationStatus = 'participe' | 'interesse' | 'refuse';
+export type BackendParticipationStatus = 'en_attente' | 'accepte' | 'refuse';
 export type EventAssignmentRole = 'organisateur' | 'participant' | 'intervenant' | 'jury';
 export type EventTemplateSchema = Record<string, string | number | boolean | null>;
 
@@ -42,6 +43,23 @@ export type EventAssignedEntry = {
 
 export type EventAssignedUsers = Record<EventAssignmentRole, EventAssignedEntry[]>;
 
+export type EventValidationStatus = 'pending' | 'approved' | 'rejected';
+export type EventWorkflowState = 'draft' | 'pending' | 'published' | 'rejected';
+
+export type EventCompletionSection = {
+    key: string;
+    label: string;
+    weight: number;
+    percentage: number;
+    status: 'complete' | 'partial' | 'empty';
+    missing: string[];
+};
+
+export type EventCompletionSummary = {
+    percentage: number;
+    sections: EventCompletionSection[];
+};
+
 export type EventSummary = {
     id: number;
     titre: string;
@@ -50,9 +68,21 @@ export type EventSummary = {
     date_debut: string;
     date_fin: string | null;
     lieu: string | null;
+    lien_live?: string | null;
     statut: EventStatus;
+    validation_status?: EventValidationStatus;
+    workflow_state?: EventWorkflowState;
+    rejection_reason?: string | null;
+    submitted_at?: string | null;
     visibilite: 'public' | 'prive' | 'restreint';
     public_cible: string;
+    comments_enabled: boolean;
+    comment_replies_enabled: boolean;
+    comment_reactions_enabled: boolean;
+    comment_policy: string;
+    messages_enabled: boolean;
+    evenement_certifie: boolean;
+    certificate_template_version?: string | null;
     capacite_max: number | null;
     participants_count: number;
     comments_count: number;
@@ -70,12 +100,21 @@ export type EventSummary = {
         backend_statut?: 'en_attente' | 'accepte' | 'refuse';
     } | null;
     can_join?: boolean;
+    management_role?: 'createur' | 'organisateur' | null;
+    can_manage?: boolean;
+    can_edit?: boolean;
+    can_delete?: boolean;
+    can_submit?: boolean;
+    completion?: EventCompletionSummary;
+    submission_errors?: string[];
+    suggestions?: string[];
+    messages_count?: number;
 };
 
 export type EventParticipant = {
     id: number;
-    statut: ParticipationStatus;
-    backend_statut?: 'en_attente' | 'accepte' | 'refuse';
+    statut: ParticipationStatus | BackendParticipationStatus;
+    backend_statut?: BackendParticipationStatus;
     user_id: number;
     user: {
         id: number | null;
@@ -98,6 +137,34 @@ export type EventProgramme = {
     ordre: number;
 };
 
+export type EventCriterion = {
+    id?: number;
+    nom: string;
+    description: string | null;
+    bareme: number | null;
+    coefficient: number | null;
+    ordre: number | null;
+    actif: boolean;
+};
+
+export type EventMedia = {
+    id: number;
+    nom_fichier?: string;
+    chemin_fichier?: string;
+    type_fichier?: string;
+    taille_fichier?: number;
+    description?: string | null;
+    is_public?: boolean;
+    download_allowed?: boolean;
+    uploaded_by?: number;
+    created_at?: string;
+    updated_at?: string;
+    type: 'image' | 'pdf' | 'autre' | string;
+    name: string | null;
+    size: number | null;
+    url: string;
+};
+
 export type EventProgrammeDraft = {
     id?: number;
     titre: string;
@@ -111,7 +178,7 @@ export type EventProgrammeDraft = {
     ordre: string;
 };
 
-export type EventMedia = {
+export type EventMediaPreview = {
     id: number;
     type: 'image' | 'pdf' | 'autre';
     name: string | null;
@@ -315,11 +382,21 @@ export type EventDetail = {
         email: string | null;
         role: string | null;
     };
+    assignments?: Array<{
+        id: number;
+        role: EventAssignmentRole;
+        user: {
+            id: number;
+            name: string;
+            email: string;
+            role: string | null;
+        };
+    }>;
     current_inscription_id: number | null;
     current_inscription: {
         id: number;
-        statut: ParticipationStatus;
-        backend_statut?: 'en_attente' | 'accepte' | 'refuse';
+        statut: ParticipationStatus | BackendParticipationStatus;
+        backend_statut?: BackendParticipationStatus;
     } | null;
     participants: EventParticipant[];
     programmes: EventProgramme[];
@@ -332,6 +409,12 @@ export type EventDetail = {
     moderation?: EventModeration;
     jury?: EventJuryPanel | null;
     resultats: EventResult[];
+    my_result?: EventResult | null;
+    certificate?: {
+        id: number;
+        url: string;
+        statut: string;
+    } | null;
 };
 
 export type EventFormValues = {

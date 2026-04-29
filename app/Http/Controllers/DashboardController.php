@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EventNotification;
 use App\Models\Evenement;
 use App\Models\InscriptionEvenement;
+use App\Models\User;
 use App\Services\UpcomingEventReminderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -23,6 +24,7 @@ class DashboardController extends Controller
         abort_unless($user, 403);
         $this->reminders->dispatchForUser($user);
 
+        // Mes événements (créés par l'utilisateur) - pour tous les utilisateurs
         $mesEvenements = Evenement::query()
             ->with(['createur:id,name,email,role', 'roles', 'medias'])
             ->withCount(['inscriptions', 'comments', 'activities'])
@@ -31,6 +33,56 @@ class DashboardController extends Controller
             ->take(3)
             ->get()
             ->map(fn (Evenement $evenement) => $this->serializeEvenement($evenement, $user));
+
+        // Pour les admins: tous les événements, pour les autres: seulement les leurs
+        $allEventsForAdmin = $user->isAdmin()
+            ? Evenement::query()
+                ->with(['createur:id,name,email,role', 'roles', 'medias'])
+                ->withCount(['inscriptions', 'comments', 'activities'])
+                ->latest('date_debut')
+                ->take(10)
+                ->get()
+                ->map(fn (Evenement $evenement) => $this->serializeEvenement($evenement, $user))
+            : [];
+
+        // Utilisateurs qui ont créé des événements ou sont assignés comme organisateur, jury, intervenant
+        $eventActors = User::query()
+            ->where('est_actif', true)
+            ->where(function ($query) {
+                // Ceux qui ont créé des événements
+                $query->whereHas('evenementsCrees')
+                    // Ou ceux qui sont assignés comme organisateur, jury, intervenant
+                    ->orWhereHas('evenementAssignments', function ($assignments) {
+                        $assignments->whereIn('role', ['organisateur', 'jury', 'intervenant']);
+                    });
+            })
+            ->withCount('evenementsCrees as events_created_count')
+            ->orderByDesc('events_created_count')
+            ->take(10)
+            ->get(['id', 'name', 'email', 'role'])
+            ->map(function (User $actor) {
+                // Récupérer les événements de cet utilisateur
+                $events = Evenement::query()
+                    ->with(['createur:id,name,email,role', 'roles', 'medias'])
+                    ->withCount(['inscriptions', 'comments', 'activities'])
+                    ->where(function ($query) use ($actor) {
+                        $query->where('cree_par', $actor->id)
+                            ->orWhereHas('assignments', fn ($a) => $a->where('user_id', $actor->id));
+                    })
+                    ->latest('date_debut')
+                    ->take(5)
+                    ->get()
+                    ->map(fn (Evenement $e) => $this->serializeEvenement($e, request()->user()));
+
+                return [
+                    'id' => $actor->id,
+                    'name' => $actor->name,
+                    'email' => $actor->email,
+                    'role' => $actor->role,
+                    'events' => $events,
+                    'events_count' => count($events),
+                ];
+            });
 
         $evenementsPopulaires = Evenement::query()
             ->with(['createur:id,name,email,role', 'roles', 'medias'])
@@ -149,10 +201,31 @@ class DashboardController extends Controller
                     ->where('type', 'rappel_evenement')
                     ->count(),
             ],
+            // Nouvelles données pour le dashboard amélioré
+            'isAdmin' => $user->isAdmin(),
+            'allEventsForAdmin' => $allEventsForAdmin,
+            'eventActors' => $eventActors,
+            'pendingEventsCount' => Evenement::where('validation_status', 'pending')->whereNotNull('submitted_at')->count(),
+            // Pour la page de gestion
+            'mesEvenementsGestion' => Evenement::query()
+                ->with(['createur:id,name,email,role', 'roles', 'medias'])
+                ->withCount(['inscriptions', 'comments', 'activities'])
+                ->when(!$user->isAdmin(), fn($q) => $q->where('cree_par', $user->id))
+                ->latest('date_debut')
+                ->get()
+                ->map(fn(Evenement $e) => $this->serializeEvenement($e, $user)),
+            // User roles and permissions for control panel
+            'userRoles' => [$user->role],
+            'userPermissions' => [
+                'canManage' => $user->isAdmin(),
+                'canManageMessages' => $user->isAdmin(),
+                'canJuryMember' => false, // Will be determined per event
+                'canPresident' => false, // Will be determined per event
+            ],
         ]);
     }
 
-    private function serializeEvenement(Evenement $evenement, $user): array
+    private function serializeEvenement(Evenement $evenement, User $user): array
     {
         $cover = $evenement->medias->firstWhere('type', 'image');
 
@@ -192,7 +265,7 @@ class DashboardController extends Controller
         };
     }
 
-    private function canJoin(Evenement $evenement, $user): bool
+    private function canJoin(Evenement $evenement, User $user): bool
     {
         if ($evenement->cree_par === $user->id || $user->isAdmin() || $evenement->statut === 'cloture') {
             return false;

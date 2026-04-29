@@ -7,10 +7,10 @@ import { EventActivityTimeline } from '@/components/evenements/EventActivityTime
 import { EventBadge } from '@/components/evenements/EventBadge';
 import { EventCommentsPanel } from '@/components/evenements/EventCommentsPanel';
 import { EventMessageBoard } from '@/components/evenements/EventMessageBoard';
-import { EventTabs } from '@/components/evenements/EventTabs';
-import type { EventTabKey } from '@/components/evenements/EventTabs';
+import { EventActorsManagement } from '@/components/evenements/EventActorsManagement';
 import { EventTimeline } from '@/components/evenements/EventTimeline';
 import { EventToast } from '@/components/evenements/EventToast';
+import { EventTabs, type EventTabKey } from '@/components/evenements/EventTabs';
 import { JuryWorkbench } from '@/components/evenements/JuryWorkbench';
 import { MediaGallery } from '@/components/evenements/MediaGallery';
 import { ParticipantsList } from '@/components/evenements/ParticipantsList';
@@ -47,7 +47,7 @@ type ShowProps = {
         presidentJury?: boolean;
         juryMember?: boolean;
     };
-    recommendations: EventSummary[];
+    recommendations?: EventSummary[];
 };
 
 type EventStatusPayload = {
@@ -99,13 +99,31 @@ function formatTime(date: string, end: string | null) {
     return `${startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}${endDate ? ` - ${endDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}`;
 }
 
-export default function EvenementsShow({ evenement, can, recommendations }: ShowProps) {
+function toParticipationStatus(event: EventDetail): ParticipationStatus | null {
+    const backendStatus = event.current_inscription?.backend_statut ?? null;
+
+    if (backendStatus === 'accepte') {
+        return 'participe';
+    }
+
+    if (backendStatus === 'en_attente') {
+        return 'interesse';
+    }
+
+    if (backendStatus === 'refuse') {
+        return 'refuse';
+    }
+
+    return event.current_inscription?.statut === 'participe' || event.current_inscription?.statut === 'interesse' || event.current_inscription?.statut === 'refuse'
+        ? event.current_inscription.statut
+        : null;
+}
+
+export default function EvenementsShow({ evenement, can, recommendations = [] }: ShowProps) {
     const { auth } = usePage().props as unknown as { auth: { user?: User | null } };
     const [activeTab, setActiveTab] = useState<EventTabKey>('overview');
     const [toast, setToast] = useState<{ message: string; tone: 'success' | 'error' } | null>(null);
-    const [optimisticParticipation, setOptimisticParticipation] = useState<ParticipationStatus | null>(
-        evenement.current_inscription?.statut ?? null,
-    );
+    const [optimisticParticipation, setOptimisticParticipation] = useState<ParticipationStatus | null>(toParticipationStatus(evenement));
     const [liveStatus, setLiveStatus] = useState<{
         statut?: EventDetail['statut'];
         competition_status?: string | null;
@@ -219,7 +237,7 @@ export default function EvenementsShow({ evenement, can, recommendations }: Show
                     tone: 'success',
                 }),
             onError: () => {
-                setOptimisticParticipation(displayedEvent.current_inscription?.statut ?? null);
+                setOptimisticParticipation(toParticipationStatus(displayedEvent));
                 setToast({ message: "Impossible de s inscrire a cet evenement pour le moment.", tone: 'error' });
             },
         });
@@ -235,7 +253,7 @@ export default function EvenementsShow({ evenement, can, recommendations }: Show
             preserveScroll: true,
             onSuccess: () => setToast({ message: 'Participation annulee.', tone: 'success' }),
             onError: () => {
-                setOptimisticParticipation(displayedEvent.current_inscription?.statut ?? null);
+                setOptimisticParticipation(toParticipationStatus(displayedEvent));
                 setToast({ message: "Impossible d annuler la participation.", tone: 'error' });
             },
         });
@@ -310,10 +328,10 @@ export default function EvenementsShow({ evenement, can, recommendations }: Show
                                         ) : (
                                             <>
                                                 <Button type="button" size="lg" variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20" onClick={() => join('interesse')}>
-                                                    Interesse
+                                                    Liker
                                                 </Button>
                                                 <Button type="button" size="lg" className="bg-white text-slate-950 hover:bg-cyan-50" onClick={() => join('participe')}>
-                                                    Je participe
+                                                    S inscrire
                                                 </Button>
                                             </>
                                         )
@@ -351,7 +369,7 @@ export default function EvenementsShow({ evenement, can, recommendations }: Show
                     </div>
                     <div className="grid gap-6 border-t border-slate-100 p-6 lg:grid-cols-[1.5fr_0.9fr] dark:border-slate-800">
                         <div className="space-y-5">
-                            <EventTabs activeTab={activeTab} onChange={setActiveTab} showResults={displayedEvent.type === 'concours'} />
+                            <EventTabs activeTab={activeTab} onChange={setActiveTab} showResults={displayedEvent.type === 'concours'} showActors={can.manage} />
                             {activeTab === 'overview' ? (
                                 <div className="space-y-6">
                                     <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50/70 p-6 dark:border-slate-800 dark:bg-slate-900/40">
@@ -442,6 +460,13 @@ export default function EvenementsShow({ evenement, can, recommendations }: Show
                             {activeTab === 'program' ? <EventTimeline programmes={displayedEvent.programmes} /> : null}
                             {activeTab === 'participants' ? (
                                 <ParticipantsList participants={displayedEvent.participants} canManage={Boolean(can.manageParticipants || can.manage)} onToast={(message) => setToast({ message, tone: 'success' })} />
+                            ) : null}
+                            {activeTab === 'actors' && can.manage ? (
+                                <EventActorsManagement 
+                                    event={displayedEvent} 
+                                    canManage={can.manage}
+                                    onToast={(message) => setToast({ message, tone: 'success' })} 
+                                />
                             ) : null}
                             {activeTab === 'media' ? (
                                 <MediaGallery medias={displayedEvent.medias} evenementId={displayedEvent.id} canUpload={can.uploadMedia} onToast={(message) => setToast({ message, tone: 'success' })} />

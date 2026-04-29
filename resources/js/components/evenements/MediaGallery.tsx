@@ -15,27 +15,29 @@ type MediaGalleryProps = {
 export function MediaGallery({ medias, evenementId, canUpload = false, onToast }: MediaGalleryProps) {
     const [selectedMedia, setSelectedMedia] = useState<EventMedia | null>(null);
     const uploadForm = useForm({
-        evenement_id: evenementId,
-        fichier: null as File | null,
+        media: null as File | null,
+        description: '',
+        is_public: true,
+        download_allowed: true,
     });
 
     const submitUpload = () => {
-        if (!uploadForm.data.fichier) {
+        if (!uploadForm.data.media) {
             return;
         }
 
-        uploadForm.post('/evenement-medias', {
+        uploadForm.post(`/evenements/${evenementId}/media`, {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => {
-                uploadForm.reset('fichier');
+                uploadForm.reset('media');
                 onToast?.('Media ajoute.');
             },
         });
     };
 
     const removeMedia = (id: number) => {
-        router.delete(`/evenement-medias/${id}`, {
+        router.delete(`/evenements/${evenementId}/media/${id}`, {
             preserveScroll: true,
             onSuccess: () => onToast?.('Media supprime.'),
         });
@@ -56,10 +58,10 @@ export function MediaGallery({ medias, evenementId, canUpload = false, onToast }
                                 type="file"
                                 className="hidden"
                                 accept="image/*,.pdf"
-                                onChange={(event) => uploadForm.setData('fichier', event.target.files?.[0] ?? null)}
+                                onChange={(event) => uploadForm.setData('media', event.target.files?.[0] ?? null)}
                             />
                         </label>
-                        <Button type="button" onClick={submitUpload} disabled={!uploadForm.data.fichier || uploadForm.processing}>
+                        <Button type="button" onClick={submitUpload} disabled={!uploadForm.data.media || uploadForm.processing}>
                             Envoyer
                         </Button>
                     </div>
@@ -101,6 +103,8 @@ export function MediaGallery({ medias, evenementId, canUpload = false, onToast }
                                             event.stopPropagation();
                                             removeMedia(media.id);
                                         }}
+                                        title="Supprimer le media"
+                                        aria-label={`Supprimer le media ${media.name || 'sans titre'}`}
                                         className="inline-flex size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 dark:border-slate-800 dark:text-slate-400 dark:hover:border-rose-900 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
                                     >
                                         <Trash2 className="size-4" />

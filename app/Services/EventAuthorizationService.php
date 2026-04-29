@@ -129,4 +129,34 @@ class EventAuthorizationService
 
         return (bool) ($assignment && $assignment->role === 'jury');
     }
+
+    /**
+     * Get all permissions for a user on an event
+     *
+     * @return array<string, bool>
+     */
+    public function getPermissions(Evenement $evenement, ?User $user): array
+    {
+        if (! $user) {
+            return [];
+        }
+
+        $isAdmin = $this->isAdminOrCreator($evenement, $user);
+
+        return [
+            'manage' => $isAdmin,
+            'join' => $this->canView($evenement, $user),
+            'uploadMedia' => $isAdmin,
+            'archive' => $isAdmin,
+            'delete' => $isAdmin,
+            'changeVisibility' => $isAdmin || $this->canChangeVisibility($evenement, $user),
+            'manageParticipants' => $isAdmin || $this->canManageParticipants($evenement, $user),
+            'manageComments' => $isAdmin || $this->canManageComments($evenement, $user),
+            'manageMessages' => $isAdmin || $this->canManageMessages($evenement, $user),
+            'manageResults' => $isAdmin || $this->canManageResults($evenement, $user),
+            'manageCertificates' => $isAdmin || $this->canManageCertificates($evenement, $user),
+            'presidentJury' => $this->isPresidentJury($evenement, $user),
+            'juryMember' => $this->isJuryMember($evenement, $user),
+        ];
+    }
 }

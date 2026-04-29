@@ -29,6 +29,17 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton size="lg" asChild>
+                            <Link href={dashboard()} prefetch>
+                                <div className="grid min-w-0 gap-1 text-left">
+                                    <span className="text-sm font-semibold">Dashboard</span>
+                                </div>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
                 <ModuleFiveCombobox />
             </SidebarContent>
 

@@ -8,7 +8,7 @@ import { EventToast } from '@/components/evenements/EventToast';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppLayout from '@/layouts/app-layout';
-import { create, index } from '@/routes/evenements';
+import { gestion, index } from '@/routes/evenements';
 import type { BreadcrumbItem, EventFilterState, EventSummary, PaginatedEvents } from '@/types';
 
 type IndexProps = {
@@ -72,12 +72,12 @@ export default function EvenementsIndex({ evenements, filters, stats, recommenda
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Evenements" />
             <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-                <section className="overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.18),_transparent_32%),linear-gradient(135deg,_rgba(15,23,42,1),_rgba(8,47,73,0.96)_55%,_rgba(8,145,178,0.86))] p-6 text-white shadow-xl shadow-slate-200/70 dark:shadow-black/20">
+                <section className="overflow-hidden rounded-4xl bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.18),transparent_32%),linear-gradient(135deg,rgba(15,23,42,1),rgba(8,47,73,0.96)_55%,rgba(8,145,178,0.86))] p-6 text-white shadow-xl shadow-slate-200/70 dark:shadow-black/20">
                     <div className="flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
                         <div className="max-w-3xl space-y-4">
                             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100">
                                 <Sparkles className="size-3.5" />
-                                Module 5 - Conferences & Concours
+                                Gérer - Conferences & Concours
                             </div>
                             <div className="space-y-3">
                                 <h1 className="max-w-2xl text-3xl font-semibold sm:text-4xl">
@@ -89,7 +89,7 @@ export default function EvenementsIndex({ evenements, filters, stats, recommenda
                             </div>
                         </div>
                         <div className="flex flex-col gap-3 sm:flex-row">
-                            <div className="grid min-w-0 flex-1 grid-cols-3 gap-3 rounded-[1.5rem] border border-white/15 bg-white/10 p-3 backdrop-blur">
+                            <div className="grid min-w-0 flex-1 grid-cols-3 gap-3 rounded-3xl border border-white/15 bg-white/10 p-3 backdrop-blur">
                                 <div className="rounded-2xl bg-white/10 p-3">
                                     <div className="text-xs uppercase tracking-[0.18em] text-cyan-100/80">Total</div>
                                     <div className="mt-2 text-2xl font-semibold">{stats.total}</div>
@@ -103,8 +103,8 @@ export default function EvenementsIndex({ evenements, filters, stats, recommenda
                                     <div className="mt-2 text-2xl font-semibold">{stats.upcoming}</div>
                                 </div>
                             </div>
-                            <Button asChild size="lg" className="h-auto rounded-[1.5rem] bg-white px-5 py-4 text-slate-950 hover:bg-cyan-50">
-                                <Link href={create()}>
+                            <Button asChild size="lg" className="h-auto rounded-3xl bg-white px-5 py-4 text-slate-950 hover:bg-cyan-50">
+                                <Link href={gestion()}>
                                     <Plus className="size-4" />
                                     Creer un evenement
                                 </Link>
@@ -116,7 +116,7 @@ export default function EvenementsIndex({ evenements, filters, stats, recommenda
                 <EventFilters filters={localFilters} onChange={setLocalFilters} />
 
                 <section className="grid gap-4 md:grid-cols-3">
-                    <div className="rounded-[1.75rem] border border-slate-200 bg-white/85 p-5 dark:border-slate-800 dark:bg-slate-950/70">
+                    <div className="rounded-3xl border border-slate-200 bg-white/85 p-5 dark:border-slate-800 dark:bg-slate-950/70">
                         <div className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
                             <CalendarRange className="size-4" />
                             Vue temporelle
@@ -125,7 +125,7 @@ export default function EvenementsIndex({ evenements, filters, stats, recommenda
                             Filtrez le catalogue par periode pour passer des sorties recentes aux temps forts a venir.
                         </p>
                     </div>
-                    <div className="rounded-[1.75rem] border border-slate-200 bg-white/85 p-5 dark:border-slate-800 dark:bg-slate-950/70">
+                    <div className="rounded-3xl border border-slate-200 bg-white/85 p-5 dark:border-slate-800 dark:bg-slate-950/70">
                         <div className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
                             <Users className="size-4" />
                             Recommandations intelligentes
@@ -134,7 +134,7 @@ export default function EvenementsIndex({ evenements, filters, stats, recommenda
                             Le score prend en compte le role, l historique d inscriptions et les signaux d engagement de la plateforme.
                         </p>
                     </div>
-                    <div className="rounded-[1.75rem] border border-slate-200 bg-white/85 p-5 dark:border-slate-800 dark:bg-slate-950/70">
+                    <div className="rounded-3xl border border-slate-200 bg-white/85 p-5 dark:border-slate-800 dark:bg-slate-950/70">
                         <div className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
                             <Sparkles className="size-4" />
                             Carousel immersif
@@ -194,8 +194,8 @@ export default function EvenementsIndex({ evenements, filters, stats, recommenda
                     {isFiltering ? (
                         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                             {Array.from({ length: 6 }).map((_, indexValue) => (
-                                <div key={indexValue} className="space-y-4 rounded-[2rem] border border-slate-200 bg-white/90 p-5 dark:border-slate-800 dark:bg-slate-950/70">
-                                    <Skeleton className="aspect-[16/10] rounded-[1.5rem]" />
+                                <div key={indexValue} className="space-y-4 rounded-4xl border border-slate-200 bg-white/90 p-5 dark:border-slate-800 dark:bg-slate-950/70">
+                                    <Skeleton className="aspect-16/10 rounded-3xl" />
                                     <Skeleton className="h-4 w-1/3" />
                                     <Skeleton className="h-8 w-5/6" />
                                     <Skeleton className="h-4 w-full" />
@@ -210,8 +210,25 @@ export default function EvenementsIndex({ evenements, filters, stats, recommenda
                             ))}
                         </div>
                     ) : (
-                        <div className="rounded-[2rem] border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400">
-                            Aucun evenement ne correspond a ces filtres pour le moment.
+                        <div className="rounded-4xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center dark:border-slate-700 dark:bg-slate-900/50">
+                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                                {filters.statut === 'publie'
+                                    ? 'Aucun evenement publie a decouvrir pour le moment.'
+                                    : 'Aucun evenement ne correspond a ces filtres.'}
+                            </h3>
+                            <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                {filters.search || filters.type !== 'all' || filters.scope !== 'upcoming' || filters.date !== 'all'
+                                    ? 'Essayez d elargir les filtres ou de revenir a la vue par defaut.'
+                                    : 'Les prochains evenements apparaitront ici des qu ils seront publies et valides.'}
+                            </p>
+                            <div className="mt-6 flex justify-center gap-3">
+                                <Button type="button" variant="outline" onClick={() => setLocalFilters({ search: '', scope: 'upcoming', type: 'all', statut: 'all', date: 'all' })}>
+                                    Reinitialiser les filtres
+                                </Button>
+                                <Button asChild>
+                                    <Link href={gestion()}>Ouvrir la gestion</Link>
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </section>

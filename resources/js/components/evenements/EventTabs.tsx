@@ -1,27 +1,29 @@
 import { cn } from '@/lib/utils';
 
-export type EventTabKey = 'overview' | 'program' | 'participants' | 'media' | 'chat' | 'results';
+export type EventTabKey = 'overview' | 'program' | 'participants' | 'actors' | 'media' | 'chat' | 'results';
 
 type EventTabsProps = {
     activeTab: EventTabKey;
     onChange: (tab: EventTabKey) => void;
     showResults?: boolean;
+    showActors?: boolean;
 };
 
 const tabs: Array<{ key: EventTabKey; label: string }> = [
     { key: 'overview', label: 'Apercu' },
     { key: 'program', label: 'Programme' },
     { key: 'participants', label: 'Participants' },
+    { key: 'actors', label: 'Acteurs' },
     { key: 'media', label: 'Medias' },
     { key: 'chat', label: 'Messagerie' },
     { key: 'results', label: 'Resultats' },
 ];
 
-export function EventTabs({ activeTab, onChange, showResults = false }: EventTabsProps) {
+export function EventTabs({ activeTab, onChange, showResults = false, showActors = false }: EventTabsProps) {
     return (
         <div className="overflow-x-auto">
             <div className="inline-flex min-w-full gap-2 rounded-2xl border border-white/60 bg-white/80 p-2 shadow-sm shadow-slate-200/70 backdrop-blur dark:border-slate-800/70 dark:bg-slate-950/70 dark:shadow-black/20">
-                {tabs.filter((tab) => showResults || tab.key !== 'results').map((tab) => (
+                {tabs.filter((tab) => (showResults || tab.key !== 'results') && (showActors || tab.key !== 'actors')).map((tab) => (
                     <button
                         key={tab.key}
                         type="button"

@@ -1,19 +1,33 @@
 import { Link, useForm } from '@inertiajs/react';
 import type { InertiaLinkProps } from '@inertiajs/react';
-import { Eye, ImagePlus, Layers3, ListChecks, Rocket, Sparkles } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { ListChecks, Layers3 } from 'lucide-react';
+import { ImagePlus } from 'lucide-react';
+import { Rocket } from 'lucide-react';
+import { useMemo, useState, useEffect } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import type { EventAssignmentPermissions, EventAssignmentRole, EventFormMeta, EventFormValues } from '@/types';
+import type { EventFormMeta, EventFormValues, EventAssignmentRole, EventAssignmentPermissions } from '@/types';
 import { EventBadge } from './EventBadge';
+import { 
+    EventBasicsStep,
+    formWizardSteps,
+    defaultPermissionsForRole,
+    assignmentRoleDescriptions,
+    permissionLabels
+} from './EventFormWizard/sections';
 import { EventProgramEditor } from './EventProgramEditor';
-import { RichTextEditor } from './RichTextEditor';
 
 type EventFormWizardProps = {
     mode: 'create' | 'edit';
@@ -24,80 +38,11 @@ type EventFormWizardProps = {
     cancelHref: NonNullable<InertiaLinkProps['href']>;
 };
 
-const steps = [
-    { key: 'basics', label: 'Informations', icon: Sparkles },
-    { key: 'access', label: 'Acces', icon: Layers3 },
-    { key: 'program', label: 'Programme', icon: ListChecks },
-    { key: 'media', label: 'Medias', icon: ImagePlus },
-    { key: 'preview', label: 'Apercu', icon: Eye },
-] as const;
-
-const permissionLabels: Record<keyof EventAssignmentPermissions, string> = {
-    can_manage_messages: 'Messages',
-    can_manage_comments: 'Commentaires',
-    can_edit_event: 'Edition',
-    can_change_visibility: 'Visibilite',
-    can_manage_participants: 'Participants',
-    can_assign_jury: 'Affecter jury',
-    can_assign_organizers: 'Affecter organisateurs',
-    can_manage_certificates: 'Certificats',
-    can_manage_results: 'Resultats',
-};
-
-const assignmentRoleDescriptions: Record<string, string> = {
-    organisateur: 'Peut aider a preparer et piloter l evenement.',
-    participant: 'Figure parmi les personnes attendues sur l evenement.',
-    intervenant: 'Anime une session, une presentation ou une intervention.',
-    jury: 'Participe a l evaluation ou a la deliberation.',
-};
-
-function defaultPermissionsForRole(role: EventAssignmentRole): EventAssignmentPermissions {
-    if (role === 'organisateur') {
-        return {
-            can_manage_messages: true,
-            can_manage_comments: true,
-            can_edit_event: true,
-            can_change_visibility: true,
-            can_manage_participants: false,
-            can_assign_jury: false,
-            can_assign_organizers: false,
-            can_manage_certificates: true,
-            can_manage_results: false,
-        };
-    }
-
-    if (role === 'jury') {
-        return {
-            can_manage_messages: false,
-            can_manage_comments: false,
-            can_edit_event: false,
-            can_change_visibility: false,
-            can_manage_participants: false,
-            can_assign_jury: false,
-            can_assign_organizers: false,
-            can_manage_certificates: false,
-            can_manage_results: true,
-        };
-    }
-
-    return {
-        can_manage_messages: false,
-        can_manage_comments: false,
-        can_edit_event: false,
-        can_change_visibility: false,
-        can_manage_participants: false,
-        can_assign_jury: false,
-        can_assign_organizers: false,
-        can_manage_certificates: false,
-        can_manage_results: false,
-    };
-}
-
 export function EventFormWizard({ mode, meta, action, method = 'post', initialValues, cancelHref }: EventFormWizardProps) {
-    const [step, setStep] = useState<(typeof steps)[number]['key']>('basics');
+    const [step, setStep] = useState<(typeof formWizardSteps)[number]['key']>('basics');
     const form = useForm<EventFormValues>(initialValues);
 
-    const currentStepIndex = steps.findIndex((item) => item.key === step);
+    const currentStepIndex = formWizardSteps.findIndex((item) => item.key === step);
     const mediaPreviewUrl = useMemo(
         () => (form.data.media ? URL.createObjectURL(form.data.media) : null),
         [form.data.media],
@@ -112,15 +57,39 @@ export function EventFormWizard({ mode, meta, action, method = 'post', initialVa
         return () => URL.revokeObjectURL(mediaPreviewUrl);
     }, [mediaPreviewUrl]);
 
-    const submit = () => {
-        form.transform((data) => ({
-            ...data,
-            _method: method === 'put' ? 'put' : undefined,
-        }));
+    const validateStep = (stepKey: (typeof formWizardSteps)[number]['key']): boolean => {
+        switch (stepKey) {
+            case 'basics':
+                return Boolean(form.data.titre && form.data.type && form.data.date_debut);
+            case 'access':
+                return Boolean(form.data.visibilite && form.data.statut && form.data.roles.length > 0);
+            case 'program':
+                return true;
+            case 'media':
+                return true;
+            case 'preview':
+                return Boolean(form.data.titre && form.data.type && form.data.date_debut && form.data.visibilite && form.data.statut);
+            default:
+                return false;
+        }
+    };
 
-        form.post(action, {
-            forceFormData: true,
-        });
+    const canProceedToNext = (): boolean => {
+        return validateStep(step);
+    };
+
+    const goToNextStep = () => {
+        if (!canProceedToNext()) {
+            return;
+        }
+
+        const nextIndex = Math.min(formWizardSteps.length - 1, currentStepIndex + 1);
+        setStep(formWizardSteps[nextIndex]!.key);
+    };
+
+    const goToPreviousStep = () => {
+        const prevIndex = Math.max(0, currentStepIndex - 1);
+        setStep(formWizardSteps[prevIndex]!.key);
     };
 
     const toggleAssignment = (role: EventAssignmentRole, userId: number, checked: boolean) => {
@@ -165,10 +134,27 @@ export function EventFormWizard({ mode, meta, action, method = 'post', initialVa
         });
     };
 
+    const submit = () => {
+        if (!validateStep('preview')) {
+            setStep('preview');
+
+            return;
+        }
+
+        form.transform((data) => ({
+            ...data,
+            _method: method === 'put' ? 'put' : undefined,
+        }));
+
+        form.post(action, {
+            forceFormData: true,
+        });
+    };
+
     return (
         <div className="space-y-8">
             <div className="grid gap-3 lg:grid-cols-4">
-                {steps.map((item, index) => (
+                {formWizardSteps.map((item, index) => (
                     <button
                         key={item.key}
                         type="button"
@@ -191,64 +177,11 @@ export function EventFormWizard({ mode, meta, action, method = 'post', initialVa
                 ))}
             </div>
 
-            {step === 'basics' ? (
-                <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-                    <div className="space-y-5 rounded-[2rem] border border-slate-200 bg-white/90 p-6 dark:border-slate-800 dark:bg-slate-950/70">
-                        <div className="space-y-2">
-                            <Label htmlFor="titre">Titre de l evenement</Label>
-                            <Input id="titre" value={form.data.titre} onChange={(event) => form.setData('titre', event.target.value)} placeholder="Sommet IA et Innovation 2026" />
-                            <InputError message={form.errors.titre} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Description</Label>
-                            <RichTextEditor value={form.data.description} onChange={(value) => form.setData('description', value)} />
-                            <InputError message={form.errors.description} />
-                        </div>
-                    </div>
-                    <div className="space-y-5 rounded-[2rem] border border-slate-200 bg-white/90 p-6 dark:border-slate-800 dark:bg-slate-950/70">
-                        <div className="space-y-2">
-                            <Label>Type d evenement</Label>
-                            <Select value={form.data.type} onValueChange={(value) => form.setData('type', value as EventFormValues['type'])}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {meta.types.map((type) => (
-                                        <SelectItem key={type.value} value={type.value}>
-                                            {type.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <InputError message={form.errors.type} />
-                        </div>
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            <div className="space-y-2">
-                                <Label htmlFor="date_debut">Date de debut</Label>
-                                <Input id="date_debut" type="datetime-local" value={form.data.date_debut} onChange={(event) => form.setData('date_debut', event.target.value)} />
-                                <InputError message={form.errors.date_debut} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="date_fin">Date de fin</Label>
-                                <Input id="date_fin" type="datetime-local" value={form.data.date_fin} onChange={(event) => form.setData('date_fin', event.target.value)} />
-                                <InputError message={form.errors.date_fin} />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="lieu">Lieu</Label>
-                            <Input id="lieu" value={form.data.lieu} onChange={(event) => form.setData('lieu', event.target.value)} placeholder="Campus principal, batiment B" />
-                            <InputError message={form.errors.lieu} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="lien_live">Lien Meet / Zoom</Label>
-                            <Input id="lien_live" value={form.data.lien_live} onChange={(event) => form.setData('lien_live', event.target.value)} placeholder="https://meet.google.com/..." />
-                            <InputError message={form.errors.lien_live} />
-                        </div>
-                    </div>
-                </div>
-            ) : null}
+            {step === 'basics' && (
+                <EventBasicsStep form={form} meta={meta} />
+            )}
 
-            {step === 'access' ? (
+            {step === 'access' && (
                 <div className="space-y-6">
                     <div className="grid gap-6 lg:grid-cols-2">
                         <div className="space-y-5 rounded-[2rem] border border-slate-200 bg-white/90 p-6 dark:border-slate-800 dark:bg-slate-950/70">
@@ -423,7 +356,7 @@ export function EventFormWizard({ mode, meta, action, method = 'post', initialVa
                         </div>
                     </div>
 
-                    {form.data.type === 'concours' ? (
+                    {form.data.type === 'concours' && (
                         <div className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 dark:border-slate-800 dark:bg-slate-950/70">
                             <div className="mb-4 text-sm font-medium text-slate-500 dark:text-slate-400">Configuration concours et jury</div>
                             <div className="grid gap-4 lg:grid-cols-4">
@@ -462,11 +395,11 @@ export function EventFormWizard({ mode, meta, action, method = 'post', initialVa
                                 </Button>
                             </div>
                         </div>
-                    ) : null}
+                    )}
                 </div>
-            ) : null}
+            )}
 
-            {step === 'media' ? (
+            {step === 'media' && (
                 <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
                     <div className="space-y-5 rounded-[2rem] border border-slate-200 bg-white/90 p-6 dark:border-slate-800 dark:bg-slate-950/70">
                         <div className="space-y-2">
@@ -500,15 +433,15 @@ export function EventFormWizard({ mode, meta, action, method = 'post', initialVa
                         </div>
                     </div>
                 </div>
-            ) : null}
+            )}
 
-            {step === 'program' ? (
+            {step === 'program' && (
                 <div className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 dark:border-slate-800 dark:bg-slate-950/70">
                     <EventProgramEditor programmes={form.data.programmes} eventStart={form.data.date_debut} onChange={(programmes) => form.setData('programmes', programmes)} />
                 </div>
-            ) : null}
+            )}
 
-            {step === 'preview' ? (
+            {step === 'preview' && (
                 <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
                     <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white/90 dark:border-slate-800 dark:bg-slate-950/70">
                         <div className="aspect-[16/7] overflow-hidden bg-gradient-to-br from-slate-950 via-sky-700 to-cyan-400">
@@ -540,23 +473,34 @@ export function EventFormWizard({ mode, meta, action, method = 'post', initialVa
                             Verification avant publication
                         </div>
                         <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
-                            <li>Titre : {form.data.titre ? 'Pret' : 'Manquant'}</li>
-                            <li>Date : {form.data.date_debut ? 'Prete' : 'Manquante'}</li>
-                            <li>Audience : {form.data.roles.length ? form.data.roles.join(', ') : 'Aucun role selectionne'}</li>
-                            <li>Visibilite : {form.data.visibilite}</li>
+                            <li className={form.data.titre ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                                Titre : {form.data.titre ? '✓ Pret' : '✗ Manquant'}
+                            </li>
+                            <li className={form.data.date_debut ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                                Date : {form.data.date_debut ? '✓ Prete' : '✗ Manquante'}
+                            </li>
+                            <li className={form.data.roles.length ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                                Audience : {form.data.roles.length ? form.data.roles.join(', ') : '✗ Aucun role selectionne'}
+                            </li>
+                            <li className={form.data.visibilite ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                                Visibilite : {form.data.visibilite || '✗ Non definie'}
+                            </li>
+                            <li className={form.data.statut ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                                Statut : {form.data.statut || '✗ Non defini'}
+                            </li>
                             <li>Messagerie : {form.data.messages_enabled ? 'Active' : 'Inactive'}</li>
                             <li>Certifications : {form.data.evenement_certifie ? 'Actives' : 'Inactives'}</li>
                         </ul>
                     </div>
                 </div>
-            ) : null}
+            )}
 
             <div className="flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
                 <div className="flex gap-3">
-                    <Button type="button" variant="outline" onClick={() => setStep(steps[Math.max(0, currentStepIndex - 1)]!.key)} disabled={currentStepIndex === 0}>
+                    <Button type="button" variant="outline" onClick={goToPreviousStep} disabled={currentStepIndex === 0}>
                         Precedent
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => setStep(steps[Math.min(steps.length - 1, currentStepIndex + 1)]!.key)} disabled={currentStepIndex === steps.length - 1}>
+                    <Button type="button" variant="outline" onClick={goToNextStep} disabled={currentStepIndex === formWizardSteps.length - 1 || !canProceedToNext()}>
                         Suivant
                     </Button>
                 </div>
@@ -564,9 +508,11 @@ export function EventFormWizard({ mode, meta, action, method = 'post', initialVa
                     <Button asChild type="button" variant="outline">
                         <Link href={cancelHref}>Annuler</Link>
                     </Button>
-                    <Button type="button" onClick={submit} disabled={form.processing}>
-                        {mode === 'create' ? 'Creer l evenement' : 'Enregistrer les modifications'}
-                    </Button>
+                    {step === 'preview' && validateStep('preview') ? (
+                        <Button type="button" onClick={submit} disabled={form.processing}>
+                            {mode === 'create' ? 'Soumettre pour validation' : 'Enregistrer les modifications'}
+                        </Button>
+                    ) : null}
                 </div>
             </div>
         </div>

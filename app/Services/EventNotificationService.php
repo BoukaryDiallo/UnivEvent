@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Events\UserNotificationCreated;
 use App\Models\EventNotification;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class EventNotificationService
@@ -32,7 +33,16 @@ class EventNotificationService
             }
         }
 
-        UserNotificationCreated::dispatch($notification);
+        try {
+            UserNotificationCreated::dispatch($notification);
+        } catch (\Throwable $exception) {
+            Log::warning('Event notification broadcast failed.', [
+                'notification_id' => $notification->id,
+                'user_id' => $user->id,
+                'type' => $type,
+                'error' => $exception->getMessage(),
+            ]);
+        }
 
         return $notification;
     }

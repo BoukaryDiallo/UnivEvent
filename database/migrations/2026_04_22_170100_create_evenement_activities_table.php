@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('evenement_id')->constrained('evenements')->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('type');
-            $table->string('label');
+            $table->string('label')->default('Activité');
             $table->text('description')->nullable();
             $table->json('meta')->nullable();
             $table->timestamps();

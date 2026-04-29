@@ -19,6 +19,13 @@ class Evenement extends Model
         'visibilite',
         'public_cible',
         'statut',
+        'validation_status',
+        'submitted_at',
+        'approved_at',
+        'approved_by',
+        'rejected_at',
+        'rejected_by',
+        'rejection_reason',
         'cree_par',
         'inscription_requise',
         'capacite_max',
@@ -39,6 +46,9 @@ class Evenement extends Model
     protected $casts = [
         'date_debut' => 'datetime',
         'date_fin' => 'datetime',
+        'submitted_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
         'inscription_requise' => 'boolean',
         'checkin_active' => 'boolean',
         'comments_enabled' => 'boolean',
@@ -110,6 +120,12 @@ class Evenement extends Model
     public function juryPanel()
     {
         return $this->hasOne(JuryPanel::class);
+    }
+
+    // Alias pour compatibilité avec jury
+    public function jury()
+    {
+        return $this->juryPanel();
     }
 
     public function activities()

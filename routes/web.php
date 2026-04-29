@@ -3,6 +3,7 @@
 use App\Http\Controllers\CertificatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventAccessController;
+use App\Http\Controllers\EventAdminController;
 use App\Http\Controllers\EventMessageController;
 use App\Http\Controllers\EventModerationController;
 use App\Http\Controllers\EventNotificationController;
@@ -22,19 +23,54 @@ Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('notifications', [NotificationCenterController::class, 'index'])->name('notifications.index');
+    Route::get('acces/{token}', [EventAccessController::class, 'scan'])
+        ->name('acces.scan');
+
+    Route::middleware(['auth', 'verified'])->post('acces/{token}/check-in', [EventAccessController::class, 'checkIn'])
+        ->name('acces.checkIn');
+
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('notifications', [NotificationCenterController::class, 'index'])->name('notifications.index');
 
     Route::middleware('role:admin')->group(function () {
         Route::get('roles', [UserController::class, 'index'])->name('roles');
+        Route::get('admin/events/pending', [EventAdminController::class, 'pendingEvents'])->name('admin.events.pending');
+        Route::post('admin/events/{evenement}/approve', [EventAdminController::class, 'approve'])->name('admin.events.approve');
+        Route::post('admin/events/{evenement}/reject', [EventAdminController::class, 'reject'])->name('admin.events.reject');
     });
 
+    Route::get('evenements/gestion', [EvenementController::class, 'gestion'])->name('evenements.gestion');
+    Route::get('evenements/gestion/conferences', [EvenementController::class, 'gestionConferences'])->name('evenements.gestion.conferences');
+    Route::get('evenements/gestion/concours', [EvenementController::class, 'gestionConcours'])->name('evenements.gestion.concours');
+    Route::get('evenements/create/concours', [EvenementController::class, 'createConcours'])->name('evenements.create.concours');
+    Route::get('evenements/create/conference', [EvenementController::class, 'createConference'])->name('evenements.create.conference');
     Route::resource('evenements', EvenementController::class);
+    Route::get('evenements/{evenement}/participant', [\App\Http\Controllers\ParticipantController::class, 'show'])
+        ->name('evenements.participant.show');
+    Route::get('evenements/{evenement}/participant/certificate', [\App\Http\Controllers\ParticipantController::class, 'downloadCertificate'])
+        ->name('evenements.participant.certificate.download');
     Route::post('evenements/{evenement}/publier', [EvenementController::class, 'publier'])
         ->name('evenements.publier');
     Route::post('evenements/{evenement}/archiver', [EvenementController::class, 'archiver'])
         ->name('evenements.archiver');
+    Route::get('evenements/{evenement}/manage', [EvenementController::class, 'manage'])->name('evenements.manage');
+    Route::patch('evenements/{evenement}/manage/{section}', [EvenementController::class, 'saveSection'])->name('evenements.saveSection');
+    Route::post('evenements/{evenement}/submit-validation', [EvenementController::class, 'submitForValidation'])->name('evenements.submitValidation');
+    Route::post('evenements/{evenement}/approve', [EvenementController::class, 'approve'])->name('evenements.approve');
+    Route::post('evenements/{evenement}/reject', [EvenementController::class, 'reject'])->name('evenements.reject');
+    Route::post('evenements/{evenement}/reset-pending', [EvenementController::class, 'resetToPending'])->name('evenements.resetPending');
+    Route::post('evenements/{evenement}/assign-user', [EvenementController::class, 'assignUser'])->name('evenements.assignUser');
+    Route::delete('evenements/{evenement}/assignments/{user}', [EvenementController::class, 'removeUser'])->name('evenements.removeUser');
+    Route::patch('evenements/{evenement}/permissions', [EvenementController::class, 'updatePermissions'])->name('evenements.updatePermissions');
+    Route::post('evenements/{evenement}/program', [EvenementController::class, 'addProgram'])->name('evenements.addProgram');
+    Route::patch('evenements/{evenement}/program/{programme}', [EvenementController::class, 'updateProgram'])->name('evenements.updateProgram');
+    Route::delete('evenements/{evenement}/program/{programme}', [EvenementController::class, 'deleteProgram'])->name('evenements.deleteProgram');
+    Route::patch('evenements/{evenement}/program/reorder', [EvenementController::class, 'reorderProgram'])->name('evenements.reorderProgram');
+    Route::post('evenements/{evenement}/media', [EvenementController::class, 'uploadMedia'])->name('evenements.uploadMedia');
+    Route::patch('evenements/{evenement}/media/{media}', [EvenementController::class, 'updateMedia'])->name('evenements.updateMedia');
+    Route::delete('evenements/{evenement}/media/{media}', [EvenementController::class, 'deleteMedia'])->name('evenements.deleteMedia');
+    Route::get('evenements/{evenement}/media/{media}/download', [EvenementController::class, 'downloadMedia'])->name('evenements.downloadMedia');
     Route::post('evenements/{evenement}/commentaires', [EvenementCommentController::class, 'store'])
         ->name('evenements.commentaires.store');
     Route::delete('commentaires/{commentaire}', [EvenementCommentController::class, 'destroy'])
@@ -112,10 +148,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('certificats/verifier/{code}', [CertificatController::class, 'verifier'])
     ->name('certificats.verifier');
-Route::get('acces/{token}', [EventAccessController::class, 'scan'])
-    ->name('acces.scan');
-
-Route::middleware(['auth', 'verified'])->post('acces/{token}/check-in', [EventAccessController::class, 'checkIn'])
-    ->name('acces.checkIn');
 
 require __DIR__.'/settings.php';
