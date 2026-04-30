@@ -41,7 +41,7 @@ class EmploiDuTempsEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.edt',
+            markdown: 'module2.emails.edt',
         );
     }
 

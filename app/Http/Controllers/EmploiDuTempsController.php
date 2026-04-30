@@ -235,80 +235,80 @@ class EmploiDuTempsController extends Controller
 
         $edtCourant = EmploiDuTemps::findOrFail($id);
 
-   
-    $conflitJour = Seance::where('emploi_du_temps_id', $id)
-        ->where('jour_semaine', $data['jour_semaine'])
-        ->exists();
 
-    if ($conflitJour) {
-        return back()->withErrors([
-            'conflit' => "Une séance existe déjà le {$data['jour_semaine']} dans cet emploi du temps."
-        ]);
-    }
+        $conflitJour = Seance::where('emploi_du_temps_id', $id)
+            ->where('jour_semaine', $data['jour_semaine'])
+            ->exists();
 
-    
-    $edtEnConflit = EmploiDuTemps::where('id', '!=', $id)
-        ->where(function ($q) use ($edtCourant) {
-            $q->where('date_debut', '<=', $edtCourant->date_fin)
-              ->where('date_fin', '>=', $edtCourant->date_debut);
-        })
-        ->pluck('id');
+        if ($conflitJour) {
+            return back()->withErrors([
+                'conflit' => "Une séance existe déjà le {$data['jour_semaine']} dans cet emploi du temps."
+            ]);
+        }
 
-    
-    $edtConcernes = $edtEnConflit->push($id);
+        
+        $edtEnConflit = EmploiDuTemps::where('id', '!=', $id)
+            ->where(function ($q) use ($edtCourant) {
+                $q->where('date_debut', '<=', $edtCourant->date_fin)
+                ->where('date_fin', '>=', $edtCourant->date_debut);
+            })
+            ->pluck('id');
 
-   
-    $conflitSalle = Seance::whereIn('emploi_du_temps_id', $edtConcernes)
-        ->where('salle_id', $data['salle_id'])
-        ->where('jour_semaine', $data['jour_semaine'])
-        ->where('creneau_id', $data['creneau_id'])
-        ->exists();
+        
+        $edtConcernes = $edtEnConflit->push($id);
 
-    if ($conflitSalle) {
-        return back()->withErrors([
-            'conflit' => "Cette salle est déjà occupée le {$data['jour_semaine']} sur ce créneau pendant cette période."
-        ]);
-    }
 
-    
-    $conflitEnseignant = Seance::whereIn('emploi_du_temps_id', $edtConcernes)
-        ->where('enseignant_id', $data['enseignant_id'])
-        ->where('jour_semaine', $data['jour_semaine'])
-        ->where('creneau_id', $data['creneau_id'])
-        ->exists();
+        $conflitSalle = Seance::whereIn('emploi_du_temps_id', $edtConcernes)
+            ->where('salle_id', $data['salle_id'])
+            ->where('jour_semaine', $data['jour_semaine'])
+            ->where('creneau_id', $data['creneau_id'])
+            ->exists();
 
-    if ($conflitEnseignant) {
-        return back()->withErrors([
-            'conflit' => "Cet enseignant a déjà une séance le {$data['jour_semaine']} sur ce créneau pendant cette période."
-        ]);
-    }
+        if ($conflitSalle) {
+            return back()->withErrors([
+                'conflit' => "Cette salle est déjà occupée le {$data['jour_semaine']} sur ce créneau pendant cette période."
+            ]);
+        }
 
-    
-    return DB::transaction(function () use ($data, $id) {
-        $prise = $this->metier->prendre(
-            $data['user_id'],
-            $data['check_date'],
-            $data['check_debut'] . ':00',
-            $data['check_fin'] . ':00',
-            'emploi du temps',
-            "seance-edt-{$id}",
-            '',
-        );
+        
+        $conflitEnseignant = Seance::whereIn('emploi_du_temps_id', $edtConcernes)
+            ->where('enseignant_id', $data['enseignant_id'])
+            ->where('jour_semaine', $data['jour_semaine'])
+            ->where('creneau_id', $data['creneau_id'])
+            ->exists();
 
-        Seance::create([
-            'jour_semaine'       => $data['jour_semaine'],
-            'type_seance'        => $data['type_seance'],
-            'creneau_id'         => $data['creneau_id'],
-            'salle_id'           => $data['salle_id'],
-            'matiere_id'         => $data['matiere_id'],
-            'enseignant_id'      => $data['enseignant_id'],
-            'description'        => $data['description'] ?? null,
-            'emploi_du_temps_id' => $id,
-            'prise_id'           => $prise->id,
-        ]);
+        if ($conflitEnseignant) {
+            return back()->withErrors([
+                'conflit' => "Cet enseignant a déjà une séance le {$data['jour_semaine']} sur ce créneau pendant cette période."
+            ]);
+        }
 
-        return back()->with('success', 'Séance ajoutée avec succès.');
-    });
+        
+        return DB::transaction(function () use ($data, $id) {
+            $prise = $this->metier->prendre(
+                $data['user_id'],
+                $data['check_date'],
+                $data['check_debut'] . ':00',
+                $data['check_fin'] . ':00',
+                'emploi du temps',
+                "seance-edt-{$id}",
+                '',
+            );
+
+            Seance::create([
+                'jour_semaine'       => $data['jour_semaine'],
+                'type_seance'        => $data['type_seance'],
+                'creneau_id'         => $data['creneau_id'],
+                'salle_id'           => $data['salle_id'],
+                'matiere_id'         => $data['matiere_id'],
+                'enseignant_id'      => $data['enseignant_id'],
+                'description'        => $data['description'] ?? null,
+                'emploi_du_temps_id' => $id,
+                'prise_id'           => $prise->id,
+            ]);
+
+            return back()->with('success', 'Séance ajoutée avec succès.');
+        });
     }
 
      public function adminSeanceEdt(string $id)
@@ -575,7 +575,7 @@ class EmploiDuTempsController extends Controller
                 'fin' => $s->creneau->heure_fin ?? null,
             ]);
 
-        $pdf = Pdf::loadView('pdf.edt-enseignant-pdf', compact('edt', 'jours', 'sesSeances', 'user'));
+        $pdf = Pdf::loadView('module2.pdf.edt-enseignant-pdf', compact('edt', 'jours', 'sesSeances', 'user'));
 
         return $pdf->download("EDT-{$edt->titre}.pdf");
     }
@@ -630,7 +630,7 @@ class EmploiDuTempsController extends Controller
                 });
 
            
-            $pdf = Pdf::loadView('pdf.edt-enseignant', [
+            $pdf = Pdf::loadView('module2.pdf.edt-enseignant', [
                 'edt' => $edt,
                 'jours' => $jours,
                 'seances' => $sesSeances,
@@ -796,7 +796,7 @@ class EmploiDuTempsController extends Controller
             });
 
         
-        $pdf = Pdf::loadView('pdf.edt-etudiant', compact('edt', 'jours', 'seances'));
+        $pdf = Pdf::loadView('module2.pdf.edt-etudiant', compact('edt', 'jours', 'seances'));
 
         return $pdf->download("EDT-{$edt->titre}.pdf");
     }
