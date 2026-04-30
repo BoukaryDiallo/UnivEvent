@@ -45,7 +45,10 @@ Route::inertia('/', 'welcome', [
     Route::get('evenements/gestion/concours', [EvenementController::class, 'gestionConcours'])->name('evenements.gestion.concours');
     Route::get('evenements/create/concours', [EvenementController::class, 'createConcours'])->name('evenements.create.concours');
     Route::get('evenements/create/conference', [EvenementController::class, 'createConference'])->name('evenements.create.conference');
-    Route::resource('evenements', EvenementController::class);
+    Route::get('evenements/{evenement}/manage', [EvenementController::class, 'manage'])->name('evenements.manage');
+    Route::get('evenements/{evenement}/edit', [EvenementController::class, 'edit'])->name('evenements.edit');
+    Route::get('evenements/{evenement}', [EvenementController::class, 'show'])->name('evenements.show');
+    Route::resource('evenements', EvenementController::class)->except(['show', 'edit']);
     Route::get('evenements/{evenement}/participant', [\App\Http\Controllers\ParticipantController::class, 'show'])
         ->name('evenements.participant.show');
     Route::get('evenements/{evenement}/participant/certificate', [\App\Http\Controllers\ParticipantController::class, 'downloadCertificate'])
@@ -54,7 +57,6 @@ Route::inertia('/', 'welcome', [
         ->name('evenements.publier');
     Route::post('evenements/{evenement}/archiver', [EvenementController::class, 'archiver'])
         ->name('evenements.archiver');
-    Route::get('evenements/{evenement}/manage', [EvenementController::class, 'manage'])->name('evenements.manage');
     Route::patch('evenements/{evenement}/manage/{section}', [EvenementController::class, 'saveSection'])->name('evenements.saveSection');
     Route::post('evenements/{evenement}/submit-validation', [EvenementController::class, 'submitForValidation'])->name('evenements.submitValidation');
     Route::post('evenements/{evenement}/approve', [EvenementController::class, 'approve'])->name('evenements.approve');

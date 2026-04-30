@@ -8,6 +8,7 @@ import { InlineEditField } from '@/components/evenements/manage/InlineEditField'
 import { MediaUploader } from '@/components/evenements/manage/MediaUploader';
 import { SectionCard } from '@/components/evenements/manage/SectionCard';
 import { SmartSubmitButton } from '@/components/evenements/manage/SmartSubmitButton';
+import { PageErrorBoundary } from '@/components/page-error-boundary';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -59,8 +60,78 @@ function readCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 }
 
-export default function ManageEvent({ evenement: initialEvent, can, meta }: ManageEventProps) {
-    const [evenement, setEvenement] = useState(initialEvent);
+const defaultSectionStatuses = [
+    { key: 'general', label: 'Informations generales', weight: 25, percentage: 0, status: 'empty' as const, missing: [] as string[] },
+    { key: 'program', label: 'Programme', weight: 20, percentage: 0, status: 'empty' as const, missing: [] as string[] },
+    { key: 'actors', label: 'Acteurs', weight: 20, percentage: 0, status: 'empty' as const, missing: [] as string[] },
+    { key: 'media', label: 'Medias', weight: 10, percentage: 0, status: 'empty' as const, missing: [] as string[] },
+    { key: 'permissions', label: 'Permissions et visibilite', weight: 10, percentage: 0, status: 'empty' as const, missing: [] as string[] },
+    { key: 'interactions', label: 'Interactions', weight: 5, percentage: 0, status: 'empty' as const, missing: [] as string[] },
+    { key: 'certificates', label: 'Certificats', weight: 10, percentage: 0, status: 'empty' as const, missing: [] as string[] },
+];
+
+function normalizeCompletion(completion?: EventCompletionSummary | null): EventCompletionSummary {
+    const sectionsByKey = new Map((completion?.sections ?? []).map((section) => [section.key, section]));
+
+    return {
+        percentage: completion?.percentage ?? 0,
+        sections: defaultSectionStatuses.map((section) => sectionsByKey.get(section.key) ?? section),
+    };
+}
+
+function normalizeTeam(team?: Record<string, EventTeamMember[]> | null) {
+    return {
+        organisateur: team?.organisateur ?? [],
+        jury: team?.jury ?? [],
+        intervenant: team?.intervenant ?? [],
+        participant: team?.participant ?? [],
+    };
+}
+
+function ManageEventContent({ evenement: initialEvent, can, meta }: ManageEventProps) {
+    // Debug: Afficher les données reçues
+    console.log('ManageEvent props:', { evenement: initialEvent, can, meta });
+
+    // Vérifier que les propriétés requises sont présentes
+    if (!initialEvent || !can || !meta) {
+        console.error('Missing required props:', { evenement: !!initialEvent, can: !!can, meta: !!meta });
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold text-red-600">Erreur de chargement</h1>
+                    <p className="text-gray-600">Les données de l'événement sont manquantes.</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Vérifier les propriétés spécifiques d'événement
+    const requiredEventProps = ['id', 'titre', 'type', 'completion', 'workflow_state'];
+    const missingProps = requiredEventProps.filter(prop => !(prop in initialEvent));
+    if (missingProps.length > 0) {
+        console.error('Missing event properties:', missingProps);
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold text-red-600">Erreur de données</h1>
+                    <p className="text-gray-600">Propriétés manquantes: {missingProps.join(', ')}</p>
+                </div>
+            </div>
+        );
+    }
+
+    const [evenement, setEvenement] = useState(() => ({
+        ...initialEvent,
+        team: normalizeTeam(initialEvent.team),
+        programme: initialEvent.programme ?? [],
+        medias: initialEvent.medias ?? [],
+        criteria: initialEvent.criteria ?? [],
+        suggestions: initialEvent.suggestions ?? [],
+        submission_errors: initialEvent.submission_errors ?? [],
+        comments_count: initialEvent.comments_count ?? 0,
+        messages_count: initialEvent.messages_count ?? 0,
+        completion: normalizeCompletion(initialEvent.completion),
+    }));
     const [programForm, setProgramForm] = useState({
         titre: '',
         description: '',
@@ -71,7 +142,7 @@ export default function ManageEvent({ evenement: initialEvent, can, meta }: Mana
         salle: '',
         type_section: 'session',
     });
-    const [criteriaDraft, setCriteriaDraft] = useState<EventCriterion[]>(initialEvent.criteria);
+    const [criteriaDraft, setCriteriaDraft] = useState<EventCriterion[]>(initialEvent.criteria ?? []);
     const [visibility, setVisibility] = useState(initialEvent.visibilite);
     const [publicCible, setPublicCible] = useState(initialEvent.public_cible);
     const [interactions, setInteractions] = useState({
@@ -140,7 +211,11 @@ export default function ManageEvent({ evenement: initialEvent, can, meta }: Mana
             setEvenement((current) => ({
                 ...current,
                 ...data.event,
-                completion: data.completion ?? current.completion,
+                team: normalizeTeam(((data.event as Partial<typeof initialEvent> | undefined)?.team ?? current.team) as typeof current.team),
+                programme: ((data.event as Partial<typeof initialEvent> | undefined)?.programme ?? current.programme) as typeof current.programme,
+                medias: ((data.event as Partial<typeof initialEvent> | undefined)?.medias ?? current.medias) as typeof current.medias,
+                criteria: ((data.event as Partial<typeof initialEvent> | undefined)?.criteria ?? current.criteria) as typeof current.criteria,
+                completion: normalizeCompletion(data.completion ?? current.completion),
                 workflow_state: data.workflow_state ?? current.workflow_state,
                 submission_errors: data.submission_errors ?? current.submission_errors,
                 suggestions: data.suggestions ?? current.suggestions,
@@ -461,5 +536,13 @@ export default function ManageEvent({ evenement: initialEvent, can, meta }: Mana
                 </div>
             </div>
         </EventManageLayout>
+    );
+}
+
+export default function ManageEvent(props: ManageEventProps) {
+    return (
+        <PageErrorBoundary page="evenements/Manage">
+            <ManageEventContent {...props} />
+        </PageErrorBoundary>
     );
 }

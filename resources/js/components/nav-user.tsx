@@ -14,11 +14,22 @@ import {
 import { UserInfo } from '@/components/user-info';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useIsMobile } from '@/hooks/use-mobile';
+import type { User } from '@/types';
+
+const guestUser: User = {
+    id: 0,
+    name: 'Invite',
+    email: '',
+    email_verified_at: null,
+    created_at: '',
+    updated_at: '',
+};
 
 export function NavUser() {
-    const { auth } = usePage().props;
+    const { auth } = usePage().props as { auth?: { user?: User | null } };
     const { state } = useSidebar();
     const isMobile = useIsMobile();
+    const user = auth?.user ?? guestUser;
 
     return (
         <SidebarMenu>
@@ -30,7 +41,7 @@ export function NavUser() {
                             className="group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent"
                             data-test="sidebar-menu-button"
                         >
-                            <UserInfo user={auth.user} />
+                            <UserInfo user={user} />
                             <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
@@ -45,7 +56,7 @@ export function NavUser() {
                                   : 'bottom'
                         }
                     >
-                        <UserMenuContent user={auth.user} />
+                        <UserMenuContent user={user} />
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>

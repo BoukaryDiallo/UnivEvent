@@ -20,7 +20,10 @@ class Programme extends Model
         'type_section',
         'ordre'
     ];
-
+    
+    protected $casts = [
+        'date_programme' => 'date',
+    ];
     public function evenement()
     {
         return $this->belongsTo(Evenement::class);

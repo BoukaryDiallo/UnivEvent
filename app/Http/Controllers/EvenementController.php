@@ -216,6 +216,7 @@ class EvenementController extends Controller
         }
 
         $evenement->load($relations);
+        $evenement->loadCount(['inscriptions', 'comments', 'activities']);
 
         $viewer = $request->user();
         $currentInscription = $viewer
@@ -244,14 +245,9 @@ class EvenementController extends Controller
                 ->first()
             : null;
 
-        $eventData = (new EvenementResource($evenement))->toArray($request);
+        $eventData = (new EvenementResource($evenement))->resolve();
         $eventData['validation_status'] = $evenement->validation_status;
         $eventData['workflow_state'] = $this->eventService->workflowState($evenement);
-        $eventData['current_inscription'] = $currentInscription ? [
-            'id' => $currentInscription->id,
-            'statut' => $this->mapParticipationStatus($currentInscription->statut),
-            'backend_statut' => $currentInscription->statut,
-        ] : null;
         $eventData['participants'] = $evenement->inscriptions
             ->map(fn ($inscription) => [
                 'id' => $inscription->id,
@@ -1683,7 +1679,11 @@ class EvenementController extends Controller
 
     public function manage(Request $request, Evenement $evenement)
     {
-        $this->authorize('manage', $evenement);
+        Log::info('Manage method called', ['event_id' => $evenement->id, 'user_id' => $request->user()?->id]);
+
+        $this->authorize('update', $evenement);
+
+        Log::info('Authorization passed');
 
         $evenement->load([
             'createur',
@@ -1701,22 +1701,48 @@ class EvenementController extends Controller
             'createur',
         ]);
 
+        Log::info('Event loaded with relations');
+
         $eventData = (new EvenementResource($evenement))->toArray($request);
+        Log::info('EvenementResource created', ['eventData_keys' => array_keys($eventData)]);
+
         $eventData['team'] = $this->roleService->getTeam($evenement);
+        Log::info('Team data added');
+
         $eventData['programme'] = $evenement->programmes->map(fn ($programme) => [
             'id' => $programme->id,
             'titre' => $programme->titre,
             'description' => $programme->description,
             'intervenant' => $programme->intervenant,
-            'date_programme' => $programme->date_programme?->toDateString(),
+            'date_programme' => $programme->date_programme instanceof \Illuminate\Support\Carbon
+                ? $programme->date_programme->toDateString()
+                : (is_string($programme->date_programme) ? substr($programme->date_programme, 0, 10) : null),
             'heure_debut' => $programme->heure_debut,
             'heure_fin' => $programme->heure_fin,
             'salle' => $programme->salle,
             'type_section' => $programme->type_section,
             'ordre' => $programme->ordre,
         ])->sortBy('ordre')->values()->toArray();
+        Log::info('Programme data added');
+
         $eventData['medias'] = $this->mediaService->getMediaForEvent($evenement, $request->user());
+        Log::info('Media data added');
        
+        $eventData['activities'] = ($request->user()->id === $evenement->cree_par || $request->user()->isAdmin())
+            ? $evenement->activities->map(fn ($activity) => [
+                'id' => $activity->id,
+                'type' => $activity->type,
+                'label' => $activity->label,
+                'description' => $activity->description,
+                'created_at' => optional($activity->created_at)->toIso8601String(),
+                'user' => [
+                    'id' => $activity->user?->id,
+                    'name' => $activity->user?->name,
+                    'role' => $activity->user?->role,
+                ],
+            ])->values()->all()
+            : [];
+
         $eventData['criteria'] = optional($evenement->juryPanel)
         ->criteria
         ?->map(function ($criterion) {
@@ -1730,14 +1756,45 @@ class EvenementController extends Controller
                 'actif' => (bool) $criterion->actif,
             ];
         })?->values()?->toArray() ?? [];
+        Log::info('Criteria data added');
 
         $eventData['comments_count'] = $evenement->comments->count();
         $eventData['messages_count'] = $evenement->messages->count();
-        $eventData['workflow_state'] = $this->eventService->workflowState($evenement);
-        $eventData['completion'] = $this->completionService->summarize($evenement);
-        $eventData['submission_errors'] = $this->eventService->submissionErrors($evenement);
-        $eventData['suggestions'] = $this->eventService->suggestions($evenement);
+        Log::info('Counts added');
 
+        $eventData['workflow_state'] = $this->eventService->workflowState($evenement);
+        Log::info('Workflow state added', ['workflow_state' => $eventData['workflow_state']]);
+
+        $eventData['completion'] = $this->completionService->summarize($evenement);
+        /*
+                ['key' => 'general', 'label' => 'Informations générales', 'weight' => 20, 'percentage' => 100, 'status' => 'complete', 'missing' => []],
+                ['key' => 'program', 'label' => 'Programme', 'weight' => 30, 'percentage' => 0, 'status' => 'empty', 'missing' => ['titre']],
+                ['key' => 'team', 'label' => 'Équipe', 'weight' => 25, 'percentage' => 50, 'status' => 'partial', 'missing' => ['organisateur']],
+                ['key' => 'media', 'label' => 'Médias', 'weight' => 15, 'percentage' => 0, 'status' => 'empty', 'missing' => ['image']],
+                ['key' => 'settings', 'label' => 'Paramètres', 'weight' => 10, 'percentage' => 100, 'status' => 'complete', 'missing' => []],
+        */
+        Log::info('Completion added', ['completion_percentage' => $eventData['completion']['percentage']]);
+
+        $eventData['submission_errors'] = $this->eventService->submissionErrors($evenement);
+        Log::info('Submission errors added', ['errors_count' => count($eventData['submission_errors'])]);
+
+        $eventData['suggestions'] = $this->eventService->suggestions($evenement) ?? [];
+        if (!is_array($eventData['suggestions'])) {
+            $eventData['suggestions'] = [];
+        }
+        Log::info('Suggestions added', ['suggestions_count' => count($eventData['suggestions'])]);
+
+        Log::info('About to render Inertia response', [
+            'evenement_keys' => array_keys($eventData),
+            'suggestions_type' => gettype($eventData['suggestions']),
+            'suggestions_value' => json_encode($eventData['suggestions']),
+            'completion_type' => gettype($eventData['completion']),
+            'completion_value' => json_encode($eventData['completion']),
+        ]);
+
+        // Nettoyer les données pour éviter les objets vides
+        $eventData['suggestions'] = array_filter($eventData['suggestions'], fn($item) => is_string($item));
+        
         return Inertia::render('evenements/Manage', [
             'evenement' => $eventData,
             'can' => [
@@ -1756,7 +1813,7 @@ class EvenementController extends Controller
             'meta' => $this->formMeta(),
         ]);
     }
-
+ 
     public function gestion(Request $request)
     {
         $user = $request->user();

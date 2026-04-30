@@ -45,12 +45,15 @@ import { mine as myRegistrations } from '@/routes/inscriptions';
 
 export function ModuleFiveCombobox() {
     const { isCurrentUrl } = useCurrentUrl();
-    const { auth, notifications } = usePage().props as any;
+    const { auth, notifications } = usePage().props as {
+        auth?: { user?: { role?: string | null } | null };
+        notifications?: { unread_count?: number } | null;
+    };
     const { notifications: liveNotifications } = useLiveNotifications();
 
     const unreadCount = liveNotifications?.unread_count ?? notifications?.unread_count ?? 0;
 
-    const user = auth?.user;
+    const user = auth?.user ?? null;
     const role = user?.role;
 
     const isAdmin = role === 'admin';
