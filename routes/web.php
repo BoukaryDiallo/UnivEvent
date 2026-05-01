@@ -24,6 +24,9 @@ Route::inertia('/', 'welcome', [
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Espace Élections
+    Route::get('espace-election', [ResultatController::class, 'espaceElections'])->name('espace.elections');
+
     // Administration
     Route::middleware(['role:admin'])->group(function () {
         Route::get('gestion', [GestionController::class, 'index'])->name('gestion');
@@ -33,3 +36,4 @@ Route::middleware(['auth'])->group(function () {
 
 require __DIR__.'/settings.php';
 require __DIR__.'/clubs.php';
+require __DIR__.'/elections.php';

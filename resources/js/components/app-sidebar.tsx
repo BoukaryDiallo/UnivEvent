@@ -1,9 +1,4 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, Settings } from 'lucide-react';
-import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
     SidebarContent,
@@ -13,62 +8,47 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-// Custom Components
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 
-// Icons - Lucide React
 import {
     BookOpen,
-    Building2,
-    ChevronDown,
     FolderGit2,
-    GraduationCap,
     LayoutGrid,
-    Users,
     Vote,
+    Users,
     Trophy,
-    Radio,
     List,
-    FileText,
+    Settings,
+    ChevronDown,
+    Building2,
+    GraduationCap,
 } from 'lucide-react';
 
-// Routes
-import { dashboard, roles } from '@/routes';
-import votes, { elections as votesElections } from '@/routes/votes';
-import candidatures from '@/routes/candidatures';
-import resultats from '@/routes/resultats';
-import elections from '@/routes/elections';
-import ufr from '@/routes/ufr';
-import departement from '@/routes/departement';
-import filiere from '@/routes/filiere';
-import etudiants from '@/routes/etudiants';
-import live from '@/routes/votes/live';
-
-// Utils & Types
-import { cn } from '@/lib/utils';
-import type { NavItem } from '@/types';
+import { dashboard } from '@/routes';
 
 export function AppSidebar() {
     const { auth } = usePage().props as any;
-    const user = auth?.user;
+    const role = auth?.user?.role;
 
-export function AppSidebar() {
-    const { auth } = usePage().props as any;
-    const user = auth?.user;
+    const mainNavItems = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+    ];
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
-
-    const footerNavItems: NavItem[] = [
+    const footerNavItems = [
         {
             title: 'Repository',
             href: 'https://github.com/laravel/react-starter-kit',
@@ -97,90 +77,134 @@ const mainNavItems: NavItem[] = [
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <SidebarMenuButton>
-                                    <Building2 className="h-4 w-4" />
-                                    <span>Structure académique</span>
-                                    <ChevronDown className="ml-auto h-4 w-4" />
-                                </SidebarMenuButton>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent sideOffset={12} align="start">
-                                <DropdownMenuItem asChild>
-                                    <Link href={ufr.index.url()} className="w-full">
-                                        <Building2 className="mr-2 h-4 w-4" />
-                                        UFR
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href={departement.index.url()} className="w-full">
-                                        <FolderGit2 className="mr-2 h-4 w-4" />
-                                        Départements
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href={filiere.index.url()} className="w-full">
-                                        <GraduationCap className="mr-2 h-4 w-4" />
-                                        Filières
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href={etudiants.index.url()} className="w-full">
-                                        <GraduationCap className="mr-2 h-4 w-4" />
-                                        Étudiants
-                                    </Link>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <SidebarMenuButton>
-                                    <Vote className="h-4 w-4" />
-                                    <span>Gestion des Élections</span>
-                                    <ChevronDown className="ml-auto h-4 w-4" />
-                                </SidebarMenuButton>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent sideOffset={12} align="start">
-                                <DropdownMenuItem asChild>
-                                    <Link href={elections.index.url()} className="w-full">
-                                        <List className="mr-2 h-4 w-4" />
-                                        Élections
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    
-                                    <Link href={candidatures.index.url()} className="w-full">
-                                        <Users className="mr-2 h-4 w-4" />
-                                        Candidatures
-                                    </Link>
-                                </DropdownMenuItem>
-                               
-                                <DropdownMenuItem asChild>
-                                    <Link href={votes.index.url()} className="w-full">
-                                        <List className="mr-2 h-4 w-4" />
-                                        Historique des votes
-                                    </Link>
-                                </DropdownMenuItem>
-                                 <DropdownMenuItem asChild>
-                                    <Link href={resultats.index.url()} className="w-full">
-                                        <Trophy className="mr-2 h-4 w-4" />
-                                        Résultats
-                                    </Link>
-                                </DropdownMenuItem>
 
-                                <DropdownMenuItem asChild>
-                                    <Link href="/espace-elections" className="w-full">
-                                        <BookOpen className="mr-2 h-4 w-4" />
-                                        Espace Élections
-                                    </Link>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </SidebarMenuItem>
+                <SidebarMenu>
+
+         
+                    {role === 'etudiant' && (
+                        <SidebarMenuItem>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <SidebarMenuButton>
+                                        <Vote className="h-4 w-4" />
+                                        <span>Espace Élections</span>
+                                        <ChevronDown className="ml-auto h-4 w-4" />
+                                    </SidebarMenuButton>
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent sideOffset={12} align="start">
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/espace-election" className="w-full">
+                                            <Vote className="mr-2 h-4 w-4" />
+                                            Espace élection
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </SidebarMenuItem>
+                    )}
+
+               
+    
+                    {role === 'admin' && (
+                        <>
+                            {/* Structure académique */}
+                            <SidebarMenuItem>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <SidebarMenuButton>
+                                            <Building2 className="h-4 w-4" />
+                                            <span>Structure académique</span>
+                                            <ChevronDown className="ml-auto h-4 w-4" />
+                                        </SidebarMenuButton>
+                                    </DropdownMenuTrigger>
+
+                                    <DropdownMenuContent sideOffset={12} align="start">
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/ufr" className="w-full">
+                                                <Building2 className="mr-2 h-4 w-4" />
+                                                UFR
+                                            </Link>
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/departement" className="w-full">
+                                                <FolderGit2 className="mr-2 h-4 w-4" />
+                                                Départements
+                                            </Link>
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/filiere" className="w-full">
+                                                <GraduationCap className="mr-2 h-4 w-4" />
+                                                Filières
+                                            </Link>
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/etudiants" className="w-full">
+                                                <Users className="mr-2 h-4 w-4" />
+                                                Étudiants
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </SidebarMenuItem>
+
+                            {/* Gestion élections */}
+                            <SidebarMenuItem>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <SidebarMenuButton>
+                                            <Vote className="h-4 w-4" />
+                                            <span>Gestion des élections</span>
+                                            <ChevronDown className="ml-auto h-4 w-4" />
+                                        </SidebarMenuButton>
+                                    </DropdownMenuTrigger>
+
+                                    <DropdownMenuContent sideOffset={12} align="start">
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/elections" className="w-full">
+                                                <List className="mr-2 h-4 w-4" />
+                                                Élections
+                                            </Link>
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/candidatures" className="w-full">
+                                                <Users className="mr-2 h-4 w-4" />
+                                                Candidatures
+                                            </Link>
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/votes" className="w-full">
+                                                <Vote className="mr-2 h-4 w-4" />
+                                                Votes
+                                            </Link>
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/resultats" className="w-full">
+                                                <Trophy className="mr-2 h-4 w-4" />
+                                                Résultats
+                                            </Link>
+                                        </DropdownMenuItem>
+
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/espace-election" className="w-full">
+                                                <Vote className="mr-2 h-4 w-4" />
+                                                Espace Élections
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </SidebarMenuItem>
+
+                            
+                        </>
+                    )}
+
                 </SidebarMenu>
             </SidebarContent>
 

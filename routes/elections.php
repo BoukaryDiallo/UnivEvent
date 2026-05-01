@@ -120,7 +120,8 @@ Route::middleware(['auth'])->group(function () {
     
     // Routes de consultation des résultats (frontend)
     Route::get('/resultats', [ResultatController::class, 'index'])
-        ->name('resultats.index');
+        ->name('resultats.index')
+        ->middleware('role:admin');
 
     Route::get('/resultats/{election}', [ResultatController::class, 'show'])
         ->name('resultats.show');
