@@ -160,7 +160,7 @@ export default function ParticipantShow({ event, can }: ShowProps) {
                                         </div>
                                         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/80">
                                             <p className="text-sm font-semibold text-slate-900 dark:text-white">Public cible</p>
-                                            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{event.public_cible}</p>
+                                            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{event.roles?.length ? event.roles.join(', ') : event.public_cible}</p>
                                         </div>
                                     </CardContent>
                                 </Card>

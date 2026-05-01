@@ -2,6 +2,7 @@ import { router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { EventAssignableUser, EventTeamMember } from '@/types/evenements';
 
@@ -15,9 +16,18 @@ type ActorManagerProps = {
 
 export function ActorManager({ eventId, role, title, members, assignableUsers }: ActorManagerProps) {
     const [userId, setUserId] = useState<string>('');
+    const [search, setSearch] = useState('');
     const availableUsers = useMemo(
-        () => assignableUsers.filter((user) => !members.some((member) => member.user_id === user.id)),
-        [assignableUsers, members],
+        () =>
+            assignableUsers.filter((user) => {
+                if (members.some((member) => member.user_id === user.id)) {
+                    return false;
+                }
+
+                const haystack = `${user.name ?? ''} ${user.email ?? ''} ${user.role ?? ''}`.toLowerCase();
+                return haystack.includes(search.trim().toLowerCase());
+            }),
+        [assignableUsers, members, search],
     );
 
     function addMember() {
@@ -39,6 +49,7 @@ export function ActorManager({ eventId, role, title, members, assignableUsers }:
                 <h3 className="font-medium text-slate-800">{title}</h3>
                 <span className="text-sm text-slate-500">{members.length}</span>
             </div>
+            <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Rechercher dans ${title.toLowerCase()}...`} />
             <div className="flex flex-col gap-3 md:flex-row">
                 <Select value={userId} onValueChange={setUserId}>
                     <SelectTrigger className="rounded-2xl">

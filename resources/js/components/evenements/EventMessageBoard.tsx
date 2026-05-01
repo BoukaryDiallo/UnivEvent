@@ -1,8 +1,9 @@
 import { router } from '@inertiajs/react';
 import { MessageSquare, Pin, Reply, Send } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { EventMessage } from '@/types';
 import { UserAvatar } from './UserAvatar';
@@ -17,6 +18,15 @@ type EventMessageBoardProps = {
 export function EventMessageBoard({ evenementId, messages, canManage = false, onToast }: EventMessageBoardProps) {
     const [content, setContent] = useState('');
     const [replies, setReplies] = useState<Record<number, string>>({});
+    const [search, setSearch] = useState('');
+    const filteredMessages = useMemo(
+        () =>
+            messages.filter((message) => {
+                const haystack = `${message.user.name ?? ''} ${message.contenu} ${message.type}`.toLowerCase();
+                return haystack.includes(search.trim().toLowerCase());
+            }),
+        [messages, search],
+    );
 
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -57,6 +67,7 @@ export function EventMessageBoard({ evenementId, messages, canManage = false, on
                     <MessageSquare className="size-4" />
                     Messagerie liee a l evenement
                 </div>
+                <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Rechercher dans les messages..." className="mt-4" />
                 <Textarea value={content} onChange={(event) => setContent(event.target.value)} placeholder="Poser une question a l organisateur ou discuter avec les participants..." className="mt-4 min-h-28" />
                 <div className="mt-4 flex justify-end">
                     <Button type="submit" disabled={!content.trim()}>
@@ -65,9 +76,9 @@ export function EventMessageBoard({ evenementId, messages, canManage = false, on
                     </Button>
                 </div>
             </form>
-            {messages.length ? (
+            {filteredMessages.length ? (
                 <div className="space-y-4">
-                    {messages.map((message) => (
+                    {filteredMessages.map((message) => (
                         <div key={message.id} className="rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
                             <div className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-3">
@@ -115,7 +126,7 @@ export function EventMessageBoard({ evenementId, messages, canManage = false, on
                 </div>
             ) : (
                 <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400">
-                    Aucun message pour le moment.
+                    {messages.length ? 'Aucun message ne correspond a la recherche.' : 'Aucun message pour le moment.'}
                 </div>
             )}
         </div>

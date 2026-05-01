@@ -719,18 +719,26 @@ class EvenementController extends Controller
         $this->authorize('update', $evenement);
 
         $validated = $request->validate([
-            'media' => 'required|file|max:10240|mimes:jpg,jpeg,png,gif,pdf',
+            'media' => 'required',
+            'media.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,pdf',
             'description' => 'nullable|string|max:500',
             'is_public' => 'nullable|boolean',
             'download_allowed' => 'nullable|boolean',
+            'confidentialite' => 'nullable|string|in:public,inscrits,participants,organisateur,intervenant,jury,president_jury',
         ]);
 
         try {
-            $media = $this->mediaService->uploadMedia($evenement, $request->file('media'), [
-                'description' => $validated['description'] ?? null,
-                'is_public' => $validated['is_public'] ?? true,
-                'download_allowed' => $validated['download_allowed'] ?? true,
-            ]);
+            $files = $request->file('media');
+            $files = is_array($files) ? $files : [$files];
+
+            foreach ($files as $file) {
+                $this->mediaService->uploadMedia($evenement, $file, [
+                    'description' => $validated['description'] ?? null,
+                    'is_public' => $validated['is_public'] ?? true,
+                    'download_allowed' => $validated['download_allowed'] ?? true,
+                    'confidentialite' => $validated['confidentialite'] ?? null,
+                ]);
+            }
             $this->refreshValidationStateAfterMutation($evenement, $request->user());
 
             return back()->with('status', 'media_uploaded');
@@ -747,6 +755,7 @@ class EvenementController extends Controller
             'description' => 'nullable|string|max:500',
             'is_public' => 'nullable|boolean',
             'download_allowed' => 'nullable|boolean',
+            'confidentialite' => 'nullable|string|in:public,inscrits,participants,organisateur,intervenant,jury,president_jury',
         ]);
 
         $this->mediaService->updateMedia($media, $validated);
@@ -767,9 +776,14 @@ class EvenementController extends Controller
 
     public function downloadMedia(Request $request, Evenement $evenement, EvenementMedia $media)
     {
-        $assignment = $evenement->assignments()->where('user_id', $request->user()->id)->first();
+        abort_unless($media->evenement_id === $evenement->id, 404);
 
-        if (!$this->mediaService->canDownload($media, $request->user(), $assignment)) {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $assignment = $evenement->assignments()->where('user_id', $user->id)->first();
+
+        if (!$this->mediaService->canDownload($media, $user, $assignment)) {
             abort(403, 'Téléchargement non autorisé');
         }
 
@@ -1714,9 +1728,7 @@ class EvenementController extends Controller
             'titre' => $programme->titre,
             'description' => $programme->description,
             'intervenant' => $programme->intervenant,
-            'date_programme' => $programme->date_programme instanceof \Illuminate\Support\Carbon
-                ? $programme->date_programme->toDateString()
-                : (is_string($programme->date_programme) ? substr($programme->date_programme, 0, 10) : null),
+            'date_programme' => $this->normalizeProgrammeDate($programme->date_programme),
             'heure_debut' => $programme->heure_debut,
             'heure_fin' => $programme->heure_fin,
             'salle' => $programme->salle,
@@ -1983,5 +1995,18 @@ class EvenementController extends Controller
     public function messages(Request $request)
     {
         return Inertia::render('evenements/Messages');
+    }
+
+    private function normalizeProgrammeDate(mixed $value): ?string
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d');
+        }
+
+        if (is_string($value) && $value !== '') {
+            return substr($value, 0, 10);
+        }
+
+        return null;
     }
 }

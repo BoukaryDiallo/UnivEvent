@@ -22,7 +22,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useEventLiveChannel } from '@/hooks/use-event-live-channel';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import type { EventDetail, EventSummary, ParticipationStatus, User, SharedData } from '@/types';
+import type { EventDetail, EventSummary, ParticipationStatus, User } from '@/types';
 
 type ShowProps = {
     evenement: EventDetail;
@@ -56,7 +56,7 @@ function normalizeTeam(team?: EventDetail['team'] | null): EventDetail['team'] {
 }
 
 function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowProps) {
-    const { auth } = usePage<SharedData>().props;
+    const { auth } = usePage<{ auth: { user?: User | null } }>().props;
     const [activeTab, setActiveTab] = useState<EventTabKey>('overview');
     const [toast, setToast] = useState<{ message: string; tone: 'success' | 'error' } | null>(null);
     
@@ -87,10 +87,10 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
     const isOrganisateur = auth.user?.id === displayedEvent.createur.id || (displayedEvent.team.organisateur?.some(m => m.user_id === auth.user?.id));
     const isIntervenant = displayedEvent.team.intervenant?.some(m => m.user_id === auth.user?.id);
     const isJuryMember = can.juryMember || displayedEvent.team.jury?.some(m => m.user_id === auth.user?.id);
-    const isParticipant = displayedEvent.participation?.statut === 'participe';
+    const publicCibleLabel = displayedEvent.roles?.length ? displayedEvent.roles.join(', ') : displayedEvent.public_cible;
 
     const handleJoin = (mode: ParticipationStatus = 'participe') => {
-        router.post(`/evenements/${displayedEvent.id}/inscrire`, { mode }, {
+        router.post('/inscriptions', { evenement_id: displayedEvent.id, mode }, {
             onSuccess: () => setToast({ message: mode === 'participe' ? 'Inscription réussie !' : 'Intérêt enregistré.', tone: 'success' }),
         });
     };
@@ -114,6 +114,20 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
         { title: 'Événements', href: '/evenements' },
         { title: displayedEvent.titre, href: '#' },
     ];
+
+    useEventLiveChannel(displayedEvent.id, {
+        'event.status.updated': () => {
+            router.reload({ only: ['evenement', 'can'] });
+            setToast({ message: 'L evenement a ete mis a jour.', tone: 'success' });
+        },
+        'jury.scores.updated': () => {
+            router.reload({ only: ['evenement'] });
+        },
+        'event.results.published': () => {
+            router.reload({ only: ['evenement'] });
+            setToast({ message: 'Les resultats viennent d etre actualises.', tone: 'success' });
+        },
+    }, Boolean(auth.user));
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -183,7 +197,7 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
                             activeTab={activeTab} 
                             onChange={setActiveTab} 
                             showResults={displayedEvent.type === 'concours' && (can.manageResults || displayedEvent.competition_status === 'resultats_publies')} 
-                            showActors={can.manage} 
+                            showActors={can.manage || can.manageParticipants || can.manageMessages || can.manageResults || can.uploadMedia} 
                         />
 
                         {/* Tab Content */}
@@ -218,14 +232,16 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
                             {activeTab === 'program' && <EventTimeline programmes={displayedEvent.programmes} />}
                             
                             {activeTab === 'participants' && (
-                                <ParticipantsList 
-                                    participants={displayedEvent.participants} 
-                                    canManage={Boolean(can.manageParticipants || can.manage)} 
-                                    onToast={(msg) => setToast({ message: msg, tone: 'success' })} 
-                                />
+                                <div id="participants">
+                                    <ParticipantsList 
+                                        participants={displayedEvent.participants} 
+                                        canManage={Boolean(can.manageParticipants || can.manage)} 
+                                        onToast={(msg) => setToast({ message: msg, tone: 'success' })} 
+                                    />
+                                </div>
                             )}
 
-                            {activeTab === 'actors' && can.manage && (
+                            {activeTab === 'actors' && (can.manage || can.manageParticipants || can.manageMessages || can.manageResults || can.uploadMedia) && (
                                 <EventActorsManagement 
                                     event={displayedEvent} 
                                     canManage={can.manage} 
@@ -244,10 +260,10 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
 
                             {activeTab === 'chat' && (
                                 <EventCommentsPanel 
-                                    eventId={displayedEvent.id} 
+                                    evenementId={displayedEvent.id} 
                                     comments={displayedEvent.comments} 
-                                    messages={displayedEvent.messages} 
-                                    canPost={displayedEvent.comments_enabled} 
+                                    canManage={Boolean(can.manageComments || can.manage)} 
+                                    onToast={(msg, tone) => setToast({ message: msg, tone: tone ?? 'success' })} 
                                 />
                             )}
 
@@ -331,12 +347,29 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
                                         <h3 className="font-bold">Pass Événement</h3>
                                     </div>
 
-                                    {!displayedEvent.participation ? (
+                                    {!displayedEvent.participation && can.join ? (
                                         <div className="space-y-4">
                                             <p className="text-sm text-white/70 leading-relaxed">Rejoignez cet événement pour accéder aux contenus exclusifs et recevoir votre certificat.</p>
                                             <Button className="w-full rounded-2xl bg-white py-6 font-bold text-slate-950 hover:bg-slate-100" onClick={() => handleJoin('participe')} disabled={!can.join}>
                                                 S'inscrire
                                             </Button>
+                                        </div>
+                                    ) : !displayedEvent.participation ? (
+                                        <div className="space-y-4">
+                                            <p className="text-sm text-white/70 leading-relaxed">
+                                                {isOrganisateur
+                                                    ? 'Vous pilotez deja cet evenement. Le bouton d inscription est masque pour eviter les doubles statuts.'
+                                                    : isIntervenant
+                                                      ? 'Vous etes deja affecte comme intervenant sur cet evenement.'
+                                                      : isJuryMember
+                                                        ? 'Vous etes deja affecte comme membre du jury sur cet evenement.'
+                                                        : 'Cet evenement n accepte pas une inscription directe pour votre profil.'}
+                                            </p>
+                                            {(can.manageParticipants || can.manage) ? (
+                                                <Button variant="secondary" className="w-full rounded-2xl border-0 bg-sky-500 text-white hover:bg-sky-600" asChild>
+                                                    <Link href={`/evenements/${displayedEvent.id}/manage#actors`}>Inscrire des participants</Link>
+                                                </Button>
+                                            ) : null}
                                         </div>
                                     ) : (
                                         <div className="space-y-6">
@@ -380,7 +413,7 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-slate-500">Public</span>
-                                    <span className="text-sm font-bold capitalize">{displayedEvent.public_cible}</span>
+                                    <span className="text-sm font-bold capitalize">{publicCibleLabel}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-slate-500">Visibilité</span>
@@ -391,7 +424,7 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
                             <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
                                 <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-slate-400">Organisé par</h4>
                                 <div className="flex items-center gap-3">
-                                    <UserAvatar name={displayedEvent.createur.name} size="sm" />
+                                    <UserAvatar name={displayedEvent.createur.name} className="size-8" />
                                     <div className="min-w-0">
                                         <p className="truncate font-bold text-sm">{displayedEvent.createur.name}</p>
                                         <p className="text-xs text-slate-500 capitalize">{displayedEvent.createur.role}</p>

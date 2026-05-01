@@ -76,7 +76,7 @@ class ParticipantService
                 'titre' => $programme->titre,
                 'description' => $programme->description,
                 'intervenant' => $programme->intervenant,
-                'date_programme' => optional($programme->date_programme)->toDateString(),
+                'date_programme' => $this->normalizeProgrammeDate($programme->date_programme),
                 'heure_debut' => $programme->heure_debut,
                 'heure_fin' => $programme->heure_fin,
                 'salle' => $programme->salle,
@@ -181,5 +181,18 @@ class ParticipantService
                 'pending_messages' => 0,
             ],
         ];
+    }
+
+    private function normalizeProgrammeDate(mixed $value): ?string
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d');
+        }
+
+        if (is_string($value) && $value !== '') {
+            return substr($value, 0, 10);
+        }
+
+        return null;
     }
 }

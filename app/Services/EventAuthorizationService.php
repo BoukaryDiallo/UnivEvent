@@ -7,9 +7,14 @@ use App\Models\User;
 
 class EventAuthorizationService
 {
+    public function isCreator(Evenement $evenement, ?User $user): bool
+    {
+        return (bool) ($user && $evenement->cree_par === $user->id);
+    }
+
     public function isAdminOrCreator(Evenement $evenement, ?User $user): bool
     {
-        return (bool) ($user && ($user->isAdmin() || $evenement->cree_par === $user->id));
+        return (bool) ($user && ($user->isAdmin() || $this->isCreator($evenement, $user)));
     }
 
     public function assignment(Evenement $evenement, ?User $user)
@@ -142,19 +147,26 @@ class EventAuthorizationService
         }
 
         $isAdmin = $this->isAdminOrCreator($evenement, $user);
+        $canEdit = $isAdmin || $this->canEditEvent($evenement, $user);
+        $canManageParticipants = $isAdmin || $this->canManageParticipants($evenement, $user);
+        $canManageComments = $isAdmin || $this->canManageComments($evenement, $user);
+        $canManageMessages = $isAdmin || $this->canManageMessages($evenement, $user);
+        $canManageResults = $isAdmin || $this->canManageResults($evenement, $user);
+        $canManageCertificates = $isAdmin || $this->canManageCertificates($evenement, $user);
+        $isAssigned = (bool) $this->assignment($evenement, $user);
 
         return [
-            'manage' => $isAdmin,
-            'join' => $this->canView($evenement, $user),
-            'uploadMedia' => $isAdmin,
+            'manage' => $canEdit || $canManageParticipants || $canManageMessages || $canManageResults || $canManageCertificates,
+            'join' => $this->canView($evenement, $user) && ! $isAdmin && ! $isAssigned,
+            'uploadMedia' => $canEdit,
             'archive' => $isAdmin,
             'delete' => $isAdmin,
             'changeVisibility' => $isAdmin || $this->canChangeVisibility($evenement, $user),
-            'manageParticipants' => $isAdmin || $this->canManageParticipants($evenement, $user),
-            'manageComments' => $isAdmin || $this->canManageComments($evenement, $user),
-            'manageMessages' => $isAdmin || $this->canManageMessages($evenement, $user),
-            'manageResults' => $isAdmin || $this->canManageResults($evenement, $user),
-            'manageCertificates' => $isAdmin || $this->canManageCertificates($evenement, $user),
+            'manageParticipants' => $canManageParticipants,
+            'manageComments' => $canManageComments,
+            'manageMessages' => $canManageMessages,
+            'manageResults' => $canManageResults,
+            'manageCertificates' => $canManageCertificates,
             'presidentJury' => $this->isPresidentJury($evenement, $user),
             'juryMember' => $this->isJuryMember($evenement, $user),
         ];

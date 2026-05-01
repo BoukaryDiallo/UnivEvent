@@ -13,6 +13,15 @@ class MediaService
 {
     private const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
     private const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    private const CONFIDENTIALITY_LEVELS = [
+        'public',
+        'inscrits',
+        'participants',
+        'organisateur',
+        'intervenant',
+        'jury',
+        'president_jury',
+    ];
 
     public function uploadMedia(Evenement $event, UploadedFile $file, array $data = []): EvenementMedia
     {
@@ -29,6 +38,8 @@ class MediaService
             'description' => $data['description'] ?? null,
             'is_public' => $data['is_public'] ?? true,
             'download_allowed' => $data['download_allowed'] ?? true,
+            'confidentialite' => $this->normalizeConfidentiality($data['confidentialite'] ?? null, $data['is_public'] ?? true),
+            'meta' => $data['meta'] ?? null,
         ]);
     }
 
@@ -38,6 +49,9 @@ class MediaService
             'description' => $data['description'] ?? $media->description,
             'is_public' => $data['is_public'] ?? $media->is_public,
             'download_allowed' => $data['download_allowed'] ?? $media->download_allowed,
+            'confidentialite' => array_key_exists('confidentialite', $data)
+                ? $this->normalizeConfidentiality($data['confidentialite'], (bool) ($data['is_public'] ?? $media->is_public))
+                : $media->confidentialite,
         ]);
 
         return $media;
@@ -72,7 +86,12 @@ class MediaService
             return false;
         }
 
-        if ($media->is_public) {
+        return $this->canAccess($media, $user, $assignment);
+    }
+
+    public function canAccess(EvenementMedia $media, ?User $user, $assignment = null): bool
+    {
+        if ($media->is_public || $this->normalizeConfidentiality($media->confidentialite, (bool) $media->is_public) === 'public') {
             return true;
         }
 
@@ -80,12 +99,37 @@ class MediaService
             return false;
         }
 
-        if ($user->isAdmin()) {
+        $event = $media->relationLoaded('evenement') ? $media->evenement : $media->evenement()->first();
+
+        if ($event && ($user->isAdmin() || $event->cree_par === $user->id)) {
             return true;
         }
 
-        // Check assignment permissions
-        return $assignment && ($assignment->permissions['can_download_media'] ?? false);
+        $confidentialite = $this->normalizeConfidentiality($media->confidentialite, (bool) $media->is_public);
+        $assignment ??= $event?->assignments()->where('user_id', $user->id)->first();
+
+        if ($confidentialite === 'inscrits') {
+            return $event?->inscriptions()->where('utilisateur_id', $user->id)->exists() ?? false;
+        }
+
+        if ($confidentialite === 'participants') {
+            return $event?->inscriptions()
+                ->where('utilisateur_id', $user->id)
+                ->where('statut', 'accepte')
+                ->exists() ?? false;
+        }
+
+        if (!$assignment) {
+            return false;
+        }
+
+        return match ($confidentialite) {
+            'organisateur' => $assignment->role === 'organisateur',
+            'intervenant' => $assignment->role === 'intervenant',
+            'jury' => $assignment->role === 'jury',
+            'president_jury' => $assignment->role === 'jury' && (bool) $assignment->is_president_jury,
+            default => (bool) ($assignment->permissions['can_download_media'] ?? false),
+        };
     }
 
     public function getMediaForEvent(Evenement $event, ?User $user = null): array
@@ -93,18 +137,23 @@ class MediaService
         $assignment = $user ? $event->assignments()->where('user_id', $user->id)->first() : null;
 
         return $event->medias->map(function ($media) use ($user, $assignment) {
+            $canAccess = $this->canAccess($media, $user, $assignment);
+
             return [
                 'id' => $media->id,
                 'type' => $media->type,
                 'name' => $media->nom_original,
                 'size' => $media->taille,
-                'url' => $this->resolvePublicUrl($media),
+                'url' => $canAccess ? $this->resolvePublicUrl($media) : null,
                 'description' => $media->description,
                 'is_public' => $media->is_public,
+                'download_allowed' => (bool) $media->download_allowed,
+                'confidentialite' => $this->normalizeConfidentiality($media->confidentialite, (bool) $media->is_public),
+                'can_view' => $canAccess,
                 'can_download' => $this->canDownload($media, $user, $assignment),
                 'uploaded_at' => $media->created_at,
             ];
-        })->toArray();
+        })->filter(fn (array $media) => $media['can_view'])->values()->toArray();
     }
 
     private function validateFile(UploadedFile $file): void
@@ -121,5 +170,18 @@ class MediaService
     private function getMediaType(UploadedFile $file): string
     {
         return str_contains($file->getMimeType(), 'pdf') ? 'pdf' : 'image';
+    }
+
+    private function normalizeConfidentiality(?string $confidentialite, bool $isPublic): string
+    {
+        if ($isPublic) {
+            return 'public';
+        }
+
+        if (! $confidentialite || ! in_array($confidentialite, self::CONFIDENTIALITY_LEVELS, true)) {
+            return 'inscrits';
+        }
+
+        return $confidentialite;
     }
 }

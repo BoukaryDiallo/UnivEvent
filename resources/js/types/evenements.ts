@@ -156,13 +156,16 @@ export type EventMedia = {
     description?: string | null;
     is_public?: boolean;
     download_allowed?: boolean;
+    confidentialite?: 'public' | 'inscrits' | 'participants' | 'organisateur' | 'intervenant' | 'jury' | 'president_jury' | string;
     uploaded_by?: number;
     created_at?: string;
     updated_at?: string;
     type: 'image' | 'pdf' | 'autre' | string;
     name: string | null;
     size: number | null;
-    url: string;
+    url: string | null;
+    can_view?: boolean;
+    can_download?: boolean;
 };
 
 export type EventProgrammeDraft = {
@@ -371,6 +374,7 @@ export type EventDetail = {
     certificate_template_version?: string;
     allow_participant_result_tracking?: boolean;
     competition_status?: string;
+    validation_status?: EventValidationStatus;
     participants_count: number;
     comments_count: number;
     activity_count: number;
@@ -394,6 +398,11 @@ export type EventDetail = {
     }>;
     current_inscription_id: number | null;
     current_inscription: {
+        id: number;
+        statut: ParticipationStatus | BackendParticipationStatus;
+        backend_statut?: BackendParticipationStatus;
+    } | null;
+    participation?: {
         id: number;
         statut: ParticipationStatus | BackendParticipationStatus;
         backend_statut?: BackendParticipationStatus;

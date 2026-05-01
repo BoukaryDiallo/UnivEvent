@@ -145,6 +145,7 @@ function ManageEventContent({ evenement: initialEvent, can, meta }: ManageEventP
     const [criteriaDraft, setCriteriaDraft] = useState<EventCriterion[]>(initialEvent.criteria ?? []);
     const [visibility, setVisibility] = useState(initialEvent.visibilite);
     const [publicCible, setPublicCible] = useState(initialEvent.public_cible);
+    const [audienceRolesSelection, setAudienceRolesSelection] = useState<string[]>(initialEvent.roles ?? []);
     const [interactions, setInteractions] = useState({
         comments_enabled: initialEvent.comments_enabled,
         comment_replies_enabled: initialEvent.comment_replies_enabled,
@@ -349,6 +350,9 @@ function ManageEventContent({ evenement: initialEvent, can, meta }: ManageEventP
                                     <Input value={programForm.intervenant} onChange={(event) => setProgramForm((current) => ({ ...current, intervenant: event.target.value }))} placeholder="Intervenant" />
                                     <Input type="date" value={programForm.date_programme} onChange={(event) => setProgramForm((current) => ({ ...current, date_programme: event.target.value }))} />
                                     <Input value={programForm.salle} onChange={(event) => setProgramForm((current) => ({ ...current, salle: event.target.value }))} placeholder="Salle" />
+                                    <Input type="time" value={programForm.heure_debut} onChange={(event) => setProgramForm((current) => ({ ...current, heure_debut: event.target.value }))} />
+                                    <Input type="time" value={programForm.heure_fin} onChange={(event) => setProgramForm((current) => ({ ...current, heure_fin: event.target.value }))} />
+                                    <Input value={programForm.type_section} onChange={(event) => setProgramForm((current) => ({ ...current, type_section: event.target.value }))} placeholder="Atelier, keynote, pause..." />
                                     <div className="md:col-span-2">
                                         <Textarea value={programForm.description} onChange={(event) => setProgramForm((current) => ({ ...current, description: event.target.value }))} placeholder="Description" />
                                     </div>
@@ -402,7 +406,7 @@ function ManageEventContent({ evenement: initialEvent, can, meta }: ManageEventP
                         title="Permissions / visibilite"
                         description="Controlez l exposition et l audience cible."
                         status={sectionStatus.permissions}
-                        action={<Button onClick={() => void saveSection('permissions', { visibilite: visibility, public_cible: publicCible, roles: evenement.roles })}>Sauver</Button>}
+                        action={<Button onClick={() => void saveSection('permissions', { visibilite: visibility, public_cible: publicCible, roles: audienceRolesSelection })}>Sauver</Button>}
                     >
                         <div className="space-y-4">
                             <div className="space-y-2">
@@ -434,6 +438,27 @@ function ManageEventContent({ evenement: initialEvent, can, meta }: ManageEventP
                                         ))}
                                     </SelectContent>
                                 </Select>
+                            </div>
+                            <div className="space-y-3">
+                                <Label>Publics cibles multiples</Label>
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    {audienceRoles.map((option) => (
+                                        <label key={option.value} className="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3">
+                                            <Checkbox
+                                                checked={audienceRolesSelection.includes(option.value)}
+                                                onCheckedChange={(checked) =>
+                                                    setAudienceRolesSelection((current) =>
+                                                        checked === true
+                                                            ? Array.from(new Set([...current, option.value]))
+                                                            : current.filter((value) => value !== option.value),
+                                                    )
+                                                }
+                                            />
+                                            <span>{option.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-slate-500">Utilisez cette liste pour cibler etudiants, enseignants, admins ou clubs. Les roles d organisation restent geres dans les acteurs.</p>
                             </div>
                         </div>
                     </SectionCard>

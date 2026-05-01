@@ -12,7 +12,18 @@ class EvenementMedia extends Model
         'type',
         'chemin_fichier',
         'nom_original',
-        'taille'
+        'taille',
+        'description',
+        'is_public',
+        'download_allowed',
+        'confidentialite',
+        'meta',
+    ];
+
+    protected $casts = [
+        'is_public' => 'boolean',
+        'download_allowed' => 'boolean',
+        'meta' => 'array',
     ];
 
     public function evenement()
