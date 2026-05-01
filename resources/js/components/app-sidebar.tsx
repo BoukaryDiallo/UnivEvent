@@ -1,13 +1,9 @@
-// React & Inertia
-import { Link } from '@inertiajs/react';
-
-// UI Components
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, FolderGit2, LayoutGrid, Settings } from 'lucide-react';
+import AppLogo from '@/components/app-logo';
+import { NavFooter } from '@/components/nav-footer';
+import { NavMain } from '@/components/nav-main';
+import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
     SidebarContent,
@@ -56,33 +52,35 @@ import live from '@/routes/votes/live';
 import { cn } from '@/lib/utils';
 import type { NavItem } from '@/types';
 
+export function AppSidebar() {
+    const { auth } = usePage().props as any;
+    const user = auth?.user;
+
+export function AppSidebar() {
+    const { auth } = usePage().props as any;
+    const user = auth?.user;
+
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard.url(),
+        href: dashboard(),
         icon: LayoutGrid,
-    },
-    {
-        title: 'Rôles',
-        href: roles.url(),
-        icon: Users,
-    },
-    ];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
     },
 ];
 
-export function AppSidebar() {
+    const footerNavItems: NavItem[] = [
+        {
+            title: 'Repository',
+            href: 'https://github.com/laravel/react-starter-kit',
+            icon: FolderGit2,
+        },
+        {
+            title: 'Documentation',
+            href: 'https://laravel.com/docs/starter-kits#react',
+            icon: BookOpen,
+        },
+    ];
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

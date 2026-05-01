@@ -9,7 +9,7 @@ use App\Http\Controllers\DepouillementController;
 
 // Routes du module élections
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
         
     Route::resource('elections', 

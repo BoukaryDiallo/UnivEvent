@@ -31,7 +31,7 @@ const sidebarNavItems: NavItem[] = [
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
-    // When server-side rendering, we only render the layout on the client...
+    // Lors du rendu côté serveur, nous ne rendons la mise en page que côté client...
     if (typeof window === 'undefined') {
         return null;
     }
