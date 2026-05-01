@@ -6,7 +6,6 @@ export function useAuth() {
     const { auth } = usePage().props as any;
 
     const roles = auth.roles || [];
-    console.log((roles));
     
     const permissions = auth.permissions || [];
 

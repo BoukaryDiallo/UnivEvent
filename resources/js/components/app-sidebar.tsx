@@ -77,7 +77,7 @@ export function AppSidebar() {
         }
 
 
-        if (hasRole('etudinant')) {
+        if (hasRole('etudiant')) {
             mainNavItems.push(
             /*{
                 // ajouter les liens pour les etudiants ici
