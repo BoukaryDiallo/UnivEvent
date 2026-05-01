@@ -9,7 +9,7 @@ export type Election = {
     type: 'ufr' | 'promotion';
     id_ufr: number | null;
     id_filiere: number | null;
-    statut: 'liste_generee' | 'planifiee' | 'ouverte' | 'cloturee' | 'second_tour_planifie' | 'second_tour' | 'terminee';
+    statut: 'liste_generee' | 'planifiee' | 'ouverte' | 'cloturee' | 'second_tour_requis' | 'second_tour_planifie' | 'second_tour' | 'terminee';
     tour: 1 | 2;
     created_at: string;
     updated_at: string;

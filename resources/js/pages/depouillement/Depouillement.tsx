@@ -1,11 +1,10 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import AppLayout  from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, BarChart3, TrendingUp, User,Trophy, CheckCircle, ArrowLeft } from 'lucide-react';
-import { Link } from '@inertiajs/react';
 import { useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { PageProps, Election, Candidature } from '@/types';
@@ -23,42 +22,30 @@ interface Props extends PageProps {
     resultats: Resultat[];
     total: number;
     tour: number;
+    secondTourRequis: boolean;
+    peutPublier: boolean;
 }
 
 export default function Depouillement() {
-    const { election, resultats, total, tour } = usePage<Props>().props;
+    const { election, resultats, total, tour, secondTourRequis, peutPublier } = usePage<Props>().props;
     const { confirm, ConfirmDialog } = useConfirmDialog();
     const { processing, post } = useForm();
 
-    const secondTourRequis =
-        tour === 1 &&
-        resultats.length > 0 &&
-        resultats[0].pourcentage < 50;
-
     const handlePublier = () => {
-        const message = secondTourRequis
-            ? "Êtes-vous sûr de vouloir publier les résultats du 1er tour ?"
-            : "Êtes-vous sûr de vouloir publier ces résultats ? Cette action est irréversible.";
-
         confirm({
             title: 'Publier les résultats',
-            description: message,
-            onConfirm: () => post(`/depouillement/${election.id_election}/publier`),
+            description: 'Êtes-vous sûr de vouloir publier ces résultats ?',
+            onConfirm: () => post(`/resultats/${election.id_election}/publier`),
             variant: 'default'
         });
     };
 
     const handleConfigurerSecondTour = () => {
-        confirm({
-            title: 'Configurer le second tour',
-            description: "Configurer le second tour avec les deux premiers candidats ? Vous devrez définir les dates du nouveau vote.",
-            onConfirm: () => router.get(`/elections/${election.id_election}/second-tour`),
-            variant: 'default'
-        });
+        router.get(`/elections/${election.id_election}/second-tour-form`);
     };
 
     const handleRetour = () => {
-        router.get(resultatsShow.url({ election: election.id_election }));
+        router.get(`/resultats/${election.id_election}`);
     };
 
     const getWinnerBadge = (index: number) => {
@@ -139,17 +126,19 @@ export default function Depouillement() {
                                     <div key={resultat.id_candidature} className="border rounded-lg p-4">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                {resultat.candidature.user.photo ? (
-                                                    <img
-                                                        src={`/storage/${resultat.candidature.user.photo}`}
-                                                        alt={resultat.candidature.user.name}
-                                                        className="w-12 h-12 rounded-full"
-                                                    />
-                                                ) : (
-                                                    <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center">
-                                                        <User className="h-6 w-6 text-gray-600" />
-                                                    </div>
-                                                )}
+                                                <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl shadow-md border-2 border-white">
+                                                    {resultat.candidature.user.photo ? (
+                                                        <img
+                                                            src={`/storage/${resultat.candidature.user.photo}`}
+                                                            alt={resultat.candidature.user.name}
+                                                            className="w-14 h-14 rounded-xl object-cover shadow-sm"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-sm">
+                                                            {resultat.candidature.user.name.charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
 
                                                 <div>
                                                     <h3 className="font-semibold text-lg">
@@ -176,11 +165,11 @@ export default function Depouillement() {
                                                     <div className="w-32 bg-gray-200 rounded-full h-2">
                                                         <div
                                                             className="bg-blue-600 h-2 rounded-full"
-                                                            style={{ width: `${resultat.pourcentage}%` }}
+                                                            style={{ width: `${Number(resultat.pourcentage)}%` }}
                                                         />
                                                     </div>
                                                     <span className="text-sm font-medium">
-                                                        {resultat.pourcentage.toFixed(2)}%
+                                                        {Number(resultat.pourcentage).toFixed(2)}%
                                                     </span>
                                                 </div>
                                             </div>
@@ -207,15 +196,15 @@ export default function Depouillement() {
                                     </Button>
                                 )}
 
-                                <Button
-                                    onClick={handlePublier}
-                                    className="bg-green-600 hover:bg-green-700"
-                                >
-                                    <CheckCircle className="h-4 w-4 mr-2" />
-                                    {secondTourRequis
-                                        ? "Publier résultats du 1er tour"
-                                        : "Publier les résultats"}
-                                </Button>
+                                {peutPublier && (
+                                    <Button
+                                        onClick={handlePublier}
+                                        className="bg-blue-600 hover:bg-blue-700"
+                                    >
+                                        <CheckCircle className="h-4 w-4 mr-2" />
+                                        Publier les résultats
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </CardContent>

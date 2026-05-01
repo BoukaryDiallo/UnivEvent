@@ -14,6 +14,7 @@ use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\FiliereController;
 use App\Http\Controllers\DepouillementController;
 use App\Http\Controllers\ResultatController;
+use App\Http\Controllers\ResultatBrouillonController;
 
 Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
@@ -40,8 +41,11 @@ Route::resource('etudiants', EtudiantController::class);
 
 
 /////////////////////////////////////GESTION DES ÉLECTIONS///////////////////////////////////
-Route::get('/espace-elections', [ResultatController::class, 'index'])->name('elections.workflow');
+Route::get('/espace-elections', [ResultatController::class, 'espaceElections'])->name('elections.workflow');
 
+
+/////////////////////////////////////GESTION DES RÉSULTATS///////////////////////////////////
+// Ces routes sont gérées dans elections.php pour éviter les doublons
 
 /////////////////////////////////////GESTION DES UFR///////////////////////////////////
 Route::resource('ufr', UfrController::class);

@@ -31,7 +31,7 @@ class VoteController extends Controller
             ->get()
             ->filter(function ($election) {
                 $election->synchronizeStatus();
-                return $election->statut === 'ouverte';
+                return in_array($election->statut, ['ouverte', 'second_tour']);
             });
 
         return Inertia::render('votes/VoteElectionsOuvertes', compact('elections'));
@@ -52,7 +52,7 @@ class VoteController extends Controller
             return back()->with('error', 'Vous n\'êtes pas enregistré comme étudiant.');
         }
 
-        if ($election->statut !== 'ouverte') {
+        if (!in_array($election->statut, ['ouverte', 'second_tour'])) {
             return back()->with('error', 'Cette élection n\'est pas ouverte pour le vote.');
         }
 

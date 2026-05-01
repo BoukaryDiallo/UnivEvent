@@ -3,6 +3,7 @@ import { Button } from './button'
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
 } from './dialog'
@@ -34,6 +35,7 @@ export default function ConfirmDialog({
     const handleConfirm = () => {
         if (!isLoading) {
             onConfirm()
+            onClose() // Fermer le dialogue après la confirmation
         }
     }
 
@@ -42,10 +44,8 @@ export default function ConfirmDialog({
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
+                    <DialogDescription>{description}</DialogDescription>
                 </DialogHeader>
-                <div className="py-4">
-                    <p className="text-sm text-gray-600">{description}</p>
-                </div>
                 <div className="flex justify-end gap-3 pt-4">
                     <Button
                         variant="outline"

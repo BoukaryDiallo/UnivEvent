@@ -251,7 +251,6 @@ class ElectionController extends Controller
             'type' => 'required|in:ufr,promotion',
             'id_ufr' => 'nullable|exists:ufrs,id_ufr',
             'id_filiere' => 'nullable|exists:filieres,id_filiere',
-            'statut' => 'required|in:brouillon,liste_generee,ouverte,second_tour,terminee',
         ]);
 
         if ($error = $this->validateType($request)) {
@@ -266,7 +265,7 @@ class ElectionController extends Controller
             'type' => $request->type,
             'id_ufr' => $request->type === 'ufr' ? $request->id_ufr : null,
             'id_filiere' => $request->type === 'promotion' ? $request->id_filiere : null,
-            'statut' => $request->statut,
+            // Le statut n'est pas mis à jour pour préserver l'état actuel
         ]);
 
         return redirect()->route('elections.index');
@@ -391,6 +390,7 @@ class ElectionController extends Controller
             'date_debut' => $request->date_debut,
             'date_fin' => $request->date_fin,
             'statut' => 'second_tour', // Le statut passera à 'second_tour' quand la date de début arrivera
+            'tour' => 2, // ⚠️ CRUCIAL : passer au tour 2 pour permettre les votes du second tour
         ]);
 
         return redirect()->route('elections.admin', $election)
@@ -425,12 +425,21 @@ class ElectionController extends Controller
                 ->get();
         }
 
+        // Récupérer les résultats de dépouillement (brouillons)
+        $resultatsDepouillement = \App\Models\Resultat::where('id_election', $election->id_election)
+            ->where('tour', $election->tour)
+            ->where('statut_publication', 'brouillon')
+            ->with(['candidature.user'])
+            ->orderBy('rang')
+            ->get();
+
         return Inertia::render('elections/ElectionAdmin', [
             'election' => $election,
             'totalVotes' => $totalVotes,
             'totalVoters' => $totalVoters,
             'totalCandidatures' => $totalCandidatures,
             'candidaturesValidees' => $candidaturesValidees,
+            'resultatsDepouillement' => $resultatsDepouillement,
         ]);
     }
 

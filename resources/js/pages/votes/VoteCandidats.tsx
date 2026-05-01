@@ -33,6 +33,7 @@ interface Candidature {
     id_candidature: number;
     programme: string;
     statut: string;
+    photo?: string;
     user: User;
 }
 
@@ -118,7 +119,22 @@ export default function VoteCandidats() {
                                             key={candidature.id_candidature}
                                             className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
                                         >
-                                            <div className="flex justify-between items-start mb-2">
+                                            <div className="flex items-start gap-4 mb-3">
+                                                {/* Photo du candidat */}
+                                                <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl shadow-md border-2 border-white flex-shrink-0">
+                                                    {candidature.photo ? (
+                                                        <img 
+                                                            src={candidature.photo} 
+                                                            alt={candidature.user.name}
+                                                            className="w-14 h-14 rounded-xl object-cover shadow-sm"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-sm">
+                                                            {candidature.user.name.charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                
                                                 <div className="flex-1">
                                                     <h4 className="font-semibold text-lg">
                                                         {candidature.user.name}

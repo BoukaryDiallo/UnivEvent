@@ -49,7 +49,7 @@ export default function CandidatureShow() {
                         <div className="flex flex-col md:flex-row gap-6">
                             {/* Photo du candidat */}
                             <div className="flex-shrink-0">
-                                <div className="border-4 border-gray-200 rounded-lg overflow-hidden shadow-lg">
+                                <div className="border-4 border-gray-200 rounded-xl overflow-hidden shadow-lg">
                                     {candidature.photo ? (
                                         <img
                                             src={`/storage/${candidature.photo}`}
@@ -57,11 +57,11 @@ export default function CandidatureShow() {
                                             className="w-48 h-48 object-cover"
                                         />
                                     ) : (
-                                        <div className="w-48 h-48 bg-gray-100 flex items-center justify-center">
+                                        <div className="w-48 h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
                                             <div className="text-center text-gray-500">
-                                                <svg className="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                                                </svg>
+                                                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-2">
+                                                    {candidature.user.name.charAt(0).toUpperCase()}
+                                                </div>
                                                 <p className="text-sm">Aucune photo</p>
                                             </div>
                                         </div>

@@ -37,6 +37,7 @@ import {
     Trophy,
     Radio,
     List,
+    FileText,
 } from 'lucide-react';
 
 // Routes
@@ -166,13 +167,13 @@ export function AppSidebar() {
                                         Historique des votes
                                     </Link>
                                 </DropdownMenuItem>
-                               
-                                <DropdownMenuItem asChild>
+                                 <DropdownMenuItem asChild>
                                     <Link href={resultats.index.url()} className="w-full">
                                         <Trophy className="mr-2 h-4 w-4" />
                                         Résultats
                                     </Link>
                                 </DropdownMenuItem>
+
                                 <DropdownMenuItem asChild>
                                     <Link href="/espace-elections" className="w-full">
                                         <BookOpen className="mr-2 h-4 w-4" />

@@ -46,7 +46,7 @@ export default function VoteResults() {
                                             <img
                                                 src={`/storage/${result.photo}`}
                                                 alt={result.name}
-                                                className="rounded-full mr-2 w-10 h-10"
+                                                className="rounded-xl mr-3 w-16 h-16 object-cover shadow-md border-2 border-white"
                                             />
                                             <div className="flex-grow">
                                                 <strong>{result.name}</strong>

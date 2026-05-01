@@ -1,506 +1,422 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { TabsContent } from '@/components/ui/tabs';
-import { AlertCircle, CheckCircle2, Users, Calendar, Clock, Trophy, ArrowLeft } from 'lucide-react';
-import { Link } from '@inertiajs/react';
-import { usePage } from '@inertiajs/react';
-import type { PageProps } from '@/types/app';
-import { Election, WorkflowData, ElectionStats, TimelinePost } from '@/types';
-import { getImageUrl } from '@/utils/image';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+    Users, 
+    Calendar, 
+    CheckCircle, 
+    Clock, 
+    FileText, 
+    TrendingUp,
+    UserPlus,
+    BarChart3,
+    Trophy,
+    Eye,
+    Edit,
+    Trash2,
+    Plus,
+    ArrowRight,
+    ArrowLeft,
+    UserCheck,
+    List,
+    Vote,
+    CheckCircle2,
+    AlertCircle
+} from 'lucide-react';
+import type { Election, WorkflowData, ElectionStats } from '@/types/election';
+import { useState, useEffect } from 'react';
+import { router } from '@inertiajs/react';
+import candidaturesRoutes from '@/routes/candidatures';
 import votesRoutes from '@/routes/votes';
-import WorkflowTabsLayout from '@/components/elections/WorkflowTabsLayout';
+import resultatsRoutes from '@/routes/resultats';
+import ResultatsOfficiels from '@/components/resultats/ResultatsOfficiels';
 
-interface Props extends PageProps {
+interface TimelinePost {
+    id: number;
+    author: string;
+    content: string;
+    created_at: string;
+}
+
+interface Props {
     workflow?: WorkflowData;
     stats?: ElectionStats;
     election?: Election;
     posts?: TimelinePost[];
+    resultatsOfficiels?: any;
+    resultatsBrouillons?: any;
+    resultatsAffiches?: any;
+    totalVotes?: number;
+    totalVoters?: number;
+    participationRate?: number;
+    showPublishButton?: boolean;
+    etatResultats?: {
+        winner: any;
+        secondTourNeeded: boolean;
+        equality: boolean;
+        majority: boolean;
+        type: 'elected' | 'second_tour' | 'no_majority' | 'no_results';
+    };
 }
 
 export default function ResultatsVote() {
-    const { workflow, stats, election, posts } = usePage<Props>().props;
+    const { workflow, stats, election, posts, resultatsAffiches, totalVotes, totalVoters, participationRate, showPublishButton, etatResultats } = usePage<Props>().props;
 
     // Si on affiche une seule élection (vue détaillée)
-    if (election && posts) {
+    if (election && resultatsAffiches) {
         return (
             <AppLayout>
-                <Head title={election.titre} />
+                <Head title={`Résultats - ${election.titre}`} />
 
                 <div className="container mt-4 space-y-6">
                     {/* Bouton retour */}
                     <div className="mb-4">
-                        <Button asChild variant="outline" className="mb-4">
-                            <Link href="/resultats">
-                                <ArrowLeft className="h-4 w-4 mr-2" />
-                                Retour aux élections
-                            </Link>
-                        </Button>
+                        <Link href="/espace-elections" className="inline-flex items-center text-blue-600 hover:text-blue-800">
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Retour aux élections
+                        </Link>
                     </div>
 
-                    <div className="text-center space-y-2">
-                        <h1 className="text-3xl font-bold text-gray-900">{election.titre}</h1>
-                        <p className="text-gray-600">Suivez l'évolution de cette élection</p>
-                        <Badge variant="outline" className="text-sm">
-                            Statut: {election.statut}
-                        </Badge>
-                    </div>
-
-                    <div className="relative">
-                        <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-                        
-                        {posts.map((post, index) => (
-                            <div key={index} className="relative flex items-start space-x-4 pb-8">
-                                <div className={`relative z-10 w-4 h-4 rounded-full border-2 border-white ${
-                                    post.type === 'resultats_publies' ? 'bg-green-500' :
-                                    post.type === 'vote_ouvert' ? 'bg-blue-500' :
-                                    post.type === 'vote_cloture' ? 'bg-orange-500' :
-                                    post.type === 'candidats_publies' ? 'bg-purple-500' :
-                                    post.type === 'liste_generee' ? 'bg-indigo-500' :
-                                    'bg-gray-500'
-                                }`}></div>
-                                
-                                <div className="flex-1 min-w-0">
-                                    <Card className="shadow-sm hover:shadow-md transition-shadow">
-                                        <CardContent className="p-6">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center space-x-2">
-                                                    {getPostIcon(post.type)}
-                                                    <h3 className="font-semibold text-lg">{getPostTitle(post.type)}</h3>
-                                                </div>
-                                                <span className="text-sm text-gray-500">{post.date}</span>
-                                            </div>
-                                            {renderPostContent(post)}
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    {/* Composant des résultats officiels */}
+                    <ResultatsOfficiels
+                        election={election}
+                        resultats={resultatsAffiches}
+                        totalVotes={totalVotes || 0}
+                        totalVoters={totalVoters || 0}
+                        participationRate={participationRate || 0}
+                        showPublishButton={showPublishButton}
+                        etatResultats={etatResultats}
+                    />
                 </div>
             </AppLayout>
         );
     }
 
-    // Vue principale avec workflow
+    // Vue principale avec sections (sans onglets)
+    
+    // Définition des fonctions pour les boutons
+   const handleCandidater = (election: Election) => {
+        console.log("🚀 handleCandidater appelé");
+        console.log("📋 Élection reçue:", election);
+        console.log("🆔 ID élection:", election.id_election);
+        
+        // Vérifier les routes Wayfinder
+        console.log("🔍 Routes candidatures:", candidaturesRoutes);
+        console.log("🔍 Routes create:", candidaturesRoutes.create);
+        console.log("🔍 Routes create.election:", candidaturesRoutes.create?.election);
+        
+        // Générer l'URL
+        const url = candidaturesRoutes.create.election.url({ election: election.id_election });
+        console.log("🌐 URL générée:", url);
+        console.log("🌐 Type d'URL:", typeof url);
+        
+        // Vérifier router
+        console.log("🔧 Router disponible:", typeof router);
+        console.log("🔧 Router visit:", typeof router.visit);
+        
+        console.log("📡 Tentative de redirection vers:", url);
+        
+        try {
+            router.visit(url);
+            console.log("✅ router.visit appelé avec succès");
+        } catch (error) {
+            console.error("❌ Erreur lors de router.visit:", error);
+        }
+    };
+
+    const handleVoter = (election: Election) => {
+        router.visit(votesRoutes.candidats.url({ election: election.id_election }));
+    };
+
+    const handleVoirResultats = (election: Election) => {
+        router.visit(resultatsRoutes.show.url({ election: election.id_election }));
+    };
+
+    const handleVoterSecondTour = (election: Election) => {
+        router.visit(votesRoutes.candidats.url({ election: election.id_election }));
+    };
+
     return (
         <AppLayout>
-            <Head title="Élections" />
-            <WorkflowTabsLayout
-                title="Espace Élections"
-                description="Suivez l'évolution des élections en temps réel"
-            >
-                {/* 🟡 Candidatures ouvertes */}
-                <TabsContent value="liste_generee" className="space-y-4">
-                    <Alert>
-                        <AlertDescription>
-                            📢 Les candidatures sont ouvertes pour ces élections. Déposez votre dossier pour devenir candidat !
-                        </AlertDescription>
-                    </Alert>
-                    
-                    {stats && (
-                        <div className="flex justify-center gap-4 flex-wrap">
-                            <Badge variant="secondary" className="text-sm">
-                                Total: {stats.total_elections}
-                            </Badge>
-                            <Badge variant="default" className="text-sm bg-green-100 text-green-800">
-                                Ouvertes: {stats.ouvertes}
-                            </Badge>
-                            <Badge variant="secondary" className="text-sm bg-orange-100 text-orange-800">
-                                Clôturées: {stats.cloturees}
-                            </Badge>
-                            <Badge variant="secondary" className="text-sm bg-blue-100 text-blue-800">
-                                Terminées: {stats.terminees}
-                            </Badge>
-                        </div>
-                    )}
-                    
-                    {workflow?.liste_generee?.length > 0 ? (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {workflow.liste_generee.map((election) => (
-                                <Card key={election.id_election}>
-                                    <CardHeader>
-                                        <CardTitle className="text-lg">{election.titre}</CardTitle>
-                                        <Badge variant="secondary">{election.type}</Badge>
-                                    </CardHeader>
-                                    <CardContent className="space-y-3">
-                                        <p className="text-sm text-gray-600">{election.description}</p>
-                                        <div className="text-xs text-gray-500">
-                                            {election.ufr?.nom} {election.filiere?.nom && `• ${election.filiere.nom}`}
-                                        </div>
-                                        <Button asChild className="w-full">
-                                            <Link href="/candidatures/create">
-                                                Candidater
-                                            </Link>
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 text-gray-500">
-                            Aucune élection avec candidatures ouvertes
-                        </div>
-                    )}
-                </TabsContent>
+            <Head title="Espace Élections" />
+            
+            {/* Header principal */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                <div className="container mx-auto px-4 py-12">
+                    <div className="text-center">
+                        <h1 className="text-4xl font-bold mb-4">Espace Élections</h1>
+                        <p className="text-xl mb-8 text-blue-100">Participez à la vie démocratique de votre université</p>
+                        
+                        {/* Statistiques principales */}
+                        {stats && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center">
+                                    <Users className="h-12 w-12 mx-auto mb-3 text-blue-200" />
+                                    <div className="text-3xl font-bold">{stats.total_elections}</div>
+                                    <div className="text-blue-100">Élections totales</div>
+                                </div>
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center">
+                                    <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-200" />
+                                    <div className="text-3xl font-bold">{stats.ouvertes}</div>
+                                    <div className="text-green-100">Élections actives</div>
+                                </div>
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center">
+                                    <Trophy className="h-12 w-12 mx-auto mb-3 text-yellow-200" />
+                                    <div className="text-3xl font-bold">{stats.terminees || 0}</div>
+                                    <div className="text-yellow-100">Élections terminées</div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
 
-                {/* 🟠 Élections planifiées */}
-                <TabsContent value="planifiee" className="space-y-4">
-                    <Alert>
-                        <AlertDescription>
-                            📋 Les candidatures sont fermées. Découvrez les candidats retenus pour ces élections.
-                        </AlertDescription>
-                    </Alert>
-                    
-                    {workflow?.planifiee?.length > 0 ? (
-                        <div className="space-y-4">
-                            {workflow.planifiee.map((election) => (
-                                <Card key={election.id_election}>
+            {/* Contenu principal - Sections sans onglets */}
+            <div className="container mx-auto px-4 py-8 space-y-12">
+                
+                {/* 🟡 Section Candidatures ouvertes */}
+                {workflow?.liste_generee && workflow.liste_generee.length > 0 && (
+                    <div className="space-y-6">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div className="flex items-center gap-3">
+                                <FileText className="h-6 w-6 text-blue-600" />
+                                <div>
+                                    <h3 className="font-semibold text-blue-800">Candidatures ouvertes</h3>
+                                    <p className="text-blue-600 text-sm">Déposez votre dossier pour devenir candidat</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {workflow.liste_generee.map((election: Election) => (
+                                <Card key={election.id_election} className="hover:shadow-lg transition-shadow">
                                     <CardHeader>
-                                        <CardTitle>{election.titre}</CardTitle>
-                                        <Badge variant="outline">Planifiée</Badge>
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <CardTitle className="text-lg">{election.titre}</CardTitle>
+                                                <Badge variant="secondary" className="mt-1">
+                                                    {election.type}
+                                                </Badge>
+                                            </div>
+                                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                                                Candidatures
+                                            </Badge>
+                                        </div>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
-                                        <p className="text-gray-600">{election.description}</p>
-                                        
-                                        {election.candidatures && election.candidatures.length > 0 && (
-                                            <div>
-                                                <h4 className="font-semibold mb-2">Candidats retenus :</h4>
-                                                <div className="grid md:grid-cols-2 gap-3">
-                                                    {election.candidatures.map((candidature) => (
-                                                        <div key={candidature.id_candidature} className="flex items-center gap-3 p-2 border rounded">
-                                                            <img 
-                                                                src={getImageUrl(candidature.user.photo)} 
-                                                                className="w-8 h-8 rounded-full object-cover"
-                                                            />
-                                                            <div>
-                                                                <strong className="text-sm">{candidature.user.name}</strong>
-                                                                {candidature.slogan && (
-                                                                    <p className="text-xs text-gray-600 italic">"{candidature.slogan}"</p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
+                                        <p className="text-gray-600 text-sm">{election.description}</p>
+                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                            <div className="flex items-center gap-1">
+                                                <Calendar className="h-4 w-4" />
+                                                <span>Fin: {new Date(election.date_fin).toLocaleDateString()}</span>
                                             </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 text-gray-500">
-                            Aucune élection planifiée
-                        </div>
-                    )}
-                </TabsContent>
-
-                {/* 🟢 Votes ouverts */}
-                <TabsContent value="ouverte" className="space-y-4">
-                    <Alert>
-                        <AlertDescription>
-                            🗳️ Le vote est ouvert ! Participez aux élections en cours.
-                        </AlertDescription>
-                    </Alert>
-                    
-                    {workflow?.ouverte?.length > 0 ? (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {workflow.ouverte.map((election) => (
-                                <Card key={election.id_election} className="border-green-200">
-                                    <CardHeader>
-                                        <CardTitle className="text-lg">{election.titre}</CardTitle>
-                                        <Badge className={election.statut === 'second_tour' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
-                                            {election.statut === 'second_tour' ? 'Second tour' : 'Vote ouvert'}
-                                        </Badge>
-                                    </CardHeader>
-                                    <CardContent className="space-y-3">
-                                        <p className="text-sm text-gray-600">{election.description}</p>
-                                        <div className="text-xs text-gray-500">
-                                            Du {new Date(election.date_debut).toLocaleDateString()} au {new Date(election.date_fin).toLocaleDateString()}
-                                        </div>
-                                        <Button asChild className="w-full bg-green-600 hover:bg-green-700">
-                                            <Link href={`/votes/candidats/${election.id_election}`}>
-                                                Voter
-                                            </Link>
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 text-gray-500">
-                            Aucun vote ouvert
-                        </div>
-                    )}
-                </TabsContent>
-
-                {/* 🔴 Votes clôturés */}
-                <TabsContent value="cloturee" className="space-y-4">
-                    <Alert>
-                        <AlertDescription>
-                            🔒 Les votes sont clôturés. Les résultats seront publiés prochainement.
-                        </AlertDescription>
-                    </Alert>
-                    
-                    {workflow?.cloturee?.length > 0 ? (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {workflow.cloturee.map((election) => (
-                                <Card key={election.id_election} className="border-orange-200">
-                                    <CardHeader>
-                                        <CardTitle className="text-lg">{election.titre}</CardTitle>
-                                        <Badge className="bg-orange-100 text-orange-800">Vote clôturé</Badge>
-                                    </CardHeader>
-                                    <CardContent className="space-y-3">
-                                        <p className="text-sm text-gray-600">{election.description}</p>
-                                        <div className="text-xs text-gray-500">
-                                            Clôturé le {new Date(election.date_fin).toLocaleDateString()}
-                                        </div>
-                                        <div className="text-center text-sm text-orange-600 font-medium">
-                                            📊 Résultats en attente de validation
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 text-gray-500">
-                            Aucun vote clôturé
-                        </div>
-                    )}
-                </TabsContent>
-
-                {/* 🏆 Résultats publiés */}
-                <TabsContent value="terminee" className="space-y-4">
-                    <Alert>
-                        <AlertDescription>
-                            🏆 Découvrez les résultats officiels des élections terminées.
-                        </AlertDescription>
-                    </Alert>
-                    
-                    {workflow?.terminee?.length > 0 ? (
-                        <div className="space-y-4">
-                            {workflow.terminee.map((election) => (
-                                <Card key={election.id_election} className="border-blue-200">
-                                    <CardHeader>
-                                        <CardTitle>{election.titre}</CardTitle>
-                                        <Badge className="bg-blue-100 text-blue-800">Résultats publiés</Badge>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <p className="text-gray-600">{election.description}</p>
-                                                <div className="text-xs text-gray-500 mt-2">
-                                                    Terminé le {new Date(election.date_fin).toLocaleDateString()}
-                                                </div>
+                                            <div className="flex items-center gap-1">
+                                                <Clock className="h-4 w-4" />
+                                                <span>Limite: {new Date(election.date_fin_candidatures).toLocaleDateString()}</span>
                                             </div>
-                                            <Button asChild variant="outline">
-                                                <Link href={`/resultats/${election.id_election}`}>
-                                                    Voir les résultats
-                                                </Link>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button 
+                                                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                                                onClick={() => handleCandidater(election)}
+                                            >
+                                                <UserPlus className="h-4 w-4 mr-2" />
+                                                Candidater
                                             </Button>
                                         </div>
                                     </CardContent>
                                 </Card>
                             ))}
                         </div>
-                    ) : (
-                        <div className="text-center py-8 text-gray-500">
-                            Aucune élection terminée
-                        </div>
-                    )}
-                </TabsContent>
-            </WorkflowTabsLayout>
-        </AppLayout>
-    );
-
-    function getPostIcon(type: string) {
-        switch (type) {
-            case 'candidatures_ouvertes':
-                return <span className="text-2xl">📢</span>;
-            case 'candidats_publies':
-                return <span className="text-2xl">👥</span>;
-            case 'liste_generee':
-                return <span className="text-2xl">📋</span>;
-            case 'vote_ouvert':
-                return <span className="text-2xl">🗳️</span>;
-            case 'vote_cloture':
-                return <span className="text-2xl">🔒</span>;
-            case 'resultats_publies':
-                return <span className="text-2xl">🏆</span>;
-            default:
-                return <span className="text-2xl">📄</span>;
-        }
-    }
-
-    function getPostTitle(type: string): string {
-        switch (type) {
-            case 'candidatures_ouvertes':
-                return 'Ouverture officielle des candidatures';
-            case 'candidats_publies':
-                return 'Publication de la liste officielle des candidats';
-            case 'liste_generee':
-                return 'Liste électorale générée - Candidatures ouvertes !';
-            case 'vote_ouvert':
-                return 'Le vote est maintenant ouvert !';
-            case 'vote_cloture':
-                return 'Le vote a été clôturé';
-            case 'resultats_publies':
-                return 'Résultats officiels publiés';
-            default:
-                return 'Mise à jour';
-        }
-    }
-
-    function renderPostContent(post: any) {
-        switch (post.type) {
-            case 'candidatures_ouvertes':
-                return (
-                    <div className="space-y-3">
-                        <p className="text-gray-700">
-                            Nous sommes heureux d'annoncer l'ouverture officielle des candidatures pour cette élection.
-                        </p>
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <p className="text-sm text-blue-800">
-                                Les candidats intéressés peuvent désormais déposer leur candidature.
-                            </p>
-                        </div>
                     </div>
-                );
+                )}
 
-            case 'candidats_publies':
-                return (
-                    <div className="space-y-4">
-                        <p className="text-gray-700">
-                            Voici la liste officielle des candidats validés pour cette élection :
-                        </p>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            {post.candidates?.map((c: any) => (
-                                <div key={c.id} className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
-                                    <img 
-                                        src={getImageUrl(c.photo)} 
-                                        className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
-                                        onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            target.src = '/placeholder.svg';
-                                        }}
-                                    />
-                                    <div>
-                                        <strong className="text-gray-900">{c.name}</strong>
-                                        {c.slogan && (
-                                            <p className="text-sm text-gray-600 italic">"{c.slogan}"</p>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-
-            case 'liste_generee':
-                return (
-                    <div className="space-y-4">
-                        <p className="text-gray-700">
-                            La liste électorale a été générée avec succès ! Les étudiants éligibles peuvent maintenant déposer leur candidature.
-                        </p>
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div className="space-y-2">
-                                <p className="text-blue-800 font-medium">Candidatures ouvertes</p>
-                                <p className="text-sm text-blue-700">
-                                    Si vous êtes éligible et intéressé(e) à devenir candidat, veuillez contacter l'administration pour déposer votre dossier.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'vote_ouvert':
-                return (
-                    <div className="space-y-4">
-                        <p className="text-gray-700">
-                            Le vote est officiellement ouvert ! Tous les électeurs éligibles peuvent maintenant participer.
-                        </p>
+                {/* 🟢 Section Élections ouvertes au vote */}
+                {workflow?.ouverte && workflow.ouverte.length > 0 && (
+                    <div className="space-y-6">
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Vote className="h-6 w-6 text-green-600" />
                                 <div>
-                                    <p className="text-green-800 font-medium">Participez au vote</p>
-                                    <p className="text-sm text-green-700">Votre voix compte !</p>
+                                    <h3 className="font-semibold text-green-800">Élections ouvertes au vote</h3>
+                                    <p className="text-green-600 text-sm">Votez maintenant pour les candidats de votre choix</p>
                                 </div>
-                                <Button asChild className="bg-green-600 hover:bg-green-700">
-                                    <Link href={votesRoutes.candidats.url({ election: post.election_id })}>
-                                        Voter maintenant
-                                    </Link>
-                                </Button>
                             </div>
-                        </div>
-                    </div>
-                );
-
-            case 'vote_cloture':
-                return (
-                    <div className="space-y-3">
-                        <p className="text-gray-700">
-                            La période de vote est maintenant terminée. Nous remercions tous les électeurs pour leur participation.
-                        </p>
-                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                            <p className="text-sm text-orange-800">
-                                Les résultats sont en cours de validation et seront publiés prochainement.
-                            </p>
-                        </div>
-                    </div>
-                );
-
-            case 'resultats_publies':
-                return (
-                    <div className="space-y-4">
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <p className="text-green-800 font-bold text-center">
-                                RÉSULTATS OFFICIELS PUBLIÉS
-                            </p>
-                            <p className="text-sm text-green-700 text-center mt-1">
-                                {post.total_votes} votes exprimés
-                            </p>
                         </div>
                         
-                        <div className="space-y-3">
-                            {post.results?.map((r: any) => (
-                                <div key={r.id} className={`border rounded-lg p-4 ${
-                                    r.isWinner ? 'bg-yellow-50 border-yellow-300' : 'bg-white border-gray-200'
-                                }`}>
-                                    <div className="flex justify-between items-center mb-3">
-                                        <div className="flex items-center space-x-2">
-                                            <strong className={`text-lg ${r.isWinner ? 'text-yellow-700' : 'text-gray-900'}`}>
-                                                {r.name}
-                                            </strong>
-                                            {r.isWinner && (
-                                                <Badge className="bg-yellow-500 text-white">
-                                                    ÉLU(E)
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {workflow.ouverte.map((election: Election) => (
+                                <Card key={election.id_election} className="hover:shadow-lg transition-shadow">
+                                    <CardHeader>
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <CardTitle className="text-lg">{election.titre}</CardTitle>
+                                                <Badge variant="default" className="mt-1 bg-green-100 text-green-800">
+                                                    {election.type}
                                                 </Badge>
-                                            )}
+                                            </div>
+                                            <Badge variant="outline" className="text-xs">
+                                                {election.statut}
+                                            </Badge>
                                         </div>
-                                        <div className="text-right">
-                                            <span className="font-bold text-blue-600">{r.votes} votes</span>
-                                            <span className="text-gray-500 ml-2">({r.percentage}%)</span>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <p className="text-gray-600 text-sm">{election.description}</p>
+                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                            <div className="flex items-center gap-1">
+                                                <Calendar className="h-4 w-4" />
+                                                <span>Fin: {new Date(election.date_fin).toLocaleDateString()}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Users className="h-4 w-4" />
+                                                <span>{election.candidatures?.length || 0} candidats</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="w-full bg-gray-200 h-4 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full transition-all duration-500 ${
-                                                r.isWinner ? 'bg-yellow-500' : 'bg-blue-600'
-                                            }`}
-                                            style={{ width: `${r.percentage}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
+                                        <div className="flex gap-2">
+                                            <Button 
+                                                className="flex-1 bg-green-600 hover:bg-green-700"
+                                                onClick={() => handleVoter(election)}
+                                            >
+                                                <Vote className="h-4 w-4 mr-2" />
+                                                Voter
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             ))}
                         </div>
                     </div>
-                );
+                )}
 
-            default:
-                return <p className="text-gray-700">{post.content}</p>;
-        }
-    }
+                {/* 🏆 Section Résultats officiels publiés */}
+                {workflow?.terminee && workflow.terminee.length > 0 && (
+                    <div className="space-y-6">
+                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <div className="flex items-center gap-3">
+                                <Trophy className="h-6 w-6 text-purple-600" />
+                                <div>
+                                    <h3 className="font-semibold text-purple-800">Résultats officiels publiés</h3>
+                                    <p className="text-purple-600 text-sm">Consultez les résultats des élections terminées</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {workflow.terminee.map((election: Election) => (
+                                <Card key={election.id_election} className="hover:shadow-lg transition-shadow">
+                                    <CardHeader>
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <CardTitle className="text-lg">{election.titre}</CardTitle>
+                                                <Badge variant="default" className="mt-1 bg-purple-100 text-purple-800">
+                                                    {election.type}
+                                                </Badge>
+                                            </div>
+                                            <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700">
+                                                Terminée
+                                            </Badge>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <p className="text-gray-600 text-sm">{election.description}</p>
+                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                            <div className="flex items-center gap-1">
+                                                <Calendar className="h-4 w-4" />
+                                                <span>Terminée: {new Date(election.date_fin).toLocaleDateString()}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <TrendingUp className="h-4 w-4" />
+                                                <span>{election.candidatures?.length || 0} candidats</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button 
+                                                className="flex-1 bg-purple-600 hover:bg-purple-700"
+                                                onClick={() => handleVoirResultats(election)}
+                                            >
+                                                <Trophy className="h-4 w-4 mr-2" />
+                                                Voir résultats
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* 🔄 Section Élections en second tour */}
+                {workflow?.ouverte && workflow.ouverte.filter((e: Election) => e.statut === 'second_tour').length > 0 && (
+                    <div className="space-y-6">
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                            <div className="flex items-center gap-3">
+                                <TrendingUp className="h-6 w-6 text-orange-600" />
+                                <div>
+                                    <h3 className="font-semibold text-orange-800">Élections en second tour</h3>
+                                    <p className="text-orange-600 text-sm">Votez pour le second tour des élections</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {workflow.ouverte.filter((e: Election) => e.statut === 'second_tour').map((election: Election) => (
+                                <Card key={election.id_election} className="hover:shadow-lg transition-shadow">
+                                    <CardHeader>
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <CardTitle className="text-lg">{election.titre}</CardTitle>
+                                                <Badge variant="default" className="mt-1 bg-orange-100 text-orange-800">
+                                                    Second Tour
+                                                </Badge>
+                                            </div>
+                                            <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700">
+                                                {election.statut}
+                                            </Badge>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <p className="text-gray-600 text-sm">{election.description}</p>
+                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                            <div className="flex items-center gap-1">
+                                                <Calendar className="h-4 w-4" />
+                                                <span>Fin: {new Date(election.date_fin).toLocaleDateString()}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Users className="h-4 w-4" />
+                                                <span>{election.candidatures?.length || 0} candidats</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button 
+                                                className="flex-1 bg-orange-600 hover:bg-orange-700"
+                                                onClick={() => handleVoterSecondTour(election)}
+                                            >
+                                                <Vote className="h-4 w-4 mr-2" />
+                                                Voter (2ème tour)
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Message si aucune élection disponible */}
+                {(!workflow?.liste_generee || workflow.liste_generee.length === 0) &&
+                 (!workflow?.ouverte || workflow.ouverte.length === 0) &&
+                 (!workflow?.terminee || workflow.terminee.length === 0) && (
+                    <div className="text-center py-12">
+                        <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <h3 className="text-lg font-semibold text-gray-600 mb-2">Aucune élection disponible</h3>
+                        <p className="text-gray-500">Revenez plus tard pour les prochaines élections</p>
+                    </div>
+                )}
+            </div>
+        </AppLayout>
+    );
 }

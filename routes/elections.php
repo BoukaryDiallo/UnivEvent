@@ -47,12 +47,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('elections.cloturerCandidatures')
         ->middleware('role:admin');
 
-    Route::get('/elections/{election}/second-tour', [ElectionController::class, 'secondTourForm'])
+    Route::get('/elections/{election}/second-tour-form', [ElectionController::class, 'secondTourForm'])
         ->name('elections.secondTour.form')
         ->middleware('role:admin');
         
     Route::post('/elections/{election}/second-tour', [ElectionController::class, 'secondTourStore'])
         ->name('elections.secondTour.store')
+        ->middleware('role:admin');
+
+    Route::post('/resultats/{election}/publier-provisoire', [ResultatController::class, 'publierProvisoire'])
+        ->name('resultats.publierProvisoire')
         ->middleware('role:admin');
 
     Route::get('/elections/{election}/admin', [ElectionController::class, 'admin'])
@@ -68,6 +72,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/candidatures/{candidature}/refuser', [CandidatureController::class, 'refuser'])
         ->name('candidatures.refuser')
+        ->middleware('role:admin');
+
+    // Route pour candidater depuis une élection spécifique
+    Route::get('/candidatures/create/{election}', [CandidatureController::class, 'createForElection'])
+        ->name('candidatures.create.election');
+        
+    // Route create classique pour admin uniquement
+    Route::get('/candidatures/create', [CandidatureController::class, 'create'])
+        ->name('candidatures.create')
         ->middleware('role:admin');
 
     /////////////////////////////////////GESTION DES VOTES///////////////////////////////////
@@ -103,29 +116,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('votes.live.show')
         ->middleware('role:admin');
 
-    Route::get('/votes/live', [VoteController::class, 'liveIndex'])
-        ->name('votes.live.index')
-        ->middleware('role:admin');
-
-    Route::get('/votes/live/{election}', [VoteController::class, 'liveShow'])
-        ->name('votes.live.show')
-        ->middleware('role:admin');
-
+    /////////////////////////////////////GESTION DES RÉSULTATS///////////////////////////////////
+    
+    // Routes de consultation des résultats (frontend)
     Route::get('/resultats', [ResultatController::class, 'index'])
         ->name('resultats.index');
 
     Route::get('/resultats/{election}', [ResultatController::class, 'show'])
         ->name('resultats.show');
 
-    Route::get('/depouillement/{election}', [DepouillementController::class, 'depouiller'])
-        ->name('depouillement.show')
+    // Routes de gestion des résultats (admin)
+    Route::get('/resultats/{election}/preview', [ResultatController::class, 'preview'])
+        ->name('resultats.preview')
         ->middleware('role:admin');
 
-    Route::post('/depouillement/{election}', [DepouillementController::class, 'depouiller'])
-        ->name('depouillement.depouiller')
+    Route::post('/resultats/{election}/publier', [ResultatController::class, 'publier'])
+        ->name('resultats.publier')
         ->middleware('role:admin');
 
-    Route::post('/depouillement/{election}/publier', [DepouillementController::class, 'publier'])
-        ->name('depouillement.publier')
+    /////////////////////////////////////GESTION DU DÉPOUILLEMENT///////////////////////////////////
+    
+    // Routes de calcul du dépouillement (admin)
+    Route::post('/depouillement/{election}/calculer', [DepouillementController::class, 'calculer'])
+        ->name('depouillement.calculer')
+        ->middleware('role:admin');
+
+    Route::get('/depouillement/{election}/results', [DepouillementController::class, 'showResults'])
+        ->name('depouillement.results')
+        ->middleware('role:admin');
+
+    // Route de vérification de l'état du dépouillement (admin)
+    Route::get('/depouillement/{election}/etat', [DepouillementController::class, 'etat'])
+        ->name('depouillement.etat')
         ->middleware('role:admin');
     });

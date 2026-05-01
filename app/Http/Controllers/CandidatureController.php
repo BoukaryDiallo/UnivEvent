@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Candidature;
-use App\Models\User;
+use App\Models\Etudiant;
 use App\Models\Election;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,26 +20,83 @@ class CandidatureController extends Controller
     // Formulaire de création
     public function create()
     {
-        $users = User::all();
-        $elections = Election::all();
-        return Inertia::render('candidatures/CandidatureCreate', compact('users','elections'));
+        $etudiants = Etudiant::with('user', 'ufr', 'filiere', 'departement')
+            ->where('statut', 'actif')
+            ->join('users', 'users.id', '=', 'etudiants.id_user')
+            ->orderBy('users.name')
+            ->select('etudiants.*')
+            ->get();
+        $elections = Election::where('statut', 'planifiee')
+            ->orWhere('statut', 'liste_generee')
+            ->orderBy('date_debut')
+            ->get();
+        return Inertia::render('candidatures/CandidatureCreate', compact('etudiants','elections'));
+    }
+
+    // Formulaire de création pour une élection spécifique
+    public function createForElection(Election $election)
+    {
+        // Debug: Log des informations
+        \Log::info('createForElection appelé', ['election_id' => $election->id_election]);
+        
+        // Récupérer l'étudiant connecté
+        $user = auth()->user();
+        \Log::info('User authentifié', ['user_id' => $user?->id, 'user_email' => $user?->email]);
+        
+        if (!$user) {
+            \Log::error('Utilisateur non authentifié');
+            return back()->with('error', 'Vous devez être connecté pour déposer une candidature.');
+        }
+        
+        $etudiant = Etudiant::where('id_user', $user->id)
+            ->whereIn('statut', ['actif', 'inscrit'])
+            ->with('user', 'ufr', 'filiere', 'departement')
+            ->first();
+            
+        \Log::info('Étudiant trouvé', ['etudiant_id' => $etudiant?->id, 'statut' => $etudiant?->statut]);
+
+        if (!$etudiant) {
+            \Log::error('Étudiant non trouvé ou non actif', ['user_id' => $user->id]);
+            return back()->with('error', 'Vous n\'êtes pas un étudiant actif ou votre profil n\'est pas complet.');
+        }
+
+        // Vérifier que l'étudiant n'a pas déjà candidaté pour cette élection
+        $existingCandidature = Candidature::where('id_user', $user->id)
+            ->where('id_election', $election->id_election)
+            ->first();
+            
+        \Log::info('Vérification candidature existante', ['existing' => $existingCandidature?->id_candidature]);
+
+        if ($existingCandidature) {
+            \Log::error('Candidature déjà existante', ['candidature_id' => $existingCandidature->id_candidature]);
+            return back()->with('error', 'Vous avez déjà soumis une candidature pour cette élection.');
+        }
+
+        \Log::info('Redirection vers CandidatureCreate', ['etudiant_id' => $etudiant->id, 'election_id' => $election->id_election]);
+        
+        return Inertia::render('candidatures/CandidatureCreate', [
+            'etudiant' => $etudiant,
+            'election' => $election,
+            'fromElection' => true
+        ]);
     }
 
     // Enregistrer une candidature
     public function store(Request $request)
     {
         $request->validate([
-            'id_user' => 'required|exists:users,id',
-            'id_election' => 'required|exists:elections,id_election',
+            'id_etudiant' => 'required_without:fromElection|exists:etudiants,id',
+            'id_election' => 'required_without:fromElection|exists:elections,id_election',
             'programme' => 'nullable|string',
             'photo' => 'nullable|image|max:4096',
-            'cnib_pdf' => 'required|mimes:pdf|max:5120',
-            'casier_judiciaire_pdf' => 'required|mimes:pdf|max:5120',
-            'attestation_inscription_pdf' => 'required|mimes:pdf|max:5120',
+            'cnib_pdf' => 'required_if:fromElection,0|required_if:needsPdf,true|mimes:pdf|max:5120',
+            'casier_judiciaire_pdf' => 'required_if:fromElection,0|required_if:needsPdf,true|mimes:pdf|max:5120',
+            'attestation_inscription_pdf' => 'required_if:fromElection,0|required_if:needsPdf,true|mimes:pdf|max:5120',
         ]);
 
         // Vérifier que l'étudiant n'a pas déjà candidaté pour cette élection
-        $existingCandidature = Candidature::where('id_user', $request->id_user)
+        $etudiant = Etudiant::find($request->id_etudiant);
+        $existingCandidature = Candidature::where('id_user', $etudiant->id_user)
             ->where('id_election', $request->id_election)
             ->first();
 
@@ -47,7 +104,27 @@ class CandidatureController extends Controller
             return back()->with('error', 'Vous avez déjà soumis une candidature pour cette élection.');
         }
 
-        $data = $request->all();
+        // Récupérer les données selon le contexte
+        if ($request->fromElection) {
+            // Depuis une élection spécifique
+            $user = auth()->user();
+            $etudiant = Etudiant::where('id_user', $user->id)->first();
+            $election = Election::find($request->id_election);
+            
+            if (!$etudiant || !$election) {
+                return back()->with('error', 'Informations invalides.');
+            }
+            
+            $data = $request->all();
+            $data['id_etudiant'] = $etudiant->id;
+            $data['id_election'] = $election->id_election;
+            $data['id_user'] = $user->id;
+        } else {
+            // Formulaire classique admin
+            $etudiant = Etudiant::find($request->id_etudiant);
+            $data = $request->all();
+            $data['id_user'] = $etudiant->id_user;
+        }
 
         if ($request->hasFile('photo')) {
             $data['photo'] = $request->file('photo')->store('photos', 'public');
@@ -72,9 +149,14 @@ class CandidatureController extends Controller
     public function edit(string $id)
     {
         $candidature = Candidature::findOrFail($id);
-        $users = User::all();
+        $etudiants = Etudiant::with('user', 'ufr', 'filiere', 'departement')
+            ->where('statut', 'actif')
+            ->join('users', 'users.id', '=', 'etudiants.id_user')
+            ->orderBy('users.name')
+            ->select('etudiants.*')
+            ->get();
         $elections = Election::all();
-        return Inertia::render('candidatures/CandidatureEdit', compact('candidature','users','elections'));
+        return Inertia::render('candidatures/CandidatureEdit', compact('candidature','etudiants','elections'));
     }
 
     // Mettre à jour une candidature

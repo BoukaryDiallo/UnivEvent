@@ -22,32 +22,27 @@ export default function ElectionAdminLayout({
     ]
 
     return (
-        <div className="container mt-5">
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">{election.titre}</h1>
-                    <p className="text-gray-600 mt-1">{election.description}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <ElectionStatusBadge statut={election.statut} />
-                    <Button variant="outline" onClick={onBack}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Retour
-                    </Button>
-                </div>
-            </div>
-
-            <Tabs defaultValue="informations" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-5">
+        <div className="container mx-auto px-6 py-8">
+            <Tabs defaultValue="informations" className="space-y-8">
+                {/* Onglets modernisés avec couleur bleue pour l'onglet actif */}
+                <TabsList className="grid w-full grid-cols-5 h-auto p-1 bg-gray-100 rounded-xl shadow-lg">
                     {tabs.map((tab) => (
-                        <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
+                        <TabsTrigger 
+                            key={tab.id} 
+                            value={tab.id} 
+                            className="flex items-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-gray-200 data-[state=active]:hover:bg-blue-700"
+                        >
                             <tab.icon className="h-4 w-4" />
-                            {tab.label}
+                            <span className="hidden sm:inline">{tab.label}</span>
+                            <span className="sm:hidden">{tab.label.slice(0, 3)}</span>
                         </TabsTrigger>
                     ))}
                 </TabsList>
 
-                {children}
+                {/* Contenu des onglets */}
+                <div className="bg-white rounded-xl shadow-lg border-0 p-6">
+                    {children}
+                </div>
             </Tabs>
         </div>
     )
