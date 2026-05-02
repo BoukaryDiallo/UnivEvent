@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ChargeRequest;
+use App\Http\Requests\DispoImportRequest;
 use App\Http\Requests\DispoRequest;
 use App\Http\Requests\EcartRequest;
 use App\Metiers\AlerteMetier;
@@ -12,6 +13,7 @@ use App\Models\Dispo;
 use App\Models\Ecart;
 use App\Models\Prise;
 use App\Models\User;
+use App\Support\DispoImportParser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -22,8 +24,8 @@ class DispoController extends Controller
     public function __construct(
         protected DispoMetier $metier,
         protected AlerteMetier $alertes,
-    ) {
-    }
+        protected DispoImportParser $importParser,
+    ) {}
 
     public function dispos(Request $request): Response
     {
@@ -195,23 +197,28 @@ class DispoController extends Controller
         $data = $request->validated();
         $creneaux = array_values($data['creneaux'] ?? []);
 
-        $this->metier->verifierJoursUniquesLot($user->id, $creneaux);
-
-        foreach ($creneaux as $index => $creneau) {
-            try {
-                $this->metier->verifierHeure(now()->toDateString(), $creneau['debut'], $creneau['fin']);
-                $this->metier->verifierChevauchement($user->id, 'dispos', $creneau['jour'], $creneau['debut'].':00', $creneau['fin'].':00');
-                $this->metier->verifierPriseHebdo($user->id, (int) $creneau['jour'], $creneau['debut'].':00', $creneau['fin'].':00');
-            } catch (ValidationException $exception) {
-                throw ValidationException::withMessages($this->prefixerErreursCreneau($exception->errors(), $index));
-            }
-        }
-
-        $this->metier->creerDisponibilites($user->id, $creneaux);
+        $this->validerEtCreerCreneaux($user->id, $creneaux, true);
 
         $message = count($creneaux) > 1
             ? 'Disponibilites ajoutees.'
             : 'Disponibilite ajoutee.';
+
+        return redirect('/dispos')->with('ok', $message);
+    }
+
+    public function importer(DispoImportRequest $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        abort_unless($user?->role === 'enseignant', 403);
+
+        $creneaux = $this->importParser->parse($request->file('fichier'));
+
+        $this->validerEtCreerCreneaux($user->id, $creneaux, false);
+
+        $message = count($creneaux) > 1
+            ? 'Disponibilites importees avec succes.'
+            : 'Disponibilite importee avec succes.';
 
         return redirect('/dispos')->with('ok', $message);
     }
@@ -542,5 +549,56 @@ class DispoController extends Controller
         }
 
         return $resultat;
+    }
+
+    protected function validerEtCreerCreneaux(int $userId, array $creneaux, bool $prefixerErreursParCreneau = true): void
+    {
+        try {
+            $this->metier->verifierJoursUniquesLot($userId, $creneaux);
+        } catch (ValidationException $exception) {
+            if ($prefixerErreursParCreneau) {
+                throw $exception;
+            }
+
+            throw ValidationException::withMessages([
+                'fichier' => $this->formaterErreursImport($exception->errors()),
+            ]);
+        }
+
+        foreach ($creneaux as $index => $creneau) {
+            try {
+                $this->metier->verifierHeure(now()->toDateString(), $creneau['debut'], $creneau['fin']);
+                $this->metier->verifierChevauchement($userId, 'dispos', $creneau['jour'], $creneau['debut'].':00', $creneau['fin'].':00');
+                $this->metier->verifierPriseHebdo($userId, (int) $creneau['jour'], $creneau['debut'].':00', $creneau['fin'].':00');
+            } catch (ValidationException $exception) {
+                if ($prefixerErreursParCreneau) {
+                    throw ValidationException::withMessages($this->prefixerErreursCreneau($exception->errors(), $index));
+                }
+
+                throw ValidationException::withMessages([
+                    'fichier' => $this->formaterErreursImport($exception->errors(), $index + 2),
+                ]);
+            }
+        }
+
+        $this->metier->creerDisponibilites($userId, $creneaux);
+    }
+
+    protected function formaterErreursImport(array $erreurs, ?int $ligne = null): array
+    {
+        $messages = [];
+
+        foreach ($erreurs as $champ => $fieldMessages) {
+            preg_match('/creneaux\.(\d+)\./', $champ, $matches);
+            $ligneCourante = $ligne ?? (isset($matches[1]) ? ((int) $matches[1]) + 2 : null);
+
+            foreach ($fieldMessages as $message) {
+                $messages[] = $ligneCourante !== null
+                    ? 'Ligne '.$ligneCourante.' : '.$message
+                    : $message;
+            }
+        }
+
+        return $messages;
     }
 }

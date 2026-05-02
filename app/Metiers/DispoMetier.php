@@ -16,8 +16,11 @@ use Illuminate\Validation\ValidationException;
 class DispoMetier implements DispoContrat
 {
     public const ACTION_CREATION = 'CREATION';
+
     public const ACTION_MODIFICATION = 'MODIFICATION';
+
     public const ACTION_SUPPRESSION = 'SUPPRESSION';
+
     public const ACTION_RESTAURATION = 'RESTAURATION';
 
     public const SEMESTRES_CHARGE = [
@@ -123,14 +126,14 @@ class DispoMetier implements DispoContrat
     public function normalizeSemestre(array $semestres): array
     {
         $semestres = array_values(array_unique(array_filter($semestres)));
-        
+
         $individuels = array_intersect($semestres, ['semestre_1', 'semestre_2', 'semestre_3']);
         $hasTous = in_array('tous_les_semestres', $semestres, true);
-        
+
         if ($hasTous || count($individuels) === 3) {
             return ['tous_les_semestres'];
         }
-        
+
         return $semestres;
     }
 
@@ -157,10 +160,11 @@ class DispoMetier implements DispoContrat
         $semestres = $this->deserializeSemestresCharge($semestre);
 
         if ($semestres !== []) {
-            $noms = array_map(fn($s) => self::SEMESTRES_CHARGE[$s] ?? 'Inconnu', $semestres);
+            $noms = array_map(fn ($s) => self::SEMESTRES_CHARGE[$s] ?? 'Inconnu', $semestres);
+
             return implode(' et ', $noms);
         }
-        
+
         return self::SEMESTRES_CHARGE['tous_les_semestres'];
     }
 
@@ -248,13 +252,15 @@ class DispoMetier implements DispoContrat
 
         foreach ($creneaux as $index => $creneau) {
             $jour = (int) ($creneau['jour'] ?? 0);
+            $nomJour = strtolower($this->nomJour($jour));
 
             if ($jour === 0) {
                 continue;
             }
 
             if (in_array($jour, $joursVus, true)) {
-                $erreurs["creneaux.$index.jour"] = 'Ce jour est deja present dans votre saisie.';
+                $erreurs["creneaux.$index.jour"] = "Le jour {$nomJour} est deja present dans votre saisie.";
+
                 continue;
             }
 
@@ -266,7 +272,7 @@ class DispoMetier implements DispoContrat
                 ->exists();
 
             if ($existe) {
-                $erreurs["creneaux.$index.jour"] = 'Une disponibilite existe deja pour ce jour.';
+                $erreurs["creneaux.$index.jour"] = "Une disponibilite existe deja pour le {$nomJour}.";
             }
         }
 
@@ -642,8 +648,8 @@ class DispoMetier implements DispoContrat
 
         foreach ($charges as $charge) {
             $semestresCharge = $this->deserializeSemestresCharge($charge->getRawOriginal('semestre'));
-            
-            if (in_array('tous_les_semestres', $semestresCharge, true) || 
+
+            if (in_array('tous_les_semestres', $semestresCharge, true) ||
                 in_array($semestre, $semestresCharge, true)) {
                 return $charge;
             }
