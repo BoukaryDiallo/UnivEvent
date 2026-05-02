@@ -4,9 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class EmploiDuTemps extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\Module2\EmploiDuTempsFactory::new();
+    }
+
     protected $table = 'emploi_du_temps';
 
     protected $fillable = [
