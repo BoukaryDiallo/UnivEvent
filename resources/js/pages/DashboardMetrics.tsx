@@ -2,6 +2,7 @@ import { CalendarClock, Ticket, TrendingUp } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface MetricsProps {
+    isAdmin: boolean;
     stats: {
         events_count: number;
         inscriptions_count: number;
@@ -10,19 +11,19 @@ interface MetricsProps {
     };
 }
 
-export function DashboardMetrics({ stats }: MetricsProps) {
+export function DashboardMetrics({ stats, isAdmin }: MetricsProps) {
     const metricCards = useMemo(() => [
         {
             title: 'Événements',
             value: stats.events_count,
-            note: 'Actifs sur la plateforme',
+            note: isAdmin ? 'Actifs sur la plateforme' : 'Dans votre perimetre',
             icon: CalendarClock,
             tone: 'from-sky-500 to-cyan-400',
         },
         {
             title: 'Inscriptions',
             value: stats.inscriptions_count,
-            note: 'Demandes et confirmations',
+            note: isAdmin ? 'Demandes et confirmations' : 'Demandes et confirmations liees',
             icon: Ticket,
             tone: 'from-indigo-500 to-blue-500',
         },
@@ -36,11 +37,11 @@ export function DashboardMetrics({ stats }: MetricsProps) {
         {
             title: 'Participation',
             value: `${stats.participation_rate}%`,
-            note: 'Taux moyen de validation',
+            note: isAdmin ? 'Taux moyen de validation' : 'Taux de validation sur votre perimetre',
             icon: Ticket,
             tone: 'from-amber-500 to-orange-400',
         },
-    ], [stats]);
+    ], [isAdmin, stats]);
 
     return (
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

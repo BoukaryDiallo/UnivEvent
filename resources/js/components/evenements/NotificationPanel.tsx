@@ -53,7 +53,16 @@ export function NotificationPanel({
                         <button
                             key={notification.id}
                             type="button"
-                            onClick={() => router.post(`/notifications/${notification.id}/read`, {}, { preserveScroll: true })}
+                            onClick={() =>
+                                router.post(`/notifications/${notification.id}/read`, {}, {
+                                    preserveScroll: true,
+                                    onSuccess: () => {
+                                        if (notification.event_id) {
+                                            router.visit(`/evenements/${notification.event_id}`);
+                                        }
+                                    },
+                                })
+                            }
                             className={`w-full rounded-2xl border px-4 py-3 text-left transition ${notification.read_at ? 'border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900' : 'border-rose-200 bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/20'}`}
                         >
                             <div className="flex items-start gap-3">

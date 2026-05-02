@@ -29,7 +29,10 @@ class MediaService
 
         $path = Storage::disk('public')->put('evenements', $file);
 
-        return EvenementMedia::create([
+        $shouldBeCover = $this->shouldUseAsCover($event, $file, $data);
+        $meta = $this->normalizeMeta($data['meta'] ?? null, $shouldBeCover);
+
+        $media = EvenementMedia::create([
             'evenement_id' => $event->id,
             'type' => $this->getMediaType($file),
             'chemin_fichier' => $path,
@@ -39,8 +42,14 @@ class MediaService
             'is_public' => $data['is_public'] ?? true,
             'download_allowed' => $data['download_allowed'] ?? true,
             'confidentialite' => $this->normalizeConfidentiality($data['confidentialite'] ?? null, $data['is_public'] ?? true),
-            'meta' => $data['meta'] ?? null,
+            'meta' => $meta,
         ]);
+
+        if ($shouldBeCover) {
+            $this->setAsCover($media);
+        }
+
+        return $media;
     }
 
     public function updateMedia(EvenementMedia $media, array $data): EvenementMedia
@@ -52,7 +61,15 @@ class MediaService
             'confidentialite' => array_key_exists('confidentialite', $data)
                 ? $this->normalizeConfidentiality($data['confidentialite'], (bool) ($data['is_public'] ?? $media->is_public))
                 : $media->confidentialite,
+            'meta' => $this->normalizeMeta(
+                array_key_exists('meta', $data) ? $data['meta'] : $media->meta,
+                (bool) ($data['is_cover'] ?? data_get($media->meta, 'is_cover', false)),
+            ),
         ]);
+
+        if (array_key_exists('is_cover', $data) && $data['is_cover']) {
+            $this->setAsCover($media->fresh());
+        }
 
         return $media;
     }
@@ -149,6 +166,7 @@ class MediaService
                 'is_public' => $media->is_public,
                 'download_allowed' => (bool) $media->download_allowed,
                 'confidentialite' => $this->normalizeConfidentiality($media->confidentialite, (bool) $media->is_public),
+                'is_cover' => (bool) data_get($media->meta, 'is_cover', false),
                 'can_view' => $canAccess,
                 'can_download' => $this->canDownload($media, $user, $assignment),
                 'uploaded_at' => $media->created_at,
@@ -183,5 +201,48 @@ class MediaService
         }
 
         return $confidentialite;
+    }
+
+    private function normalizeMeta(mixed $meta, bool $isCover = false): array
+    {
+        $payload = is_array($meta) ? $meta : [];
+        $payload['is_cover'] = $isCover;
+
+        return $payload;
+    }
+
+    private function shouldUseAsCover(Evenement $event, UploadedFile $file, array $data): bool
+    {
+        if ($this->getMediaType($file) !== 'image') {
+            return false;
+        }
+
+        if ((bool) ($data['is_cover'] ?? false)) {
+            return true;
+        }
+
+        return ! $event->medias()->where('type', 'image')->exists();
+    }
+
+    private function setAsCover(EvenementMedia $media): void
+    {
+        if ($media->type !== 'image') {
+            return;
+        }
+
+        EvenementMedia::query()
+            ->where('evenement_id', $media->evenement_id)
+            ->where('id', '!=', $media->id)
+            ->where('type', 'image')
+            ->get()
+            ->each(function (EvenementMedia $item) {
+                $meta = is_array($item->meta) ? $item->meta : [];
+                $meta['is_cover'] = false;
+                $item->update(['meta' => $meta]);
+            });
+
+        $meta = is_array($media->meta) ? $media->meta : [];
+        $meta['is_cover'] = true;
+        $media->update(['meta' => $meta]);
     }
 }

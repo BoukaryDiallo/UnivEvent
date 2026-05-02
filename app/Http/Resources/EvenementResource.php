@@ -16,7 +16,7 @@ class EvenementResource extends JsonResource
     public function toArray(Request $request): array
     {
         $user = $request->user();
-        $cover = $this->relationLoaded('medias') ? $this->medias->firstWhere('type', 'image') : null;
+        $cover = $this->resource->preferredCoverMedia();
         $currentInscription = $user && $this->relationLoaded('inscriptions')
             ? $this->inscriptions->firstWhere('utilisateur_id', $user->id)
             : null;
@@ -77,6 +77,8 @@ class EvenementResource extends JsonResource
                 'id' => $currentInscription->id,
                 'statut' => $this->mapParticipationStatus($currentInscription->statut),
                 'backend_statut' => $currentInscription->statut,
+                'is_waitlist' => (bool) $currentInscription->is_waitlist,
+                'waitlist_position' => $currentInscription->waitlist_position,
             ] : null,
             'current_inscription_id' => $currentInscription?->id,
             'created_at' => optional($this->created_at)->toIso8601String(),

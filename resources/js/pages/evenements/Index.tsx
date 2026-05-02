@@ -19,12 +19,17 @@ type IndexProps = {
         published: number;
         upcoming: number;
     };
+    catalogMode: {
+        isAdmin: boolean;
+        canManageEvents: boolean;
+        isParticipantView: boolean;
+    };
     recommendations: EventSummary[];
     recentEvents: EventSummary[];
     influentialEvents: EventSummary[];
 };
 
-export default function EvenementsIndex({ evenements, filters, stats, recommendations, recentEvents, influentialEvents }: IndexProps) {
+export default function EvenementsIndex({ evenements, filters, stats, catalogMode, recommendations, recentEvents, influentialEvents }: IndexProps) {
     const [localFilters, setLocalFilters] = useState<EventFilterState>(filters);
     const deferredFilters = useDeferredValue(localFilters);
     const [isFiltering, setIsFiltering] = useState(false);
@@ -81,28 +86,34 @@ export default function EvenementsIndex({ evenements, filters, stats, recommenda
                             </div>
                             <div className="space-y-3">
                                 <h1 className="max-w-2xl text-3xl font-semibold sm:text-4xl">
-                                    Explorez les evenements comme un catalogue premium avec recommandations, rangs thematiques et actions immediates.
+                                    {catalogMode.isParticipantView
+                                        ? 'Trouvez rapidement les evenements les plus utiles pour vous et rejoignez-les en quelques clics.'
+                                        : 'Explorez les evenements comme un catalogue premium avec recommandations, rangs thematiques et actions immediates.'}
                                 </h1>
                                 <p className="max-w-2xl text-sm leading-7 text-cyan-50/88 sm:text-base">
-                                    Conferences, concours et rendez-vous campus dans une experience plus visuelle, plus rapide et plus engageante.
+                                    {catalogMode.isParticipantView
+                                        ? 'Conferences, concours et rendez-vous campus presentes dans une experience plus lisible, plus rapide et plus orientee inscription.'
+                                        : 'Conferences, concours et rendez-vous campus dans une experience plus visuelle, plus rapide et plus engageante.'}
                                 </p>
                             </div>
                         </div>
                         <div className="flex flex-col gap-3 sm:flex-row">
-                            <div className="grid min-w-0 flex-1 grid-cols-3 gap-3 rounded-3xl border border-white/15 bg-white/10 p-3 backdrop-blur">
-                                <div className="rounded-2xl bg-white/10 p-3">
-                                    <div className="text-xs uppercase tracking-[0.18em] text-cyan-100/80">Total</div>
-                                    <div className="mt-2 text-2xl font-semibold">{stats.total}</div>
+                            {catalogMode.canManageEvents ? (
+                                <div className="grid min-w-0 flex-1 grid-cols-3 gap-3 rounded-3xl border border-white/15 bg-white/10 p-3 backdrop-blur">
+                                    <div className="rounded-2xl bg-white/10 p-3">
+                                        <div className="text-xs uppercase tracking-[0.18em] text-cyan-100/80">Total</div>
+                                        <div className="mt-2 text-2xl font-semibold">{stats.total}</div>
+                                    </div>
+                                    <div className="rounded-2xl bg-white/10 p-3">
+                                        <div className="text-xs uppercase tracking-[0.18em] text-cyan-100/80">Publies</div>
+                                        <div className="mt-2 text-2xl font-semibold">{stats.published}</div>
+                                    </div>
+                                    <div className="rounded-2xl bg-white/10 p-3">
+                                        <div className="text-xs uppercase tracking-[0.18em] text-cyan-100/80">A venir</div>
+                                        <div className="mt-2 text-2xl font-semibold">{stats.upcoming}</div>
+                                    </div>
                                 </div>
-                                <div className="rounded-2xl bg-white/10 p-3">
-                                    <div className="text-xs uppercase tracking-[0.18em] text-cyan-100/80">Publies</div>
-                                    <div className="mt-2 text-2xl font-semibold">{stats.published}</div>
-                                </div>
-                                <div className="rounded-2xl bg-white/10 p-3">
-                                    <div className="text-xs uppercase tracking-[0.18em] text-cyan-100/80">A venir</div>
-                                    <div className="mt-2 text-2xl font-semibold">{stats.upcoming}</div>
-                                </div>
-                            </div>
+                            ) : null}
                             <Button asChild size="lg" className="h-auto rounded-3xl bg-white px-5 py-4 text-slate-950 hover:bg-cyan-50">
                                 <Link href={gestion()}>
                                     <Plus className="size-4" />

@@ -11,11 +11,16 @@ class Evenement extends Model
     protected $fillable = [
         'titre',
         'description',
+        'reglement',
         'type',
+        'theme',
         'date_debut',
         'date_fin',
+        'date_soumission',
+        'date_deliberation',
         'lieu',
         'lien_live',
+        'video_url',
         'visibilite',
         'public_cible',
         'statut',
@@ -46,6 +51,8 @@ class Evenement extends Model
     protected $casts = [
         'date_debut' => 'datetime',
         'date_fin' => 'datetime',
+        'date_soumission' => 'datetime',
+        'date_deliberation' => 'datetime',
         'submitted_at' => 'datetime',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
@@ -160,5 +167,14 @@ class Evenement extends Model
         }
 
         return $this->assignments->firstWhere('user_id', $userId);
+    }
+
+    public function preferredCoverMedia(): ?EvenementMedia
+    {
+        $medias = $this->relationLoaded('medias') ? $this->medias : $this->medias()->get();
+
+        return $medias
+            ->first(fn (EvenementMedia $media) => $media->type === 'image' && (bool) data_get($media->meta, 'is_cover'))
+            ?? $medias->firstWhere('type', 'image');
     }
 }

@@ -115,6 +115,8 @@ export type EventParticipant = {
     id: number;
     statut: ParticipationStatus | BackendParticipationStatus;
     backend_statut?: BackendParticipationStatus;
+    is_waitlist?: boolean;
+    waitlist_position?: number | null;
     user_id: number;
     user: {
         id: number | null;
@@ -157,6 +159,7 @@ export type EventMedia = {
     is_public?: boolean;
     download_allowed?: boolean;
     confidentialite?: 'public' | 'inscrits' | 'participants' | 'organisateur' | 'intervenant' | 'jury' | 'president_jury' | string;
+    is_cover?: boolean;
     uploaded_by?: number;
     created_at?: string;
     updated_at?: string;
@@ -406,6 +409,8 @@ export type EventDetail = {
         id: number;
         statut: ParticipationStatus | BackendParticipationStatus;
         backend_statut?: BackendParticipationStatus;
+        is_waitlist?: boolean;
+        waitlist_position?: number | null;
     } | null;
     participants: EventParticipant[];
     programmes: EventProgramme[];

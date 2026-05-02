@@ -15,11 +15,14 @@ class InscriptionEvenement extends Model
         'statut',
         'access_token',
         'checked_in_at',
+        'is_waitlist',
+        'waitlist_position',
     ];
 
     protected $casts = [
         'donnees_formulaire' => 'array',
         'checked_in_at' => 'datetime',
+        'is_waitlist' => 'boolean',
     ];
 
     public function evenement()

@@ -7,6 +7,7 @@ use App\Models\Evenement;
 use App\Models\InscriptionEvenement;
 use App\Models\User;
 use App\Services\UpcomingEventReminderService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -23,6 +24,25 @@ class DashboardController extends Controller
 
         abort_unless($user, 403);
         $this->reminders->dispatchForUser($user);
+        $relevantEventIds = $this->relevantEventsQuery($user)->pluck('evenements.id');
+        $eventsCount = $relevantEventIds->count();
+        $inscriptionsCount = InscriptionEvenement::query()
+            ->whereIn('evenement_id', $relevantEventIds)
+            ->count();
+        $acceptedCount = InscriptionEvenement::query()
+            ->whereIn('evenement_id', $relevantEventIds)
+            ->where('statut', 'accepte')
+            ->count();
+        $upcomingCount = Evenement::query()
+            ->whereIn('id', $relevantEventIds)
+            ->where('date_debut', '>', now())
+            ->count();
+        $hasManagedEvents = Evenement::query()
+            ->where('cree_par', $user->id)
+            ->orWhereHas('assignments', fn (Builder $assignments) => $assignments
+                ->where('user_id', $user->id)
+                ->whereIn('role', ['organisateur', 'jury', 'intervenant']))
+            ->exists();
 
         // Mes événements (créés par l'utilisateur) - pour tous les utilisateurs
         $mesEvenements = Evenement::query()
@@ -87,13 +107,7 @@ class DashboardController extends Controller
         $evenementsPopulaires = Evenement::query()
             ->with(['createur:id,name,email,role', 'roles', 'medias'])
             ->withCount(['inscriptions', 'comments', 'activities'])
-            ->when(! $user->isAdmin(), function ($builder) use ($user) {
-                $builder->where(function ($query) use ($user) {
-                    $query->where('cree_par', $user->id)
-                        ->orWhereDoesntHave('roles')
-                        ->orWhereHas('roles', fn ($roles) => $roles->whereIn('role', ['tous', $user->role]));
-                });
-            })
+            ->whereIn('id', $relevantEventIds)
             ->latest('date_debut')
             ->orderByDesc('inscriptions_count')
             ->take(4)
@@ -124,13 +138,16 @@ class DashboardController extends Controller
             ->values();
 
         $analyticsSeries = collect(range(6, 0))
-            ->map(function ($daysAgo) {
+            ->map(function ($daysAgo) use ($relevantEventIds) {
                 $date = now()->copy()->subDays($daysAgo);
 
                 return [
                     'label' => $date->format('D'),
                     'date' => $date->toDateString(),
-                    'inscriptions' => InscriptionEvenement::whereDate('created_at', $date)->count(),
+                    'inscriptions' => InscriptionEvenement::query()
+                        ->whereIn('evenement_id', $relevantEventIds)
+                        ->whereDate('created_at', $date)
+                        ->count(),
                 ];
             })
             ->values();
@@ -138,6 +155,7 @@ class DashboardController extends Controller
         $topActifs = Evenement::query()
             ->with(['createur:id,name,email,role', 'roles', 'medias'])
             ->withCount(['inscriptions', 'comments', 'activities'])
+            ->whereIn('id', $relevantEventIds)
             ->orderByDesc('comments_count')
             ->orderByDesc('activities_count')
             ->take(4)
@@ -164,14 +182,8 @@ class DashboardController extends Controller
         $calendarEvents = Evenement::query()
             ->with(['createur:id,name,email,role', 'roles', 'medias'])
             ->withCount(['inscriptions', 'comments', 'activities'])
+            ->whereIn('id', $relevantEventIds)
             ->whereBetween('date_debut', [now()->startOfDay(), now()->copy()->addMonth()->endOfDay()])
-            ->when(! $user->isAdmin(), function ($builder) use ($user) {
-                $builder->where(function ($query) use ($user) {
-                    $query->where('cree_par', $user->id)
-                        ->orWhereDoesntHave('roles')
-                        ->orWhereHas('roles', fn ($roles) => $roles->whereIn('role', ['tous', $user->role]));
-                });
-            })
             ->orderBy('date_debut')
             ->take(12)
             ->get()
@@ -179,11 +191,11 @@ class DashboardController extends Controller
 
         return Inertia::render('dashboard', [
             'eventStats' => [
-                'events_count' => Evenement::count(),
-                'inscriptions_count' => InscriptionEvenement::count(),
-                'upcoming_count' => Evenement::where('date_debut', '>', now())->count(),
-                'participation_rate' => Evenement::count() > 0
-                    ? round((InscriptionEvenement::where('statut', 'accepte')->count() / max(Evenement::count(), 1)) * 100, 1)
+                'events_count' => $eventsCount,
+                'inscriptions_count' => $inscriptionsCount,
+                'upcoming_count' => $upcomingCount,
+                'participation_rate' => $inscriptionsCount > 0
+                    ? round(($acceptedCount / $inscriptionsCount) * 100, 1)
                     : 0,
             ],
             'analyticsSeries' => $analyticsSeries,
@@ -205,7 +217,9 @@ class DashboardController extends Controller
             'isAdmin' => $user->isAdmin(),
             'allEventsForAdmin' => $allEventsForAdmin,
             'eventActors' => $eventActors,
-            'pendingEventsCount' => Evenement::where('validation_status', 'pending')->whereNotNull('submitted_at')->count(),
+            'pendingEventsCount' => $user->isAdmin()
+                ? Evenement::where('validation_status', 'pending')->whereNotNull('submitted_at')->count()
+                : Evenement::where('cree_par', $user->id)->where('validation_status', 'pending')->whereNotNull('submitted_at')->count(),
             // Pour la page de gestion
             'mesEvenementsGestion' => Evenement::query()
                 ->with(['createur:id,name,email,role', 'roles', 'medias'])
@@ -221,6 +235,11 @@ class DashboardController extends Controller
                 'canManageMessages' => $user->isAdmin(),
                 'canJuryMember' => false, // Will be determined per event
                 'canPresident' => false, // Will be determined per event
+            ],
+            'dashboardMode' => [
+                'isAdmin' => $user->isAdmin(),
+                'canManageEvents' => $user->isAdmin() || $hasManagedEvents,
+                'isParticipantView' => ! $user->isAdmin() && ! $hasManagedEvents,
             ],
         ]);
     }
@@ -278,5 +297,17 @@ class DashboardController extends Controller
         }
 
         return $roles->contains('tous') || $roles->contains($user->role);
+    }
+
+    private function relevantEventsQuery(User $user): Builder
+    {
+        return Evenement::query()
+            ->when(! $user->isAdmin(), function (Builder $builder) use ($user) {
+                $builder->where(function (Builder $query) use ($user) {
+                    $query->where('cree_par', $user->id)
+                        ->orWhereHas('assignments', fn (Builder $assignments) => $assignments->where('user_id', $user->id))
+                        ->orWhereHas('inscriptions', fn (Builder $inscriptions) => $inscriptions->where('utilisateur_id', $user->id));
+                });
+            });
     }
 }

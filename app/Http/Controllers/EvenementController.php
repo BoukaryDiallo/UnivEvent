@@ -63,6 +63,14 @@ class EvenementController extends Controller
             'statut' => $request->string('statut')->value() ?: 'all',
             'date' => $request->string('date')->value() ?: 'all',
         ];
+        $hasManagedEvents = $user
+            ? Evenement::query()
+                ->where('cree_par', $user->id)
+                ->orWhereHas('assignments', fn ($assignments) => $assignments
+                    ->where('user_id', $user->id)
+                    ->whereIn('role', ['organisateur', 'jury', 'intervenant']))
+                ->exists()
+            : false;
 
         $query = Evenement::query()
             ->with(['createur:id,name,email,role', 'roles', 'medias'])
@@ -137,6 +145,14 @@ class EvenementController extends Controller
             });
 
         $evenements = EvenementResource::collection($query->paginate(9)->withQueryString());
+        $statsScope = Evenement::query()
+            ->when($user && ! $user->isAdmin(), function ($builder) use ($user) {
+                $builder->where(function ($query) use ($user) {
+                    $query->where('cree_par', $user->id)
+                        ->orWhereHas('assignments', fn ($assignments) => $assignments->where('user_id', $user->id))
+                        ->orWhereHas('inscriptions', fn ($inscriptions) => $inscriptions->where('utilisateur_id', $user->id));
+                });
+            });
 
         $recommendations = $user
             ? EvenementResource::collection($this->recommendedEvents($user))
@@ -157,9 +173,14 @@ class EvenementController extends Controller
             'evenements' => $evenements,
             'filters' => $filters,
             'stats' => [
-                'total' => Evenement::count(),
-                'published' => Evenement::where('statut', 'publie')->count(),
-                'upcoming' => Evenement::where('date_debut', '>', now())->count(),
+                'total' => (clone $statsScope)->count(),
+                'published' => (clone $statsScope)->where('statut', 'publie')->count(),
+                'upcoming' => (clone $statsScope)->where('date_debut', '>', now())->count(),
+            ],
+            'catalogMode' => [
+                'isAdmin' => (bool) $user?->isAdmin(),
+                'canManageEvents' => (bool) ($user && ($user->isAdmin() || $hasManagedEvents)),
+                'isParticipantView' => (bool) ($user && ! $user->isAdmin() && ! $hasManagedEvents),
             ],
             'availableRoles' => $this->availableRoles(),
             'recommendations' => $recommendations,
@@ -202,10 +223,12 @@ class EvenementController extends Controller
             'programmes',
             'activities.user',
             'inscriptions.utilisateur',
-            'comments.user.replies.user',
+            'comments.user',
+            'comments.replies.user',
             'comments.reactions',
             'comments.replies.reactions',
-            'messages.user.replies.user',
+            'messages.user',
+            'messages.replies.user',
             'resultats.utilisateur',
             'moderationRestrictions.creator',
             'certificats',
@@ -253,6 +276,8 @@ class EvenementController extends Controller
                 'id' => $inscription->id,
                 'statut' => $this->mapParticipationStatus($inscription->statut),
                 'backend_statut' => $inscription->statut,
+                'is_waitlist' => (bool) $inscription->is_waitlist,
+                'waitlist_position' => $inscription->waitlist_position,
                 'user_id' => $inscription->utilisateur_id,
                 'user' => [
                     'id' => $inscription->utilisateur?->id,
@@ -725,6 +750,7 @@ class EvenementController extends Controller
             'is_public' => 'nullable|boolean',
             'download_allowed' => 'nullable|boolean',
             'confidentialite' => 'nullable|string|in:public,inscrits,participants,organisateur,intervenant,jury,president_jury',
+            'use_as_cover' => 'nullable|boolean',
         ]);
 
         try {
@@ -737,6 +763,7 @@ class EvenementController extends Controller
                     'is_public' => $validated['is_public'] ?? true,
                     'download_allowed' => $validated['download_allowed'] ?? true,
                     'confidentialite' => $validated['confidentialite'] ?? null,
+                    'is_cover' => (bool) ($validated['use_as_cover'] ?? false),
                 ]);
             }
             $this->refreshValidationStateAfterMutation($evenement, $request->user());
@@ -756,6 +783,7 @@ class EvenementController extends Controller
             'is_public' => 'nullable|boolean',
             'download_allowed' => 'nullable|boolean',
             'confidentialite' => 'nullable|string|in:public,inscrits,participants,organisateur,intervenant,jury,president_jury',
+            'is_cover' => 'nullable|boolean',
         ]);
 
         $this->mediaService->updateMedia($media, $validated);
@@ -1063,7 +1091,7 @@ class EvenementController extends Controller
 
     private function serializeEvenementCard(Evenement $evenement, ?User $user): array
     {
-        $cover = $evenement->medias->firstWhere('type', 'image');
+        $cover = $evenement->preferredCoverMedia();
         $assignment = $user ? $evenement->assignments->firstWhere('user_id', $user->id) : null;
         $canManage = $user
             ? ($this->authorization->isAdminOrCreator($evenement, $user) || $assignment?->role === 'organisateur')
@@ -1144,7 +1172,7 @@ class EvenementController extends Controller
 
     private function serializeEvenementDetail(Evenement $evenement, ?int $currentInscriptionId): array
     {
-        $cover = $evenement->medias->firstWhere('type', 'image');
+        $cover = $evenement->preferredCoverMedia();
 
         return [
             'id' => $evenement->id,
@@ -1707,8 +1735,10 @@ class EvenementController extends Controller
             'programmes',
             'activities.user',
             'inscriptions.utilisateur',
-            'comments.user.replies.user',
-            'messages.user.replies.user',
+            'comments.user',
+            'comments.replies.user',
+            'messages.user',
+            'messages.replies.user',
             'juryPanel.criteria',
             'juryPanel.deliberations',
             'resultats.utilisateur',

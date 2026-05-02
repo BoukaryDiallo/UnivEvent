@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { CalendarDays, Clock3, Edit3, ExternalLink, FileText, MapPin, MessageSquareText, Radio, ScanLine, Sparkles, Trophy, Upload, ShieldCheck, ShieldAlert, Gavel, Users, Info, ChevronRight, CheckCircle2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { CalendarDays, Edit3, FileText, MapPin, MessageSquareText, Radio, ScanLine, Trophy, ShieldAlert, Users, Info, CheckCircle2, Eye } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { CertificateCanvasStudio } from '@/components/evenements/CertificateCanvasStudio';
 import { EventAccessPassCard } from '@/components/evenements/EventAccessPassCard';
 import { EventActivityTimeline } from '@/components/evenements/EventActivityTimeline';
@@ -90,8 +90,18 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
     const publicCibleLabel = displayedEvent.roles?.length ? displayedEvent.roles.join(', ') : displayedEvent.public_cible;
 
     const handleJoin = (mode: ParticipationStatus = 'participe') => {
+        const confirmed = window.confirm(
+            mode === 'participe'
+                ? "Confirmer votre inscription a cet evenement ? Votre demande pourra necessiter une validation par l organisateur."
+                : "Confirmer l enregistrement de votre interet pour cet evenement ?",
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
         router.post('/inscriptions', { evenement_id: displayedEvent.id, mode }, {
-            onSuccess: () => setToast({ message: mode === 'participe' ? 'Inscription réussie !' : 'Intérêt enregistré.', tone: 'success' }),
+            onSuccess: () => setToast({ message: mode === 'participe' ? 'Demande d inscription envoyee.' : 'Interet enregistre.', tone: 'success' }),
         });
     };
 
@@ -159,6 +169,28 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
                     <div className="space-y-8">
                         {/* Header Section */}
                         <header className="space-y-6">
+                            {displayedEvent.cover_url ? (
+                                <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/60 dark:border-slate-800 dark:shadow-black/20">
+                                    <div
+                                        className="absolute inset-0 bg-cover bg-center"
+                                        style={{ backgroundImage: `url(${displayedEvent.cover_url})` }}
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-950/80 to-sky-900/45" />
+                                    <div className="relative flex min-h-[280px] flex-col justify-end gap-4 p-6 text-white md:min-h-[360px] md:p-8">
+                                        <Badge className="w-fit border-0 bg-white/15 text-white backdrop-blur">
+                                            <Eye className="mr-1.5 size-3.5" />
+                                            Apercu public
+                                        </Badge>
+                                        <div className="max-w-3xl space-y-3">
+                                            <h2 className="text-2xl font-semibold md:text-3xl">Voici comment le public cible decouvre l evenement.</h2>
+                                            <p className="max-w-2xl text-sm leading-6 text-white/80 md:text-base">
+                                                La couverture, le titre, la date, le lieu et les ressources visibles composent la premiere impression de votre evenement.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : null}
+
                             <div className="flex flex-wrap items-center gap-3">
                                 <EventBadge status={displayedEvent.statut} />
                                 <Badge variant="outline" className="rounded-full border-slate-200 bg-white px-3 py-1 text-xs font-medium dark:border-slate-800 dark:bg-slate-950">
@@ -190,6 +222,30 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
                                     </a>
                                 )}
                             </div>
+
+                            <div className="grid gap-4 md:grid-cols-3">
+                                <div className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
+                                    <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+                                        <Info className="size-4 text-sky-500" />
+                                        Public cible
+                                    </div>
+                                    <p className="mt-3 text-base font-semibold capitalize text-slate-950 dark:text-white">{publicCibleLabel}</p>
+                                </div>
+                                <div className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
+                                    <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+                                        <CheckCircle2 className="size-4 text-emerald-500" />
+                                        Acces
+                                    </div>
+                                    <p className="mt-3 text-base font-semibold capitalize text-slate-950 dark:text-white">{displayedEvent.visibilite}</p>
+                                </div>
+                                <div className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
+                                    <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+                                        <FileText className="size-4 text-amber-500" />
+                                        Ressources
+                                    </div>
+                                    <p className="mt-3 text-base font-semibold text-slate-950 dark:text-white">{displayedEvent.medias.length} media visible(s)</p>
+                                </div>
+                            </div>
                         </header>
 
                         {/* Navigation Tabs */}
@@ -208,6 +264,21 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
                                         className="prose prose-slate max-w-none rounded-[2rem] bg-slate-50 p-8 dark:prose-invert dark:bg-slate-900/50"
                                         dangerouslySetInnerHTML={{ __html: displayedEvent.description || '<p className="italic">Aucune description disponible.</p>' }}
                                     />
+
+                                    {displayedEvent.programmes.length > 0 ? (
+                                        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+                                            <div className="mb-4 flex items-center justify-between gap-3">
+                                                <div>
+                                                    <h2 className="text-xl font-semibold text-slate-950 dark:text-white">Apercu du programme</h2>
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400">Les prochaines sessions visibles pour le public.</p>
+                                                </div>
+                                                <Button variant="outline" className="rounded-full" onClick={() => setActiveTab('program')}>
+                                                    Voir tout le programme
+                                                </Button>
+                                            </div>
+                                            <EventTimeline programmes={displayedEvent.programmes.slice(0, 3)} />
+                                        </div>
+                                    ) : null}
 
                                     {/* Stats Grid */}
                                     <div className="grid gap-4 sm:grid-cols-3">
@@ -349,7 +420,7 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
 
                                     {!displayedEvent.participation && can.join ? (
                                         <div className="space-y-4">
-                                            <p className="text-sm text-white/70 leading-relaxed">Rejoignez cet événement pour accéder aux contenus exclusifs et recevoir votre certificat.</p>
+                                            <p className="text-sm text-white/70 leading-relaxed">Confirmez votre demande pour rejoindre cet evenement. Si une validation est necessaire, vous recevrez une notification personnelle.</p>
                                             <Button className="w-full rounded-2xl bg-white py-6 font-bold text-slate-950 hover:bg-slate-100" onClick={() => handleJoin('participe')} disabled={!can.join}>
                                                 S'inscrire
                                             </Button>
@@ -377,6 +448,18 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
                                                 <span className="text-sm text-white/60">Mon statut</span>
                                                 <Badge className="bg-emerald-500 text-white border-0">{displayedEvent.participation.statut}</Badge>
                                             </div>
+                                            {displayedEvent.participation.is_waitlist ? (
+                                                <p className="text-sm leading-relaxed text-white/70">
+                                                    Vous etes actuellement sur liste d attente
+                                                    {displayedEvent.participation.waitlist_position ? ` en position ${displayedEvent.participation.waitlist_position}` : ''}.
+                                                    Vous serez prevenu automatiquement si une place se libere.
+                                                </p>
+                                            ) : null}
+                                            {displayedEvent.participation.backend_statut === 'en_attente' && !displayedEvent.participation.is_waitlist ? (
+                                                <p className="text-sm leading-relaxed text-white/70">
+                                                    Votre demande a bien ete enregistree. L organisateur ou l equipe en charge confirmera ensuite votre participation.
+                                                </p>
+                                            ) : null}
                                             {displayedEvent.access && (
                                                 <div className="space-y-4 rounded-3xl bg-white/5 p-4">
                                                     <div className="flex items-center justify-center rounded-2xl bg-white p-3">
@@ -392,7 +475,7 @@ function EvenementsShowContent({ evenement, can, recommendations = [] }: ShowPro
 
                                     {can.manage && (
                                         <div className="grid gap-2 border-t border-white/10 pt-6">
-                                            <Button variant="outline" className="justify-start rounded-2xl border-white/20 text-white hover:bg-white/10" asChild>
+                                            <Button variant="outline" className="justify-start rounded-2xl border-white/20 text-sky-500 hover:bg-sky-500 hover:text-sky-600" asChild>
                                                 <Link href={`/evenements/${displayedEvent.id}/manage`}>
                                                     <Edit3 className="mr-2 size-4" /> Console de gestion
                                                 </Link>

@@ -146,9 +146,41 @@ Route::inertia('/', 'welcome', [
         ->name('jury.finalize');
     Route::post('jury/deliberations/{deliberation}/resolve', [JuryController::class, 'resolveRevision'])
         ->name('jury.resolveRevision');
+
+    // --- MODULE 5: Conférences & Concours ---
+    Route::prefix('m5')->name('m5.')->group(function () {
+        // Events
+        Route::get('events', [\App\Http\Controllers\M5\EventController::class, 'index'])->name('events.index');
+        Route::get('events/create', [\App\Http\Controllers\M5\EventController::class, 'create'])->name('events.create');
+        Route::post('events', [\App\Http\Controllers\M5\EventController::class, 'store'])->name('events.store');
+        Route::get('events/{evenement}', [\App\Http\Controllers\M5\EventController::class, 'show'])->name('events.show');
+        Route::get('events/{evenement}/edit', [\App\Http\Controllers\M5\EventController::class, 'edit'])->name('events.edit');
+        Route::patch('events/{evenement}', [\App\Http\Controllers\M5\EventController::class, 'update'])->name('events.update');
+        
+        // Participation
+        Route::post('events/{evenement}/register', [\App\Http\Controllers\M5\ParticipantController::class, 'register'])->name('events.register');
+        Route::patch('participations/{id}/cancel', [\App\Http\Controllers\M5\ParticipantController::class, 'cancel'])->name('participations.cancel');
+
+        // Dashboard
+        Route::get('dashboard', [\App\Http\Controllers\M5\DashboardController::class, 'index'])->name('dashboard');
+
+        // Certificats
+        Route::get('certificats', [\App\Http\Controllers\M5\CertificatController::class, 'index'])->name('certificats.index');
+        Route::post('certificats/{certificat}/download', [\App\Http\Controllers\M5\CertificatController::class, 'download'])->name('certificats.download');
+
+        // Rôles
+        Route::post('events/{evenement}/roles', [\App\Http\Controllers\M5\RoleEvenementielController::class, 'store'])->name('events.roles.store');
+
+        // Jury
+        Route::get('jury/{evenement}/panel', [\App\Http\Controllers\M5\JuryController::class, 'panel'])->name('jury.panel');
+        Route::post('evaluations', [\App\Http\Controllers\M5\JuryController::class, 'evaluate'])->name('evaluations.store');
+        Route::post('deliberations/{id}/valider', [\App\Http\Controllers\M5\JuryController::class, 'valider'])->name('deliberations.valider');
+    });
 });
 
 Route::get('certificats/verifier/{code}', [CertificatController::class, 'verifier'])
     ->name('certificats.verifier');
+
+Route::get('verify/{token}', [\App\Http\Controllers\M5\CertificatController::class, 'verify'])->name('m5.verify');
 
 require __DIR__.'/settings.php';

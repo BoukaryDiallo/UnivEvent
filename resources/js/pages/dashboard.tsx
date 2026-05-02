@@ -32,6 +32,11 @@ type DashboardProps = {
         upcoming_reminders: number;
     };
     isAdmin: boolean;
+    dashboardMode: {
+        isAdmin: boolean;
+        canManageEvents: boolean;
+        isParticipantView: boolean;
+    };
 };
 
 export default function Dashboard({
@@ -41,6 +46,7 @@ export default function Dashboard({
     calendarEvents,
     notificationStats,
     isAdmin,
+    dashboardMode,
 }: DashboardProps) {
     const [toast, setToast] = useState<string | null>(null);
 
@@ -56,10 +62,10 @@ export default function Dashboard({
             <Head title="Tableau de bord" />
             <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
                 <DashboardHero isAdmin={isAdmin} />
-                <DashboardMetrics stats={eventStats} />
+                {dashboardMode.canManageEvents ? <DashboardMetrics stats={eventStats} isAdmin={isAdmin} /> : null}
 
-                <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-                    <EventAnalyticsPanel series={analyticsSeries} />
+                <section className={`grid gap-6 ${dashboardMode.canManageEvents ? 'xl:grid-cols-[1.2fr_0.8fr]' : ''}`}>
+                    {dashboardMode.canManageEvents ? <EventAnalyticsPanel series={analyticsSeries} /> : null}
                     <EventCalendarPanel events={calendarEvents} />
                 </section>
 
@@ -92,13 +98,15 @@ export default function Dashboard({
                             <div className="mt-4 text-3xl font-semibold text-slate-950 dark:text-white">{notificationStats.unread}</div>
                             <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">notification(s) non lue(s)</div>
                         </div>
-                        <div className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-black/20">
-                            <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-600 dark:bg-sky-950/30 dark:text-sky-300">
-                                <Radio className="size-5" />
+                        {dashboardMode.canManageEvents ? (
+                            <div className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-black/20">
+                                <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-600 dark:bg-sky-950/30 dark:text-sky-300">
+                                    <Radio className="size-5" />
+                                </div>
+                                <div className="mt-4 text-3xl font-semibold text-slate-950 dark:text-white">{notificationStats.total}</div>
+                                <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">elements disponibles dans la boite de notif</div>
                             </div>
-                            <div className="mt-4 text-3xl font-semibold text-slate-950 dark:text-white">{notificationStats.total}</div>
-                            <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">elements disponibles dans la boite de notif</div>
-                        </div>
+                        ) : null}
                         <div className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-black/20">
                             <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-950/30 dark:text-amber-300">
                                 <CalendarClock className="size-5" />
@@ -113,9 +121,13 @@ export default function Dashboard({
                     <div className="space-y-5 rounded-4xl border border-slate-200 bg-white/90 p-5 shadow-sm shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-black/20">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h2 className="text-xl font-semibold text-slate-950 dark:text-white">Événements disponibles</h2>
+                                <h2 className="text-xl font-semibold text-slate-950 dark:text-white">
+                                    {dashboardMode.isParticipantView ? 'Evenements recommandes pour vous' : 'Evenements disponibles'}
+                                </h2>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Découvrez les événements auxquels vous pouvez participer.
+                                    {dashboardMode.isParticipantView
+                                        ? 'Retrouvez rapidement les evenements les plus pertinents pour votre profil.'
+                                        : 'Decouvrez les evenements auxquels vous pouvez participer.'}
                                 </p>
                             </div>
                         </div>

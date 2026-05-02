@@ -25,6 +25,7 @@ export function MediaGallery({ medias, evenementId, canUpload = false, onToast }
         is_public: true,
         download_allowed: true,
         confidentialite: 'public',
+        use_as_cover: false,
     });
 
     const setPublicState = (checked: CheckedState) => {
@@ -46,6 +47,7 @@ export function MediaGallery({ medias, evenementId, canUpload = false, onToast }
             preserveScroll: true,
             onSuccess: () => {
                 uploadForm.reset('media', 'description');
+                uploadForm.setData('use_as_cover', false);
                 onToast?.('Media ajoute.');
             },
         });
@@ -55,6 +57,13 @@ export function MediaGallery({ medias, evenementId, canUpload = false, onToast }
         router.delete(`/evenements/${evenementId}/media/${id}`, {
             preserveScroll: true,
             onSuccess: () => onToast?.('Media supprime.'),
+        });
+    };
+
+    const setAsCover = (id: number) => {
+        router.patch(`/evenements/${evenementId}/media/${id}`, { is_cover: true }, {
+            preserveScroll: true,
+            onSuccess: () => onToast?.('Image de couverture mise a jour.'),
         });
     };
 
@@ -117,6 +126,13 @@ export function MediaGallery({ medias, evenementId, canUpload = false, onToast }
                                     <Checkbox checked={uploadForm.data.download_allowed} onCheckedChange={(checked) => uploadForm.setData('download_allowed', checked === true)} />
                                     Telechargement autorise
                                 </label>
+                                <label className="inline-flex items-center gap-2 text-sm">
+                                    <Checkbox
+                                        checked={uploadForm.data.use_as_cover}
+                                        onCheckedChange={(checked) => uploadForm.setData('use_as_cover', checked === true)}
+                                    />
+                                    Utiliser comme couverture
+                                </label>
                             </div>
                             <Button type="button" onClick={submitUpload} disabled={!uploadForm.data.media.length || uploadForm.processing}>
                                 Envoyer les medias
@@ -151,21 +167,38 @@ export function MediaGallery({ medias, evenementId, canUpload = false, onToast }
                                         {media.type === 'image' ? <ImageIcon className="size-3.5" /> : <FileText className="size-3.5" />}
                                         {media.type}
                                         <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-800">{media.confidentialite ?? 'public'}</span>
+                                        {media.is_cover ? <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">Couverture</span> : null}
                                     </div>
                                 </div>
                                 {canUpload ? (
-                                    <button
-                                        type="button"
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            removeMedia(media.id);
-                                        }}
-                                        title="Supprimer le media"
-                                        aria-label={`Supprimer le media ${media.name || 'sans titre'}`}
-                                        className="inline-flex size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 dark:border-slate-800 dark:text-slate-400 dark:hover:border-rose-900 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
-                                    >
-                                        <Trash2 className="size-4" />
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        {media.type === 'image' && !media.is_cover ? (
+                                            <button
+                                                type="button"
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    setAsCover(media.id);
+                                                }}
+                                                title="Utiliser comme couverture"
+                                                aria-label={`Definir ${media.name || 'ce media'} comme couverture`}
+                                                className="inline-flex rounded-full border border-amber-200 px-3 py-1 text-xs font-medium text-amber-700 transition hover:bg-amber-50 dark:border-amber-900/50 dark:text-amber-300 dark:hover:bg-amber-950/30"
+                                            >
+                                                Couverture
+                                            </button>
+                                        ) : null}
+                                        <button
+                                            type="button"
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                removeMedia(media.id);
+                                            }}
+                                            title="Supprimer le media"
+                                            aria-label={`Supprimer le media ${media.name || 'sans titre'}`}
+                                            className="inline-flex size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 dark:border-slate-800 dark:text-slate-400 dark:hover:border-rose-900 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
+                                        >
+                                            <Trash2 className="size-4" />
+                                        </button>
+                                    </div>
                                 ) : null}
                             </div>
                         </button>

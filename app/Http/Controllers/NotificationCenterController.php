@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\EventNotification;
 use App\Models\Evenement;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -29,7 +31,7 @@ class NotificationCenterController extends Controller
                 'event_id' => $notification->evenement_id,
             ]);
 
-        $feed = Evenement::query()
+        $feed = $this->relevantEventsQuery($user)
             ->with(['activities.user:id,name,email,role'])
             ->latest('updated_at')
             ->take(16)
@@ -60,5 +62,17 @@ class NotificationCenterController extends Controller
             'notifications' => $notifications,
             'feed' => $feed,
         ]);
+    }
+
+    private function relevantEventsQuery(User $user): Builder
+    {
+        return Evenement::query()
+            ->when(! $user->isAdmin(), function (Builder $builder) use ($user) {
+                $builder->where(function (Builder $query) use ($user) {
+                    $query->where('cree_par', $user->id)
+                        ->orWhereHas('assignments', fn (Builder $assignments) => $assignments->where('user_id', $user->id))
+                        ->orWhereHas('inscriptions', fn (Builder $inscriptions) => $inscriptions->where('utilisateur_id', $user->id));
+                });
+            });
     }
 }

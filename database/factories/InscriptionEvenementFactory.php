@@ -24,6 +24,8 @@ class InscriptionEvenementFactory extends Factory
             'statut' => fake()->randomElement(['en_attente', 'accepte']),
             'access_token' => Str::uuid()->toString(),
             'checked_in_at' => null,
+            'is_waitlist' => false,
+            'waitlist_position' => null,
         ];
     }
 }

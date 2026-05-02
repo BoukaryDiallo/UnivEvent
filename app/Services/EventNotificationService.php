@@ -46,4 +46,15 @@ class EventNotificationService
 
         return $notification;
     }
+
+    /**
+     * @param iterable<User> $users
+     */
+    public function notifyMany(iterable $users, string $type, string $title, string $message, ?int $eventId = null, array $data = [], bool $email = false): void
+    {
+        collect($users)
+            ->filter(fn ($user) => $user instanceof User)
+            ->unique('id')
+            ->each(fn (User $user) => $this->notify($user, $type, $title, $message, $eventId, $data, $email));
+    }
 }

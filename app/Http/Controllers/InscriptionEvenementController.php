@@ -7,6 +7,7 @@ use App\Models\InscriptionEvenement;
 use App\Services\EventAuthorizationService;
 use App\Services\EventNotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
@@ -49,21 +50,21 @@ class InscriptionEvenementController extends Controller
             abort(403, 'Participation non autorisee');
         }
 
-        if ($evenement->capacite_max && $evenement->inscriptions->count() >= $evenement->capacite_max) {
-            return back()->withErrors([
-                'participation' => 'La capacite maximale de cet evenement est atteinte.',
-            ]);
-        }
+        $isWaitlist = $this->shouldPlaceOnWaitlist($evenement);
+        $status = $this->resolveStatus($evenement, $validated['mode'] ?? 'interesse', $isWaitlist);
+        $waitlistPosition = $isWaitlist ? $this->nextWaitlistPosition($evenement) : null;
 
-        InscriptionEvenement::updateOrCreate(
+        $inscription = InscriptionEvenement::updateOrCreate(
             [
                 'evenement_id' => $evenement->id,
                 'utilisateur_id' => $user->id,
             ],
             [
                 'donnees_formulaire' => $validated['donnees_formulaire'] ?? [],
-                'statut' => $this->resolveStatus($evenement, $validated['mode'] ?? 'interesse'),
+                'statut' => $status,
                 'access_token' => Str::uuid()->toString(),
+                'is_waitlist' => $isWaitlist,
+                'waitlist_position' => $waitlistPosition,
             ],
         );
 
@@ -71,23 +72,45 @@ class InscriptionEvenementController extends Controller
             'user_id' => $user->id,
             'type' => 'inscription',
             'label' => ($validated['mode'] ?? 'interesse') === 'participe' && $evenement->visibilite !== 'restreint'
-                ? 'Participation confirmee'
+                ? ($isWaitlist ? 'Ajout en liste d attente' : 'Participation confirmee')
                 : 'Interet exprime',
             'description' => ($validated['mode'] ?? 'interesse') === 'participe' && $evenement->visibilite !== 'restreint'
-                ? 'Un utilisateur participe a cet evenement.'
+                ? ($isWaitlist
+                    ? 'Un utilisateur a ete place sur la liste d attente de cet evenement.'
+                    : 'Un utilisateur participe a cet evenement.')
                 : 'Un utilisateur a marque son interet pour cet evenement.',
         ]);
 
-        if ($evenement->createur && $evenement->createur->id !== $user->id) {
-            $this->notifications->notify(
-                $evenement->createur,
+        $stakeholders = $this->stakeholdersForRegistration($evenement, $user->id);
+
+        if ($stakeholders->isNotEmpty()) {
+            $this->notifications->notifyMany(
+                $stakeholders,
                 'nouvelle_inscription',
-                'Nouvelle inscription',
-                "{$user->name} a interagi avec {$evenement->titre}.",
+                $isWaitlist ? 'Nouvelle demande en attente de place' : 'Nouvelle inscription',
+                $isWaitlist
+                    ? "{$user->name} a rejoint la liste d attente de {$evenement->titre}."
+                    : ($status === 'accepte'
+                    ? "{$user->name} a confirme sa participation a {$evenement->titre}."
+                    : "{$user->name} a soumis une demande d inscription pour {$evenement->titre}."),
                 $evenement->id,
-                ['user_id' => $user->id],
+                ['user_id' => $user->id, 'inscription_id' => $inscription->id, 'statut' => $status, 'is_waitlist' => $isWaitlist, 'waitlist_position' => $waitlistPosition],
             );
         }
+
+        $this->notifications->notify(
+            $user,
+            'inscription_confirmee',
+            $isWaitlist ? 'Ajout sur liste d attente' : ($status === 'accepte' ? 'Participation confirmee' : 'Demande enregistree'),
+            $isWaitlist
+                ? "Aucune place n est disponible pour {$evenement->titre}. Vous etes en liste d attente en position {$waitlistPosition}."
+                : ($status === 'accepte'
+                ? "Votre participation a {$evenement->titre} est confirmee."
+                : "Votre demande pour {$evenement->titre} a bien ete enregistree et attend confirmation."),
+            $evenement->id,
+            ['inscription_id' => $inscription->id, 'statut' => $status, 'is_waitlist' => $isWaitlist, 'waitlist_position' => $waitlistPosition],
+            true,
+        );
 
         return back();
     }
@@ -107,6 +130,8 @@ class InscriptionEvenementController extends Controller
         }
 
         $inscription->delete();
+
+        $this->promoteWaitlistIfPossible($evenement);
 
         $evenement->activities()->create([
             'user_id' => $user->id,
@@ -138,7 +163,7 @@ class InscriptionEvenementController extends Controller
             ->paginate(9)
             ->through(function (InscriptionEvenement $inscription) use ($user) {
                 $evenement = $inscription->evenement;
-                $cover = $evenement->medias->firstWhere('type', 'image');
+                $cover = $evenement->preferredCoverMedia();
 
                 return [
                     'id' => $evenement->id,
@@ -166,6 +191,8 @@ class InscriptionEvenementController extends Controller
                         'id' => $inscription->id,
                         'statut' => $this->mapParticipationStatus($inscription->statut),
                         'backend_statut' => $inscription->statut,
+                        'is_waitlist' => (bool) $inscription->is_waitlist,
+                        'waitlist_position' => $inscription->waitlist_position,
                     ],
                     'can_join' => false,
                 ];
@@ -180,7 +207,22 @@ class InscriptionEvenementController extends Controller
     {
         $this->authorizeModeration($request, $inscription);
 
+        $event = $inscription->evenement;
+
+        if ($event && ! $inscription->is_waitlist && ! $this->hasSeatAvailable($event, $inscription)) {
+            return back()->withErrors([
+                'participation' => 'La capacite est atteinte. Cette demande doit rester en attente ou basculer en liste d attente.',
+            ]);
+        }
+
         $inscription->update(['statut' => 'accepte']);
+        if ($inscription->is_waitlist) {
+            $inscription->update([
+                'is_waitlist' => false,
+                'waitlist_position' => null,
+            ]);
+            $this->resequenceWaitlist($inscription->evenement);
+        }
         $inscription->evenement?->activities()->create([
             'user_id' => $request->user()->id,
             'type' => 'inscription_validee',
@@ -206,6 +248,7 @@ class InscriptionEvenementController extends Controller
     {
         $this->authorizeModeration($request, $inscription);
 
+        $wasAccepted = $inscription->statut === 'accepte';
         $inscription->update(['statut' => 'refuse']);
         $inscription->evenement?->activities()->create([
             'user_id' => $request->user()->id,
@@ -213,6 +256,9 @@ class InscriptionEvenementController extends Controller
             'label' => 'Participation refusee',
             'description' => 'Une demande a ete refusee par l organisateur.',
         ]);
+        if ($wasAccepted && $inscription->evenement) {
+            $this->promoteWaitlistIfPossible($inscription->evenement);
+        }
         if ($inscription->utilisateur) {
             $this->notifications->notify(
                 $inscription->utilisateur,
@@ -265,12 +311,126 @@ class InscriptionEvenementController extends Controller
         };
     }
 
-    private function resolveStatus(Evenement $evenement, string $mode): string
+    private function resolveStatus(Evenement $evenement, string $mode, bool $isWaitlist = false): string
     {
-        if ($mode === 'participe' && $evenement->visibilite !== 'restreint') {
+        if ($isWaitlist) {
+            return 'en_attente';
+        }
+
+        if ($mode === 'participe' && $evenement->visibilite !== 'restreint' && ! $evenement->inscription_requise) {
             return 'accepte';
         }
 
         return 'en_attente';
+    }
+
+    private function stakeholdersForRegistration(Evenement $evenement, int $actorUserId): Collection
+    {
+        $evenement->loadMissing(['createur', 'assignments.user']);
+
+        return collect([$evenement->createur])
+            ->merge(
+                $evenement->assignments
+                    ->whereIn('role', ['organisateur', 'intervenant', 'jury'])
+                    ->pluck('user')
+            )
+            ->filter(fn ($user) => $user && $user->id !== $actorUserId)
+            ->unique('id')
+            ->values();
+    }
+
+    private function shouldPlaceOnWaitlist(Evenement $evenement): bool
+    {
+        if (! $evenement->capacite_max) {
+            return false;
+        }
+
+        return $evenement->inscriptions()
+            ->where('statut', 'accepte')
+            ->count() >= $evenement->capacite_max;
+    }
+
+    private function nextWaitlistPosition(Evenement $evenement): int
+    {
+        return ((int) $evenement->inscriptions()
+            ->where('is_waitlist', true)
+            ->max('waitlist_position')) + 1;
+    }
+
+    private function promoteWaitlistIfPossible(Evenement $evenement): void
+    {
+        if (! $evenement->capacite_max) {
+            return;
+        }
+
+        $acceptedCount = $evenement->inscriptions()->where('statut', 'accepte')->count();
+
+        if ($acceptedCount >= $evenement->capacite_max) {
+            return;
+        }
+
+        $candidate = $evenement->inscriptions()
+            ->where('is_waitlist', true)
+            ->where('statut', 'en_attente')
+            ->orderBy('waitlist_position')
+            ->first();
+
+        if (! $candidate) {
+            return;
+        }
+
+        $candidate->update([
+            'statut' => 'accepte',
+            'is_waitlist' => false,
+            'waitlist_position' => null,
+        ]);
+
+        $this->resequenceWaitlist($evenement);
+
+        $evenement->activities()->create([
+            'user_id' => $candidate->utilisateur_id,
+            'type' => 'promotion_liste_attente',
+            'label' => 'Promotion depuis la liste d attente',
+            'description' => 'Une place liberee a automatiquement promu un participant.',
+        ]);
+
+        if ($candidate->utilisateur) {
+            $this->notifications->notify(
+                $candidate->utilisateur,
+                'promotion_liste_attente',
+                'Une place vient de se liberer',
+                "Votre participation a {$evenement->titre} est maintenant confirmee.",
+                $evenement->id,
+                ['inscription_id' => $candidate->id],
+                true,
+            );
+        }
+    }
+
+    private function resequenceWaitlist(Evenement $evenement): void
+    {
+        $evenement->inscriptions()
+            ->where('is_waitlist', true)
+            ->where('statut', 'en_attente')
+            ->orderBy('waitlist_position')
+            ->get()
+            ->values()
+            ->each(fn (InscriptionEvenement $inscription, int $index) => $inscription->update([
+                'waitlist_position' => $index + 1,
+            ]));
+    }
+
+    private function hasSeatAvailable(Evenement $evenement, ?InscriptionEvenement $excluding = null): bool
+    {
+        if (! $evenement->capacite_max) {
+            return true;
+        }
+
+        $acceptedCount = $evenement->inscriptions()
+            ->where('statut', 'accepte')
+            ->when($excluding, fn ($query) => $query->where('id', '!=', $excluding->id))
+            ->count();
+
+        return $acceptedCount < $evenement->capacite_max;
     }
 }

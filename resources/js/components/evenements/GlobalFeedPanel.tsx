@@ -23,8 +23,8 @@ type GlobalFeedPanelProps = {
 
 export function GlobalFeedPanel({
     items,
-    title = 'Fil d actualite global',
-    subtitle = 'Nouveaux evenements, inscriptions, programmes et resultats.',
+    title = 'Fil d actualite personalise',
+    subtitle = 'Activites recentes sur les evenements qui vous concernent.',
     showViewAll = false,
     emptyMessage = 'Le fil d actualite est encore vide.',
 }: GlobalFeedPanelProps) {
