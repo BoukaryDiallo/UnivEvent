@@ -11,7 +11,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
-import { AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ArrowLeft, Vote, User, FileText, Clock, Users } from 'lucide-react';
 import { useState } from 'react';
 import type { PageProps } from '@/types/app';
 
@@ -71,166 +71,250 @@ export default function VoteCandidats() {
     return (
         <AppLayout>
             <Head title={`Voter - ${election.titre}`} />
-            <div className="container mt-5">
-                {/* Bouton retour */}
-                <div className="mb-4">
-                    <Button variant="outline" onClick={() => window.history.back()}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Retour
-                    </Button>
-                </div>
-                
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-green-600">{election.titre}</CardTitle>
-                        {election.description && (
-                            <p className="text-muted-foreground mt-2">{election.description}</p>
-                        )}
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {dejaVote && (
-                            <Alert>
-                                <AlertCircle className="h-4 w-4" />
-                                <AlertDescription>
-                                    Vous avez déjà voté pour cette élection. Vous ne pourrez pas voter à nouveau.
-                                </AlertDescription>
-                            </Alert>
-                        )}
-
-                        {candidatures.length === 0 ? (
-                            <Alert>
-                                <AlertCircle className="h-4 w-4" />
-                                <AlertDescription>
-                                    Aucun candidat disponible pour cette élection pour le moment.
-                                </AlertDescription>
-                            </Alert>
-                        ) : (
-                            <>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <CheckCircle2 className="text-green-600" size={20} />
-                                    <span className="text-sm font-medium">
-                                        {candidatures.length} candidat{candidatures.length > 1 ? 's' : ''} en lice
-                                    </span>
-                                </div>
-
-                                <div className="grid gap-3">
-                                    {candidatures.map((candidature) => (
-                                        <div
-                                            key={candidature.id_candidature}
-                                            className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-                                        >
-                                            <div className="flex items-start gap-4 mb-3">
-                                                {/* Photo du candidat */}
-                                                <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl shadow-md border-2 border-white flex-shrink-0">
-                                                    {candidature.photo ? (
-                                                        <img 
-                                                            src={candidature.photo} 
-                                                            alt={candidature.user.name}
-                                                            className="w-14 h-14 rounded-xl object-cover shadow-sm"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-sm">
-                                                            {candidature.user.name.charAt(0).toUpperCase()}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                
-                                                <div className="flex-1">
-                                                    <h4 className="font-semibold text-lg">
-                                                        {candidature.user.name}
-                                                    </h4>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {candidature.user.email}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            {candidature.programme && (
-                                                <div className="mb-3 p-3 bg-slate-50 rounded border border-slate-200">
-                                                    <p className="text-sm">
-                                                        <strong className="block text-muted-foreground mb-1">
-                                                            Programme :
-                                                        </strong>
-                                                        {candidature.programme}
-                                                    </p>
-                                                </div>
-                                            )}
-
-                                            <Button
-                                                onClick={() => handleVoteClick(candidature)}
-                                                disabled={dejaVote || processing}
-                                                className="w-full"
-                                            >
-                                                Voter pour ce candidat
-                                            </Button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-
-                        <div className="pt-4">
-                            <Button
-                                variant="outline"
+            <div className="min-h-screen bg-gray-50 py-8">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <div className="flex items-center justify-between mb-6">
+                            <Button 
+                                variant="outline" 
                                 onClick={() => window.history.back()}
-                                className="w-full"
+                                className="flex items-center gap-2"
                             >
+                                <ArrowLeft className="h-4 w-4" />
                                 Retour
                             </Button>
                         </div>
-                    </CardContent>
-                </Card>
-
-                {/* Dialogue de confirmation */}
-                <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle className="text-green-600">Confirmer votre vote</DialogTitle>
-                            <DialogDescription>
-                                Êtes-vous certain de vouloir voter pour ce candidat ?
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        {selectedCandidate && (
-                            <div className="my-4 p-4 bg-muted rounded-lg">
-                                <p className="font-semibold text-lg">{selectedCandidate.user.name}</p>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                    {selectedCandidate.user.email}
-                                </p>
-                                {selectedCandidate.programme && (
-                                    <p className="text-sm mt-3 italic">
-                                        <strong>Programme :</strong> {selectedCandidate.programme}
+                        
+                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-8 shadow-lg">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                                    <Vote className="h-8 w-8" />
+                                </div>
+                                <div>
+                                    <h1 className="text-3xl font-bold">{election.titre}</h1>
+                                    <p className="text-blue-100 mt-2">
+                                        Votez pour votre candidat préféré
                                     </p>
+                                </div>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                                <p className="text-white mb-2">{election.description}</p>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <Users className="h-4 w-4 text-blue-300" />
+                                        <span className="text-white text-sm">
+                                            {candidatures.length} candidat{candidatures.length > 1 ? 's' : ''} en lice
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="h-4 w-4 text-blue-300" />
+                                        <span className="text-white text-sm">
+                                            {dejaVote ? 'Déjà voté' : 'Vote en attente'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Contenu principal */}
+                    <Card className="shadow-xl border-0">
+                        <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
+                            <CardTitle className="flex items-center gap-2 text-blue-700">
+                                <Users className="h-5 w-5" />
+                                Candidats disponibles
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8">
+                            {dejaVote && (
+                                <Alert className="mb-6 border-red-200 bg-red-50">
+                                    <AlertCircle className="h-4 w-4 text-red-600" />
+                                    <AlertDescription className="text-red-800">
+                                        <div className="font-semibold mb-1">Vote déjà enregistré</div>
+                                        <div className="text-sm">
+                                            Vous avez déjà voté pour cette élection. Vous ne pourrez pas voter à nouveau.
+                                        </div>
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+
+                            {candidatures.length === 0 ? (
+                                <div className="text-center py-16">
+                                    <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                                        <User className="h-12 w-12 text-gray-400" />
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                                        Aucun candidat disponible
+                                    </h3>
+                                    <p className="text-gray-500 mb-6">
+                                        Aucun candidat n'est encore disponible pour cette élection.
+                                    </p>
+                                    <Alert className="border-orange-200 bg-orange-50 max-w-md mx-auto">
+                                        <Clock className="h-4 w-4 text-orange-600" />
+                                        <AlertDescription className="text-orange-800">
+                                            Revenez plus tard pour voir les candidats inscrits.
+                                        </AlertDescription>
+                                    </Alert>
+                                </div>
+                            ) : (
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {candidatures.map((candidature) => (
+                                        <Card key={candidature.id_candidature} className="hover:shadow-xl transition-all duration-300 border-0 bg-white">
+                                            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+                                                <div className="flex items-start gap-4">
+                                                    {/* Photo du candidat */}
+                                                    <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl shadow-md border-2 border-white flex-shrink-0">
+                                                        {candidature.photo ? (
+                                                            <img 
+                                                                src={`/storage/${candidature.photo}`} 
+                                                                alt={candidature.user.name}
+                                                                className="w-14 h-14 rounded-xl object-cover shadow-sm"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-sm">
+                                                                {candidature.user.name.charAt(0).toUpperCase()}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div className="flex-1">
+                                                        <CardTitle className="text-lg text-gray-800">
+                                                            {candidature.user.name}
+                                                        </CardTitle>
+                                                        <p className="text-sm text-gray-600">
+                                                            {candidature.user.email}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </CardHeader>
+                                            <CardContent className="p-6 space-y-4">
+                                                {candidature.programme && (
+                                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <FileText className="h-4 w-4 text-blue-600" />
+                                                            <span className="font-semibold text-blue-800">Programme</span>
+                                                        </div>
+                                                        <p className="text-sm text-blue-700 leading-relaxed">
+                                                            {candidature.programme}
+                                                        </p>
+                                                    </div>
+                                                )}
+
+                                                <Button
+                                                    onClick={() => handleVoteClick(candidature)}
+                                                    disabled={dejaVote || processing}
+                                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg disabled:opacity-50"
+                                                >
+                                                    {processing ? (
+                                                        <>
+                                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                            Traitement en cours...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Vote className="h-4 w-4 mr-2" />
+                                                            {dejaVote ? 'Déjà voté' : 'Voter pour ce candidat'}
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="flex items-center justify-between pt-6 border-t border-gray-200">
+                                <div className="text-sm text-gray-500">
+                                    Votre vote est confidentiel et ne pourra être modifié
+                                </div>
+                                <Button 
+                                    variant="outline" 
+                                    onClick={() => window.history.back()}
+                                    className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                                >
+                                    <ArrowLeft className="h-4 w-4" />
+                                    Retour
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+
+            {/* Dialogue de confirmation */}
+            <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-blue-700">
+                            <Vote className="h-5 w-5" />
+                            Confirmer votre vote
+                        </DialogTitle>
+                        <DialogDescription className="text-gray-600">
+                            Êtes-vous certain de vouloir voter pour ce candidat ? Cette action est irréversible.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {selectedCandidate && (
+                        <div className="my-6">
+                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                                        {selectedCandidate.user.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-lg text-gray-800">
+                                            {selectedCandidate.user.name}
+                                        </div>
+                                        <div className="text-sm text-gray-600">
+                                            {selectedCandidate.user.email}
+                                        </div>
+                                    </div>
+                                </div>
+                                {selectedCandidate.programme && (
+                                    <div className="bg-white rounded-lg p-3">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <FileText className="h-4 w-4 text-blue-600" />
+                                            <span className="font-semibold text-blue-800 text-sm">Programme</span>
+                                        </div>
+                                        <p className="text-sm text-gray-700 leading-relaxed line-clamp-3">
+                                            {selectedCandidate.programme}
+                                        </p>
+                                    </div>
                                 )}
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        <Alert>
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription>
-                                ⚠️ Attention : Vous ne pourrez voter qu'une seule fois pour cette élection.
-                            </AlertDescription>
-                        </Alert>
-
-                        <DialogFooter>
-                            <Button
-                                variant="outline"
-                                onClick={() => setShowConfirmation(false)}
-                                disabled={processing}
-                            >
-                                Annuler
-                            </Button>
-                            <Button
-                                onClick={handleConfirmVote}
-                                disabled={processing}
-                                className="bg-green-600 hover:bg-green-700"
-                            >
-                                {processing ? 'Enregistrement...' : 'Confirmer mon vote'}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </div>
+                    <DialogFooter className="gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowConfirmation(false)}
+                            className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                        >
+                            Annuler
+                        </Button>
+                        <Button
+                            onClick={handleConfirmVote}
+                            disabled={processing}
+                            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg disabled:opacity-50"
+                        >
+                            {processing ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                    Vote en cours...
+                                </>
+                            ) : (
+                                <>
+                                    <Vote className="h-4 w-4" />
+                                    Confirmer le vote
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

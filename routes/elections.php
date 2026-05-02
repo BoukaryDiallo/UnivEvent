@@ -88,6 +88,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/votes/participer', [VoteController::class, 'electionsOuvertes'])
         ->name('votes.elections');
 
+      // Espace Élections
+    Route::get('espace-election', [ResultatController::class, 'espaceElections'])->name('espace.elections');
+
+
     Route::get('/votes/candidats/{election}', [VoteController::class, 'candidats'])
         ->name('votes.candidats');
 

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Trophy, Users, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Trophy, ArrowRight, Crown } from 'lucide-react'
 import { useState } from 'react'
 import { router } from '@inertiajs/react'
 import resultatsRoutes from '@/routes/resultats'
@@ -65,139 +65,139 @@ export default function ResultatsOfficiels({
     }
 
     return (
-        <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Trophy className="h-5 w-5 text-yellow-500" />
-                        Résultats officiels - {election.titre}
-                    </CardTitle>
-                </CardHeader>
-
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div className="text-center p-4 bg-blue-50 rounded-lg">
-                            <div className="text-2xl font-bold text-blue-600">{totalVotes}</div>
-                            <div className="text-sm text-gray-600">Votes exprimés</div>
+        <div className="min-h-screen bg-gray-50 py-8">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Header moderne */}
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-8 shadow-lg mb-8">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                            <Trophy className="h-8 w-8" />
                         </div>
-                        <div className="text-center p-4 bg-green-50 rounded-lg">
-                            <div className="text-2xl font-bold text-green-600">{totalVoters}</div>
-                            <div className="text-sm text-gray-600">Électeurs inscrits</div>
-                        </div>
-                        <div className="text-center p-4 bg-orange-50 rounded-lg">
-                            <div className="text-2xl font-bold text-orange-600">{participationRate}%</div>
-                            <div className="text-sm text-gray-600">Participation</div>
-                        </div>
-                        <div className="text-center p-4 bg-purple-50 rounded-lg">
-                            <div className="text-2xl font-bold text-purple-600">{resultats.length}</div>
-                            <div className="text-sm text-gray-600">Candidats</div>
+                        <div>
+                            <h1 className="text-3xl font-bold">Résultats officiels</h1>
+                            <p className="text-blue-100 mt-2">{election.titre}</p>
                         </div>
                     </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                        <p className="text-white">{election.description}</p>
+                    </div>
+                </div>
 
-                    {resultats[0]?.candidature?.resultat === 'elu' && (
-                        <Alert className="bg-green-50 border-green-200">
-                            <AlertDescription>
-                                <div className="flex items-center gap-2 font-semibold mb-2">
-                                    <CheckCircle className="h-5 w-5 text-green-600" />
-                                    Élu officiel
-                                </div>
-                                <p className="text-sm">
-                                    {resultats[0].candidature.user.name} est officiellement élu.
-                                </p>
-                            </AlertDescription>
-                        </Alert>
-                    )}
-
-                    {resultats[0]?.candidature?.resultat === 'second_tour' && (
-                        <Alert className="bg-yellow-50 border-yellow-200">
-                            <AlertDescription>
-                                <div className="flex items-center gap-2 font-semibold mb-2">
-                                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                                    Second tour requis
-                                </div>
-                                <p className="text-sm">
-                                    Un second tour sera organisé entre les candidats qualifiés.
-                                </p>
-                            </AlertDescription>
-                        </Alert>
-                    )}
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Classement des candidats</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    {resultats.map((resultat) => (
-                        <Card key={resultat.id_candidature}>
-                            <CardContent className="p-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl shadow-lg border-2 border-white">
-                                            {resultat.candidature.photo ? (
-                                                <img
-                                                    src={resultat.candidature.photo}
-                                                    alt={resultat.candidature.user.name}
-                                                    className="w-18 h-18 rounded-xl object-cover shadow-md"
-                                                />
-                                            ) : (
-                                                <div className="w-18 h-18 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-md">
-                                                    {resultat.candidature.user.name.charAt(0).toUpperCase()}
+                {/* Résultats des candidats */}
+                <Card className="shadow-xl border-0">
+                    <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
+                        <CardTitle className="flex items-center gap-2 text-blue-700">
+                            <Trophy className="h-5 w-5" />
+                            Classement des candidats
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                        <div className="space-y-4">
+                            {resultats.map((resultat, index) => (
+                                <Card key={resultat.id_candidature} className="hover:shadow-xl transition-all duration-300 border-0 bg-white">
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-4">
+                                                {/* Rang avec icône */}
+                                                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg border-2 border-white">
+                                                    {resultat.rang === 1 ? (
+                                                        <Crown className="h-6 w-6 text-yellow-300" />
+                                                    ) : (
+                                                        <span className="text-white font-bold text-lg">{resultat.rang}</span>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
+                                                
+                                                {/* Photo du candidat */}
+                                                <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl shadow-md border-2 border-white">
+                                                    {resultat.candidature.photo ? (
+                                                        <img
+                                                            src={`/storage/${resultat.candidature.photo}`}
+                                                            alt={resultat.candidature.user.name}
+                                                            className="w-14 h-14 rounded-xl object-cover shadow-sm"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-sm">
+                                                            {resultat.candidature.user.name.charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
 
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <h3 className="font-semibold text-lg">
-                                                    {resultat.candidature.user.name}
-                                                </h3>
-                                                {resultat.candidature.resultat === 'elu' && (
-                                                    <Badge className="bg-yellow-100 text-yellow-800">
-                                                        <Trophy className="h-3 w-3 mr-1" />
-                                                        Élu
-                                                    </Badge>
-                                                )}
-                                                {resultat.candidature.resultat === 'second_tour' && (
-                                                    <Badge className="bg-blue-100 text-blue-800">
-                                                        Qualifié pour 2ème tour
-                                                    </Badge>
-                                                )}
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <h3 className="font-semibold text-lg text-gray-800">
+                                                            {resultat.candidature.user.name}
+                                                        </h3>
+                                                        {resultat.candidature.resultat === 'elu' && (
+                                                            <Badge className="bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border-yellow-300">
+                                                                <Crown className="h-3 w-3 mr-1" />
+                                                                Élu
+                                                            </Badge>
+                                                        )}
+                                                        {resultat.candidature.resultat === 'second_tour' && (
+                                                            <Badge className="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border-blue-300">
+                                                                <ArrowRight className="h-3 w-3 mr-1" />
+                                                                Qualifié pour 2ème tour
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-sm text-gray-500">
+                                                        {resultat.candidature.user.email}
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                            <div className="text-sm text-gray-500">
-                                                {resultat.candidature.user.email}
+                                            <div className="text-right">
+                                                <div className="text-2xl font-bold text-blue-600 mb-1">
+                                                    {resultat.nb_voix}
+                                                </div>
+                                                <div className="text-sm text-gray-500">
+                                                    voix
+                                                </div>
+                                                <div className="text-lg font-semibold text-purple-600 mt-1">
+                                                    {resultat.pourcentage}%
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div className="text-right">
-                                        <div className="text-2xl font-bold text-blue-600">
-                                            {resultat.rang}ème
+                                        {/* Barre de progression */}
+                                        <div className="mt-4">
+                                            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                                <div
+                                                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500 ease-out"
+                                                    style={{ width: `${resultat.pourcentage}%` }}
+                                                >
+                                                    <div className="h-full bg-white/20 animate-pulse"></div>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between items-center mt-2">
+                                                <div className="text-xs text-gray-500">
+                                                    {resultat.pourcentage}% des voix
+                                                </div>
+                                                {resultat.rang === 1 && (
+                                                    <div className="flex items-center gap-1 text-xs text-yellow-600">
+                                                        <Crown className="h-3 w-3" />
+                                                        <span>Vainqueur</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="text-lg font-semibold">
-                                            {resultat.nb_voix} voix
-                                        </div>
-                                        <div className="text-sm text-gray-500">
-                                            {resultat.pourcentage}%
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div className="mt-3">
-                                    <div className="w-full bg-gray-200 rounded-full h-2">
-                                        <div
-                                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                                            style={{ width: `${resultat.pourcentage}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </CardContent>
-            </Card>
+                                        {/* Programme si disponible */}
+                                        {resultat.candidature.programme && (
+                                            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                                <div className="text-sm font-medium text-blue-800 mb-1">Programme</div>
+                                                <p className="text-sm text-blue-700 leading-relaxed line-clamp-2">
+                                                    {resultat.candidature.programme}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     )
 }

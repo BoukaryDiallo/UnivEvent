@@ -24,9 +24,7 @@ Route::inertia('/', 'welcome', [
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Espace Élections
-    Route::get('espace-election', [ResultatController::class, 'espaceElections'])->name('espace.elections');
-
+  
     // Administration
     Route::middleware(['role:admin'])->group(function () {
         Route::get('gestion', [GestionController::class, 'index'])->name('gestion');

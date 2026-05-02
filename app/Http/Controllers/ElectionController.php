@@ -115,7 +115,7 @@ class ElectionController extends Controller
             'tour' => 1,
         ]);
 
-        return redirect()->route('elections.prepare', $election)
+        return redirect()->route('elections.genererListe.form', $election)
             ->with('success', 'Élection créée. Passez à la préparation.');
     }
 
@@ -155,7 +155,7 @@ class ElectionController extends Controller
             ]);
 
             return redirect()
-                ->route('elections.prepare', $election)
+                ->route('elections.admin', $election)
                 ->with('success', "Liste électorale générée avec succès : {$nb} électeurs ajoutés.");
 
         } catch (\RuntimeException $e) {

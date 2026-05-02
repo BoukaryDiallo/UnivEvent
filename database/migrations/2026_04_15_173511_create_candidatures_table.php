@@ -13,9 +13,9 @@ return new class extends Migration
             $table->text('programme')->nullable();
             $table->string('photo')->nullable();
 
-            $table->string('cnib_pdf');
-            $table->string('casier_judiciaire_pdf');
-            $table->string('attestation_inscription_pdf');
+            $table->string('cnib_pdf')->nullable();
+            $table->string('casier_judiciaire_pdf')->nullable();
+            $table->string('attestation_inscription_pdf')->nullable();
 
             // dossier administratif
             $table->enum('statut', [

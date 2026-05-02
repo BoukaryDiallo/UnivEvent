@@ -84,15 +84,25 @@ class CandidatureController extends Controller
     // Enregistrer une candidature
     public function store(Request $request)
     {
-        $request->validate([
+        // Récupérer l'élection pour déterminer le type
+        $election = Election::find($request->id_election);
+        $isUfrElection = $election && $election->type === 'ufr';
+        
+        $rules = [
             'id_etudiant' => 'required_without:fromElection|exists:etudiants,id',
             'id_election' => 'required_without:fromElection|exists:elections,id_election',
             'programme' => 'nullable|string',
             'photo' => 'nullable|image|max:4096',
-            'cnib_pdf' => 'required_if:fromElection,0|required_if:needsPdf,true|mimes:pdf|max:5120',
-            'casier_judiciaire_pdf' => 'required_if:fromElection,0|required_if:needsPdf,true|mimes:pdf|max:5120',
-            'attestation_inscription_pdf' => 'required_if:fromElection,0|required_if:needsPdf,true|mimes:pdf|max:5120',
-        ]);
+        ];
+        
+        // Ajouter les règles PDF uniquement pour les élections UFR
+        if ($isUfrElection) {
+            $rules['cnib_pdf'] = 'required|mimes:pdf|max:5120';
+            $rules['casier_judiciaire_pdf'] = 'required|mimes:pdf|max:5120';
+            $rules['attestation_inscription_pdf'] = 'required|mimes:pdf|max:5120';
+        }
+        
+        $request->validate($rules);
 
         // Vérifier que l'étudiant n'a pas déjà candidaté pour cette élection
         $etudiant = Etudiant::find($request->id_etudiant);
@@ -129,13 +139,23 @@ class CandidatureController extends Controller
         if ($request->hasFile('photo')) {
             $data['photo'] = $request->file('photo')->store('photos', 'public');
         }
-        $data['cnib_pdf'] = $request->file('cnib_pdf')->store('candidatures', 'public');
-        $data['casier_judiciaire_pdf'] = $request->file('casier_judiciaire_pdf')->store('candidatures', 'public');
-        $data['attestation_inscription_pdf'] = $request->file('attestation_inscription_pdf')->store('candidatures', 'public');
+        
+        // Stocker les PDF uniquement pour les élections UFR
+        if ($isUfrElection) {
+            if ($request->hasFile('cnib_pdf')) {
+                $data['cnib_pdf'] = $request->file('cnib_pdf')->store('candidatures', 'public');
+            }
+            if ($request->hasFile('casier_judiciaire_pdf')) {
+                $data['casier_judiciaire_pdf'] = $request->file('casier_judiciaire_pdf')->store('candidatures', 'public');
+            }
+            if ($request->hasFile('attestation_inscription_pdf')) {
+                $data['attestation_inscription_pdf'] = $request->file('attestation_inscription_pdf')->store('candidatures', 'public');
+            }
+        }
 
         Candidature::create($data);
 
-        return redirect()->route('elections.workflow');
+        return redirect()->route('espace.elections');
     }
 
     // Afficher une candidature
