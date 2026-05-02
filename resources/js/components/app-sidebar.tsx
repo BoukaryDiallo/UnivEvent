@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, User } from 'lucide-react';
+import { BookOpen, FolderGit2, LayoutGrid, User, GraduationCap, DoorOpen, Users, Bell } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -22,18 +22,37 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
-
     {
         title: 'Rôles',
         href: roles(),
         icon: User,
+    },
+    {
+        title: 'Soutenances',
+        href: '/soutenances',
+        icon: GraduationCap,
+    },
+    {
+        title: 'Jurys',
+        href: '/jurys',
+        icon: Users,
+    },
+    {
+        title: 'Salles',
+        href: '/salles',
+        icon: DoorOpen,
+    },
+    {
+        title: 'Notifications',
+        href: '/notifications-soutenance',
+        icon: Bell,
     },
 ];
 
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
+        href: 'https://github.com/BoukaryDiallo/UnivEvent',
         icon: FolderGit2,
     },
     {
@@ -57,11 +76,9 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-
             <SidebarContent>
                 <NavMain items={mainNavItems} />
             </SidebarContent>
-
             <SidebarFooter>
                 <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
