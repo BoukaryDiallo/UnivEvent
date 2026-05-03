@@ -10,39 +10,27 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'role', 'est_actif'])]
+#[Fillable(['name', 'email', 'password', 'est_actif'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
-            'est_actif' => 'boolean'
+            'est_actif' => 'boolean',
         ];
     }
 
-
-    public function isAdmin(){
-        return $this->role === 'admin';
-    }
-
-    public function isEtudiant(){
-        return $this->role === 'etudiant';
-    }
-
-    public function isEnseignant(){
-        return $this->role === 'enseignant';
+    public function isScolarite(): bool
+    {
+        return $this->can('diplomas.manage');
     }
 }
