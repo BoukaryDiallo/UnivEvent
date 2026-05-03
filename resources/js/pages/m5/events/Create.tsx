@@ -8,7 +8,8 @@ import {
     UploadIcon,
     PlusIcon,
     Trash2Icon,
-    EyeIcon
+    EyeIcon,
+    ImageIcon
 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -25,9 +26,27 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import EventCard from '@/components/m5/EventCard';
-import type { EventFormValues, EventSummary } from '@/types/evenements';
+import type { EventSummary } from '@/types/evenements';
 
-export default function EventCreate() {
+type EventType = {
+    id: number;
+    name: string;
+    slug: string;
+    features: {
+        has_jury: boolean;
+        has_organizer: boolean;
+        has_speaker: boolean;
+        has_participants: boolean;
+        has_certification: boolean;
+    };
+};
+
+type EventCreateProps = {
+    event_types: EventType[];
+    auth: { user: any };
+};
+
+export default function EventCreate({ event_types, auth }: EventCreateProps) {
     const [step, setStep] = useState(1);
     const { data, setData, post, processing, errors } = useForm<any>({
         type: 'conference',
@@ -41,7 +60,7 @@ export default function EventCreate() {
         public_cible: [],
         inscription_requise: true,
         liste_attente_active: true,
-        affiche: null,
+        affiche: null as File | null,
         video_url: '',
         programme_pdf: null,
         tags: '',
@@ -50,8 +69,25 @@ export default function EventCreate() {
         date_deliberation: '',
         criteres: [{ nom: '', poids: 20 }],
         theme: '',
-        programme: [{ titre: '', start: '', end: '', type: '' }]
+        programme: [{ titre: '', start: '', end: '', type: '' }],
+        statut: 'brouillon'
     });
+
+    const [affichePreview, setAffichePreview] = useState<string | null>(null);
+
+    const handleAfficheChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData('affiche', file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAffichePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const selectedType = event_types.find(t => t.slug === data.type);
 
     const [previewEvent, setPreviewEvent] = useState<EventSummary>({
         id: 0,
@@ -76,7 +112,7 @@ export default function EventCreate() {
         comment_policy: 'all',
         messages_enabled: true,
         evenement_certifie: true,
-        createur: { id: 1, name: 'Organisateur', role: 'Staff' },
+        createur: { id: auth.user.id, name: auth.user.name, role: auth.user.role },
         participation: null
     });
 
@@ -89,15 +125,20 @@ export default function EventCreate() {
             lieu: data.lieu || 'Lieu de l\'événement',
             capacite_max: parseInt(data.capacite_max) || 100,
             roles: data.tags ? data.tags.split(',') : [],
+            cover_url: affichePreview
         }));
-    }, [data]);
+    }, [data, affichePreview]);
 
-    const nextStep = () => setStep(s => Math.min(s + 1, 4));
+    const nextStep = () => setStep(s => Math.min(s + 4, 4));
     const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
     const handleSubmit = (statut: string) => {
+        setData('statut', statut);
         post('/m5/events', {
-            onBefore: () => setData('statut', statut),
+            forceFormData: true,
+            onSuccess: () => {
+                // Success redirect handled by backend
+            }
         });
     };
 
@@ -133,12 +174,12 @@ export default function EventCreate() {
                             ))}
                         </div>
 
-                        <div className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-gray-100 shadow-xl shadow-gray-200/50 dark:bg-slate-950 dark:border-slate-800">
+                        <div className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-gray-100 shadow-sm dark:bg-slate-950 dark:border-slate-800">
                             {step === 1 && (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                                     <div className="space-y-2">
-                                        <h2 className="text-2xl font-black text-gray-900 dark:text-white">Informations générales</h2>
-                                        <p className="text-sm text-gray-500">Définissez les bases de votre événement.</p>
+                                        <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Configuration Initiale</h2>
+                                        <p className="text-sm text-gray-500">Choisissez le type d'événement et les informations de base.</p>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -149,8 +190,9 @@ export default function EventCreate() {
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="conference">Conférence</SelectItem>
-                                                    <SelectItem value="concours">Concours</SelectItem>
+                                                    {event_types.map((t) => (
+                                                        <SelectItem key={t.id} value={t.slug}>{t.name}</SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -162,14 +204,14 @@ export default function EventCreate() {
                                                 placeholder="Ex: Hackathon UJKZ 2026"
                                                 className="rounded-xl h-12"
                                             />
-                                            <p className="text-[10px] text-right text-gray-400">{data.titre.length}/150</p>
+                                            {errors.titre && <p className="text-xs text-rose-500">{errors.titre}</p>}
                                         </div>
                                         <div className="col-span-2 space-y-2">
                                             <Label>Description</Label>
                                             <Textarea 
                                                 value={data.description}
                                                 onChange={e => setData('description', e.target.value)}
-                                                placeholder="Décrivez votre événement en quelques lignes..."
+                                                placeholder="Décrivez votre événement..."
                                                 className="rounded-[1.5rem] min-h-[150px]"
                                             />
                                         </div>
@@ -178,7 +220,7 @@ export default function EventCreate() {
                                             <Input 
                                                 value={data.lieu}
                                                 onChange={e => setData('lieu', e.target.value)}
-                                                placeholder="Ex: Amphithéâtre Libye"
+                                                placeholder="Ex: Amphi Libye"
                                                 className="rounded-xl h-12"
                                             />
                                         </div>
@@ -217,8 +259,8 @@ export default function EventCreate() {
                             {step === 2 && (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                                     <div className="space-y-2">
-                                        <h2 className="text-2xl font-black text-gray-900 dark:text-white">Visibilité & Public cible</h2>
-                                        <p className="text-sm text-gray-500">Qui peut voir et s'inscrire à cet événement ?</p>
+                                        <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Visibilité & Cible</h2>
+                                        <p className="text-sm text-gray-500">Gérez l'accessibilité de votre événement.</p>
                                     </div>
 
                                     <div className="space-y-6">
@@ -228,21 +270,21 @@ export default function EventCreate() {
                                                 <RadioGroupItem value="public" id="v-public" className="peer sr-only" />
                                                 <Label htmlFor="v-public" className="flex flex-col p-4 bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer hover:bg-gray-100 peer-data-[state=checked]:border-indigo-600 peer-data-[state=checked]:bg-indigo-50 transition-all dark:bg-slate-900">
                                                     <span className="font-bold text-gray-900 dark:text-white">Public</span>
-                                                    <span className="text-[10px] text-gray-500">Visible par tous les utilisateurs</span>
+                                                    <span className="text-[10px] text-gray-500">Tout le monde</span>
                                                 </Label>
                                             </div>
                                             <div className="relative">
                                                 <RadioGroupItem value="restreint" id="v-restreint" className="peer sr-only" />
                                                 <Label htmlFor="v-restreint" className="flex flex-col p-4 bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer hover:bg-gray-100 peer-data-[state=checked]:border-indigo-600 peer-data-[state=checked]:bg-indigo-50 transition-all dark:bg-slate-900">
                                                     <span className="font-bold text-gray-900 dark:text-white">Restreint</span>
-                                                    <span className="text-[10px] text-gray-500">Seulement pour le public cible</span>
+                                                    <span className="text-[10px] text-gray-500">Public cible</span>
                                                 </Label>
                                             </div>
                                             <div className="relative">
                                                 <RadioGroupItem value="prive" id="v-prive" className="peer sr-only" />
                                                 <Label htmlFor="v-prive" className="flex flex-col p-4 bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer hover:bg-gray-100 peer-data-[state=checked]:border-indigo-600 peer-data-[state=checked]:bg-indigo-50 transition-all dark:bg-slate-900">
                                                     <span className="font-bold text-gray-900 dark:text-white">Privé</span>
-                                                    <span className="text-[10px] text-gray-500">Uniquement sur invitation</span>
+                                                    <span className="text-[10px] text-gray-500">Invitation</span>
                                                 </Label>
                                             </div>
                                         </RadioGroup>
@@ -272,25 +314,37 @@ export default function EventCreate() {
                             {step === 3 && (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                                     <div className="space-y-2">
-                                        <h2 className="text-2xl font-black text-gray-900 dark:text-white">Médias & Affiche</h2>
-                                        <p className="text-sm text-gray-500">Rendez votre événement attrayant.</p>
+                                        <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Visuels & Médias</h2>
+                                        <p className="text-sm text-gray-500">Ajoutez l'affiche et les ressources multimédias.</p>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="space-y-4">
-                                            <Label>Affiche de l'événement</Label>
-                                            <div className="aspect-[4/3] bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center p-6 text-center dark:bg-slate-900 dark:border-slate-800">
-                                                <UploadIcon className="h-10 w-10 text-gray-300 mb-2" />
-                                                <p className="text-xs text-gray-500">Cliquez pour uploader (JPG, PNG, Max 5Mo)</p>
-                                                <Input 
-                                                    type="file" 
-                                                    className="hidden" 
-                                                    id="affiche-upload" 
-                                                    onChange={e => setData('affiche', e.target.files?.[0])}
-                                                />
-                                                <Button variant="outline" asChild className="mt-4 rounded-xl">
-                                                    <label htmlFor="affiche-upload">Choisir un fichier</label>
-                                                </Button>
+                                            <Label>Affiche (Poster)</Label>
+                                            <div className="aspect-[4/3] relative bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center p-6 text-center dark:bg-slate-900 dark:border-slate-800 overflow-hidden">
+                                                {affichePreview ? (
+                                                    <>
+                                                        <img src={affichePreview} className="absolute inset-0 w-full h-full object-cover" />
+                                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                                            <Button variant="outline" className="text-white border-white" onClick={() => setAffichePreview(null)}>Changer</Button>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <ImageIcon className="h-10 w-10 text-gray-300 mb-2" />
+                                                        <p className="text-xs text-gray-500">JPG, PNG (Max 5Mo)</p>
+                                                        <Input 
+                                                            type="file" 
+                                                            className="hidden" 
+                                                            id="affiche-upload" 
+                                                            accept="image/*"
+                                                            onChange={handleAfficheChange}
+                                                        />
+                                                        <Button variant="outline" asChild className="mt-4 rounded-xl">
+                                                            <label htmlFor="affiche-upload" className="cursor-pointer">Choisir l'affiche</label>
+                                                        </Button>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="space-y-6">
@@ -304,18 +358,11 @@ export default function EventCreate() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label>Programme détaillé (PDF)</Label>
-                                                <div className="p-4 border rounded-xl flex items-center justify-between">
-                                                    <span className="text-xs text-gray-400">Aucun fichier choisi</span>
-                                                    <Button size="sm" variant="ghost">Uploader</Button>
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
                                                 <Label>Tags (séparés par des virgules)</Label>
                                                 <Input 
                                                     value={data.tags}
                                                     onChange={e => setData('tags', e.target.value)}
-                                                    placeholder="IA, Hackathon, Innovation..."
+                                                    placeholder="IA, Innovation, Campus..."
                                                     className="rounded-xl h-12"
                                                 />
                                             </div>
@@ -327,42 +374,23 @@ export default function EventCreate() {
                             {step === 4 && (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                                     <div className="space-y-2">
-                                        <h2 className="text-2xl font-black text-gray-900 dark:text-white">
-                                            Configuration {data.type === 'conference' ? 'Conférence' : 'Concours'}
-                                        </h2>
-                                        <p className="text-sm text-gray-500">Détails spécifiques à votre type d'événement.</p>
+                                        <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Configuration Avancée</h2>
+                                        <p className="text-sm text-gray-500">Paramètres spécifiques au type : <span className="text-indigo-600">{selectedType?.name}</span></p>
                                     </div>
 
-                                    {data.type === 'conference' ? (
+                                    {selectedType?.features.has_speaker && (
                                         <div className="space-y-6">
-                                            <div className="space-y-2">
-                                                <Label>Thème principal</Label>
-                                                <Input 
-                                                    value={data.theme}
-                                                    onChange={e => setData('theme', e.target.value)}
-                                                    placeholder="Le thème majeur de la conférence"
-                                                    className="rounded-xl h-12"
-                                                />
-                                            </div>
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center">
-                                                    <Label>Programme des créneaux</Label>
-                                                    <Button size="sm" variant="outline" className="rounded-lg">
-                                                        <PlusIcon className="h-4 w-4 mr-1" /> Ajouter
-                                                    </Button>
-                                                </div>
-                                                <div className="space-y-3">
-                                                    {data.programme.map((p: any, i: number) => (
-                                                        <div key={i} className="p-4 bg-gray-50 rounded-2xl flex gap-4 dark:bg-slate-900">
-                                                            <Input placeholder="Titre" className="flex-1" />
-                                                            <Input type="time" className="w-24" />
-                                                            <Button size="icon" variant="ghost" className="text-rose-500"><Trash2Icon className="h-4 w-4" /></Button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                            <Label>Thème principal</Label>
+                                            <Input 
+                                                value={data.theme}
+                                                onChange={e => setData('theme', e.target.value)}
+                                                className="h-12 rounded-xl"
+                                                placeholder="Sujet central de la conférence"
+                                            />
                                         </div>
-                                    ) : (
+                                    )}
+
+                                    {selectedType?.features.has_jury && (
                                         <div className="space-y-6">
                                             <div className="space-y-2">
                                                 <Label>Règlement du concours</Label>
@@ -375,32 +403,32 @@ export default function EventCreate() {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-2">
                                                     <Label>Fin des soumissions</Label>
-                                                    <Input type="datetime-local" className="rounded-xl" />
+                                                    <Input 
+                                                        type="datetime-local" 
+                                                        className="rounded-xl"
+                                                        value={data.date_soumission}
+                                                        onChange={e => setData('date_soumission', e.target.value)}
+                                                    />
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label>Date délibération</Label>
-                                                    <Input type="datetime-local" className="rounded-xl" />
-                                                </div>
-                                            </div>
-                                            <div className="space-y-4 pt-4 border-t">
-                                                <div className="flex justify-between items-center">
-                                                    <Label>Critères d'évaluation</Label>
-                                                    <Button size="sm" variant="outline" className="rounded-lg">
-                                                        <PlusIcon className="h-4 w-4 mr-1" /> Ajouter
-                                                    </Button>
-                                                </div>
-                                                <div className="space-y-3">
-                                                    {data.criteres.map((c: any, i: number) => (
-                                                        <div key={i} className="flex gap-4 items-center">
-                                                            <Input placeholder="Nom du critère" className="flex-1" />
-                                                            <Input type="number" placeholder="Poids %" className="w-24" />
-                                                            <Button size="icon" variant="ghost" className="text-rose-500"><Trash2Icon className="h-4 w-4" /></Button>
-                                                        </div>
-                                                    ))}
+                                                    <Input 
+                                                        type="datetime-local" 
+                                                        className="rounded-xl"
+                                                        value={data.date_deliberation}
+                                                        onChange={e => setData('date_deliberation', e.target.value)}
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
                                     )}
+
+                                    <div className="bg-amber-50 p-6 rounded-[2rem] border border-amber-100 dark:bg-amber-950/20 dark:border-amber-900/30">
+                                        <h4 className="text-xs font-bold text-amber-900 uppercase tracking-widest mb-2">Note sur les fonctionnalités</h4>
+                                        <p className="text-xs text-amber-700/80 leading-relaxed">
+                                            Certaines fonctionnalités comme la gestion de jury ou les certificats seront accessibles dans la console de gestion une fois l'événement créé.
+                                        </p>
+                                    </div>
                                 </div>
                             )}
 
@@ -421,6 +449,7 @@ export default function EventCreate() {
                                         variant="outline" 
                                         onClick={() => handleSubmit('brouillon')}
                                         className="rounded-xl border-gray-200"
+                                        disabled={processing}
                                     >
                                         <SaveIcon className="mr-2 h-4 w-4" />
                                         Brouillon
@@ -437,6 +466,7 @@ export default function EventCreate() {
                                     ) : (
                                         <Button 
                                             onClick={() => handleSubmit('en_attente')}
+                                            disabled={processing}
                                             className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-8"
                                         >
                                             <SendIcon className="mr-2 h-4 w-4" />
@@ -453,24 +483,28 @@ export default function EventCreate() {
                         <div className="sticky top-8">
                             <div className="flex items-center gap-2 mb-4 px-2">
                                 <EyeIcon className="h-4 w-4 text-indigo-600" />
-                                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Prévisualisation Live</h3>
+                                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Aperçu en direct</h3>
                             </div>
                             
                             <div className="space-y-8">
-                                <div className="scale-95 origin-top opacity-90 grayscale-[0.2] hover:grayscale-0 hover:scale-100 hover:opacity-100 transition-all duration-500">
-                                    <p className="text-[10px] font-bold text-gray-400 mb-2 ml-4">Affiche (Home)</p>
+                                <div className="scale-95 origin-top opacity-90 transition-all duration-500">
                                     <EventCard event={previewEvent} />
                                 </div>
 
                                 <div className="bg-gray-50 rounded-[2.5rem] p-6 border border-gray-100 dark:bg-slate-900 dark:border-slate-800">
-                                    <p className="text-[10px] font-bold text-gray-400 mb-4 uppercase tracking-widest">Aperçu fiche</p>
-                                    <div className="space-y-4">
-                                        <div className="h-4 w-3/4 bg-gray-200 rounded-full animate-pulse" />
-                                        <div className="h-24 w-full bg-gray-100 rounded-2xl animate-pulse" />
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="h-10 w-full bg-gray-200 rounded-xl animate-pulse" />
-                                            <div className="h-10 w-full bg-gray-200 rounded-xl animate-pulse" />
-                                        </div>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <SettingsIcon className="h-3 w-3 text-gray-400" />
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Fonctionnalités {selectedType?.name}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {selectedType && Object.entries(selectedType.features).map(([key, value]) => (
+                                            value && (
+                                                <div key={key} className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
+                                                    <CheckCircle2Icon className="h-3 w-3" />
+                                                    {key.replace('has_', '').replace('_', ' ').toUpperCase()}
+                                                </div>
+                                            )
+                                        ))}
                                     </div>
                                 </div>
                             </div>

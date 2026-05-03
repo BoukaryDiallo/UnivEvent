@@ -205,7 +205,7 @@ list.push(...actions.admin);
                     <SidebarMenuButton
                         asChild
                         isActive={isModuleActive}
-                        tooltip={{ children: 'Hub événementiel' }}
+                        tooltip={{ children: 'Menu événementiel' }}
                         className="h-auto min-h-14 items-start rounded-2xl border border-sidebar-border/60 bg-sidebar-accent/30 px-3 py-3"
                     >
                         <Link href={hubHref} prefetch>
@@ -214,7 +214,7 @@ list.push(...actions.admin);
                             </div>
 
                             <div className="grid min-w-0 flex-1 gap-0.5">
-                                <span className="text-sm font-semibold">Hub Événementiel</span>
+                                <span className="text-sm font-semibold">Menu Événementiel</span>
                                 <span className="text-xs text-sidebar-foreground/70">
                                     Accès dynamique selon vos rôles
                                 </span>

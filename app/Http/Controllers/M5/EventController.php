@@ -9,13 +9,20 @@ use App\Models\InscriptionEvenement;
 use App\Models\EvenementRole;
 use App\Models\Programme;
 use App\Models\JuryPanel;
+use App\Models\EventType;
+use App\Services\MediaService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class EventController extends Controller
 {
+    public function __construct(
+        private MediaService $mediaService
+    ) {}
+
     public function index(Request $request)
     {
         $query = Evenement::query()
@@ -72,6 +79,7 @@ class EventController extends Controller
     public function create()
     {
         return Inertia::render('m5/events/Create', [
+            'event_types' => EventType::where('is_active', true)->get(),
             'auth' => [
                 'user' => Auth::user(),
             ],
@@ -83,7 +91,7 @@ class EventController extends Controller
         $validated = $request->validate([
             'titre' => 'required|string|max:150',
             'description' => 'required|string',
-            'type' => 'required|in:conference,concours',
+            'type' => 'required|string',
             'date_debut' => 'required|date',
             'date_fin' => 'nullable|date|after:date_debut',
             'lieu' => 'nullable|string',
@@ -93,21 +101,32 @@ class EventController extends Controller
             'statut' => 'nullable|string',
             'theme' => 'nullable|string',
             'reglement' => 'nullable|string',
+            'affiche' => 'nullable|image|max:5120', // Max 5MB
         ]);
 
         return DB::transaction(function () use ($request, $validated) {
             $evenement = Evenement::create([
                 ...$validated,
-                'public_cible' => is_array($request->public_cible) ? implode(',', $request->public_cible) : $request->public_cible,
+                'public_cible' => is_array($request->public_cible) ? implode(',', $request->public_cible) : ($request->public_cible ?? 'tous'),
                 'cree_par' => Auth::id(),
                 'statut' => $request->statut ?? 'brouillon',
                 'validation_status' => 'pending',
                 'submitted_at' => $request->statut === 'en_attente' ? now() : null,
             ]);
 
-            // Step 2 & 3 & 4 data (simplified sync)
+            // Handle Poster (Affiche)
+            if ($request->hasFile('affiche')) {
+                $this->mediaService->uploadMedia($evenement, $request->file('affiche'), [
+                    'description' => 'Affiche de l\'événement',
+                    'is_public' => true,
+                    'is_cover' => true,
+                ]);
+            }
+
+            // Tags
             if ($request->filled('tags')) {
-                foreach (explode(',', $request->tags) as $tag) {
+                $tags = is_array($request->tags) ? $request->tags : explode(',', $request->tags);
+                foreach ($tags as $tag) {
                     EvenementRole::create([
                         'evenement_id' => $evenement->id,
                         'category' => 'audience',
@@ -116,9 +135,12 @@ class EventController extends Controller
                 }
             }
 
-            if ($request->type === 'concours' && $request->filled('criteres')) {
+            // Type-specific logic
+            if ($request->type === 'concours') {
                 $panel = JuryPanel::create(['evenement_id' => $evenement->id]);
-                // Criteria sync logic would go here
+                if ($request->filled('criteres')) {
+                    // Logic to sync criteria
+                }
             }
 
             return redirect()->route('m5.events.index')
@@ -126,33 +148,30 @@ class EventController extends Controller
         });
     }
 
-    public function edit(Evenement $evenement)
-    {
-        $evenement->load(['roles', 'medias', 'programmes']);
-        
-        return Inertia::render('m5/events/Edit', [
-            'event' => new EvenementResource($evenement),
-            'auth' => [
-                'user' => Auth::user(),
-            ],
-        ]);
-    }
-
     public function update(Request $request, Evenement $evenement)
     {
         $validated = $request->validate([
             'titre' => 'required|string|max:150',
             'description' => 'required|string',
-            'type' => 'required|in:conference,concours',
+            'type' => 'required|string',
             'date_debut' => 'required|date',
             'date_fin' => 'nullable|date|after:date_debut',
             'lieu' => 'nullable|string',
             'capacite_max' => 'nullable|integer|min:1',
             'visibilite' => 'required|in:public,restreint,prive',
             'statut' => 'nullable|string',
+            'affiche' => 'nullable|image|max:5120',
         ]);
 
         $evenement->update($validated);
+
+        if ($request->hasFile('affiche')) {
+            $this->mediaService->uploadMedia($evenement, $request->file('affiche'), [
+                'description' => 'Affiche de l\'événement',
+                'is_public' => true,
+                'is_cover' => true,
+            ]);
+        }
 
         if ($request->has('statut')) {
             $evenement->update(['statut' => $request->statut]);

@@ -160,6 +160,8 @@ Route::inertia('/', 'welcome', [
         // Participation
         Route::post('events/{evenement}/register', [\App\Http\Controllers\M5\ParticipantController::class, 'register'])->name('events.register');
         Route::patch('participations/{id}/cancel', [\App\Http\Controllers\M5\ParticipantController::class, 'cancel'])->name('participations.cancel');
+        Route::patch('inscriptions/{id}/approve', [\App\Http\Controllers\M5\InscriptionController::class, 'approve'])->name('inscriptions.approve');
+        Route::patch('inscriptions/{id}/reject', [\App\Http\Controllers\M5\InscriptionController::class, 'reject'])->name('inscriptions.reject');
 
         // Dashboard
         Route::get('dashboard', [\App\Http\Controllers\M5\DashboardController::class, 'index'])->name('dashboard');
@@ -175,6 +177,14 @@ Route::inertia('/', 'welcome', [
         Route::get('jury/{evenement}/panel', [\App\Http\Controllers\M5\JuryController::class, 'panel'])->name('jury.panel');
         Route::post('evaluations', [\App\Http\Controllers\M5\JuryController::class, 'evaluate'])->name('evaluations.store');
         Route::post('deliberations/{id}/valider', [\App\Http\Controllers\M5\JuryController::class, 'valider'])->name('deliberations.valider');
+    });
+
+    // Global Administration (Module 5 focus)
+    Route::middleware('role:admin')->group(function () {
+        Route::get('admin', [\App\Http\Controllers\M5\AdminController::class, 'index'])->name('admin.index');
+        Route::post('admin/types', [\App\Http\Controllers\M5\AdminController::class, 'storeType'])->name('admin.types.store');
+        Route::patch('admin/types/{eventType}', [\App\Http\Controllers\M5\AdminController::class, 'updateType'])->name('admin.types.update');
+        Route::delete('admin/types/{eventType}', [\App\Http\Controllers\M5\AdminController::class, 'deleteType'])->name('admin.types.delete');
     });
 });
 

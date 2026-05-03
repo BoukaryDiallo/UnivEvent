@@ -18,15 +18,32 @@ class EventAdminController extends Controller
     {
         $this->authorize('viewAny', Evenement::class);
 
-        $events = Evenement::query()
+        $query = Evenement::query()
             ->with(['createur:id,name,email,role', 'roles', 'medias'])
             ->where('validation_status', 'pending')
-            ->whereNotNull('submitted_at')
-            ->latest('created_at')
-            ->paginate(20);
+            ->whereNotNull('submitted_at');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('titre', 'like', "%{$search}%")
+                    ->orWhereHas('createur', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('type') && $request->type !== 'all') {
+            $query->where('type', $request->type);
+        }
+
+        $events = $query->latest('submitted_at')
+            ->paginate(20)
+            ->withQueryString();
 
         return Inertia::render('admin/events/PendingEvents', [
             'events' => $events,
+            'filters' => $request->all(['search', 'type']),
         ]);
     }
 

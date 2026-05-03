@@ -56,7 +56,7 @@ export default function NotificationsIndex({ stats, notifications, feed }: Notif
                         <div className="max-w-3xl space-y-4">
                             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100">
                                 <Radio className="size-3.5" />
-                                Hub de suivi
+                                Centre de suivi
                             </div>
                             <div className="space-y-3">
                                 <h1 className="text-3xl font-semibold sm:text-4xl">

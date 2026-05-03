@@ -6,10 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Evenement;
 use App\Models\InscriptionEvenement;
 use App\Models\Certificat;
-use App\Models\EvenementMedia;
-use App\Models\EvenementRole;
-use App\Models\Resultat;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +20,7 @@ class DashboardController extends Controller
         return match ($role) {
             'admin' => $this->adminDashboard($request),
             'organisateur' => $this->organizerDashboard($request),
-            'enseignant' => $this->participantDashboard($request), // Defaulting to participant if not explicitly organizer/jury
+            'enseignant' => $this->participantDashboard($request),
             'etudiant' => $this->participantDashboard($request),
             default => $this->participantDashboard($request),
         };
@@ -33,23 +29,57 @@ class DashboardController extends Controller
     private function organizerDashboard(Request $request)
     {
         $user = Auth::user();
-        $mes_evenements = Evenement::where('cree_par', $user->id)
-            ->withCount('inscriptions')
+        
+        // Base Query for Events
+        $eventsQuery = Evenement::where('cree_par', $user->id);
+        $totalEventsCount = $eventsQuery->count();
+        
+        // Detailed data for drill-downs
+        $mes_evenements = (clone $eventsQuery)
+            ->withCount(['inscriptions', 'comments'])
+            ->latest()
             ->get();
+
+        $inscriptions = InscriptionEvenement::whereIn('evenement_id', $eventsQuery->pluck('id'))
+            ->with(['utilisateur', 'evenement'])
+            ->latest()
+            ->get()
+            ->map(fn($ins) => [
+                'id' => $ins->id,
+                'user' => [
+                    'id' => $ins->utilisateur->id,
+                    'name' => $ins->utilisateur->name,
+                    'email' => $ins->utilisateur->email,
+                ],
+                'event_title' => $ins->evenement->titre,
+                'event_id' => $ins->evenement->id,
+                'statut' => $ins->statut,
+                'is_waitlist' => (bool)$ins->is_waitlist,
+                'waitlist_position' => $ins->waitlist_position,
+                'registered_at' => $ins->created_at->format('d/m/Y H:i'),
+                'has_cv' => (bool)($ins->donnees_formulaire['cv_path'] ?? false),
+            ]);
+
+        $prochains_evenements = (clone $eventsQuery)
+            ->where('date_debut', '>', now())
+            ->orderBy('date_debut')
+            ->get();
+
+        // Calculate Validation Rate
+        $totalRegistrations = $inscriptions->count();
+        $validatedRegistrations = $inscriptions->where('statut', 'accepte')->count();
+        $validationRate = $totalRegistrations > 0 ? round(($validatedRegistrations / $totalRegistrations) * 100, 1) : 0;
 
         return Inertia::render('m5/dashboard/Organisateur', [
             'mes_evenements' => $mes_evenements,
+            'inscriptions' => $inscriptions,
             'stats' => [
-                'total' => $mes_evenements->count(),
-                'publies' => $mes_evenements->where('statut', 'publie')->count(),
-                'en_attente_validation' => $mes_evenements->where('statut', 'en_attente')->count(),
-                'clotures' => $mes_evenements->where('statut', 'cloture')->count(),
-                'total_inscrits' => $mes_evenements->sum('inscriptions_count'),
+                'total_events' => $totalEventsCount,
+                'total_inscriptions' => $totalRegistrations,
+                'upcoming_count' => $prochains_evenements->count(),
+                'validation_rate' => $validationRate,
             ],
-            'prochains_evenements' => Evenement::where('cree_par', $user->id)
-                ->where('date_debut', '>', now())
-                ->limit(5)
-                ->get(),
+            'prochains_evenements' => $prochains_evenements,
         ]);
     }
 
@@ -83,31 +113,33 @@ class DashboardController extends Controller
 
     private function adminDashboard(Request $request)
     {
-        $stats_globales = [
-            'total_evenements' => Evenement::count(),
-            'publies' => Evenement::where('statut', 'publie')->count(),
-            'en_attente' => Evenement::where('statut', 'en_attente')->count(),
-            'total_participants' => InscriptionEvenement::count(),
-            'total_certificats' => Certificat::count(),
-            'taux_remplissage_moyen' => 75, // Placeholder
-        ];
+        // For Admin, "Your Perimeter" = Everything
+        $allEvents = Evenement::withCount('inscriptions')->get();
+        $allInscriptions = InscriptionEvenement::with(['utilisateur', 'evenement'])->latest()->get();
+        
+        $totalInscriptions = $allInscriptions->count();
+        $validatedInscriptions = $allInscriptions->where('statut', 'accepte')->count();
 
-        return Inertia::render('m5/dashboard/Admin', [
-            'stats_globales' => $stats_globales,
-            'evenements_en_attente' => Evenement::where('statut', 'en_attente')->with('createur')->get(),
-            'activite_recente' => [], // Placeholder
-            'graphiques' => [
-                'inscriptions_par_mois' => [
-                    ['name' => 'Jan', 'value' => 400],
-                    ['name' => 'Feb', 'value' => 300],
-                    ['name' => 'Mar', 'value' => 600],
-                    ['name' => 'Apr', 'value' => 800],
-                ],
-                'types_evenements' => [
-                    ['name' => 'Conférences', 'value' => 65],
-                    ['name' => 'Concours', 'value' => 35],
-                ],
+        return Inertia::render('m5/dashboard/Organisateur', [ // Admins use the same rich dashboard
+            'mes_evenements' => $allEvents,
+            'inscriptions' => $allInscriptions->map(fn($ins) => [
+                'id' => $ins->id,
+                'user' => ['id' => $ins->utilisateur->id, 'name' => $ins->utilisateur->name, 'email' => $ins->utilisateur->email],
+                'event_title' => $ins->evenement->titre,
+                'event_id' => $ins->evenement->id,
+                'statut' => $ins->statut,
+                'is_waitlist' => (bool)$ins->is_waitlist,
+                'waitlist_position' => $ins->waitlist_position,
+                'registered_at' => $ins->created_at->format('d/m/Y H:i'),
+                'has_cv' => false,
+            ]),
+            'stats' => [
+                'total_events' => $allEvents->count(),
+                'total_inscriptions' => $totalInscriptions,
+                'upcoming_count' => Evenement::where('date_debut', '>', now())->count(),
+                'validation_rate' => $totalInscriptions > 0 ? round(($validatedInscriptions / $totalInscriptions) * 100, 1) : 0,
             ],
+            'prochains_evenements' => Evenement::where('date_debut', '>', now())->orderBy('date_debut')->limit(10)->get(),
         ]);
     }
 }
