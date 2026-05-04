@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, CalendarRange, ClipboardCheck, FolderGit2, GraduationCap, LayoutGrid, PieChart, ShieldEllipsis, User } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { Bell, BookOpen,ClipboardCheck, GraduationCap, PieChart, Calendar1, CalendarClock, CalendarRange, Eye, FolderGit2, History, LayoutGrid, NotebookPen, ShieldEllipsis, User } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -71,7 +71,25 @@ export function AppSidebar() {
         );
     }
 
-    if (hasRole('admin') || can('manage users')) {
+
+        if(hasRole('admin')){
+            mainNavItems.push(
+                {
+                    title: 'Consultation',
+                    href: '/consultation',
+                    icon: Eye,
+                },
+                {
+                    title: 'Emploi du Temps',
+                    href: '/emploie-du-temps',
+                    icon: Calendar1,
+                },
+            )
+        }
+
+
+
+        if (hasRole('admin') || can('manage users')) {
         mainNavItems.push(
             {
                 title: 'Gestion des rôles',
@@ -84,7 +102,58 @@ export function AppSidebar() {
                 icon: ShieldEllipsis,
             },
         );
-    }
+        }
+
+
+        if (hasRole('enseignant')) {
+            mainNavItems.push(
+                {
+                    title: 'Mes disponibilites',
+                    href: '/dispos',
+                    icon: CalendarClock,
+                },
+                {
+                    title: 'Exceptions',
+                    href: '/ecarts',
+                    icon: CalendarRange,
+                },
+                {
+                    title: 'Reservations',
+                    href: '/mes-reservations',
+                    icon: NotebookPen,
+                },
+                {
+                    title: 'Historique',
+                    href: '/historique-disponibilites',
+                    icon: History,
+                },
+                {
+                    title: 'Notifications',
+                    href: '/mes-notifications',
+                    icon: Bell,
+                },
+                {
+                    title: 'Mon emploi du Temps',
+                    href: '/emploie-du-temps/edt-enseignant',
+                    icon: Calendar1,
+                },
+            
+            );
+        }
+
+
+        if (hasRole('etudiant')) {
+            mainNavItems.push(
+            {
+                    title: 'Emploi du Temps',
+                    href: '/emploie-du-temps/edt-etudiant',
+                    icon: Calendar1,
+                }
+            
+            );
+        }
+
+    
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -92,7 +161,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={dashboard()}>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

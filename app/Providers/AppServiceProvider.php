@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contrats\DispoContrat;
+use App\Metiers\DispoMetier;
 use App\Policies\NotificationPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Notifications\DatabaseNotification;
@@ -18,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(DispoContrat::class, DispoMetier::class);
     }
 
     /**
