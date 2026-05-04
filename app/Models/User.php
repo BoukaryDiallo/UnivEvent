@@ -26,18 +26,13 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes, TwoFactorAuthenticatable, HasRoles;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
-            'est_actif' => 'boolean'
+            'est_actif' => 'boolean',
         ];
     }
 
@@ -77,5 +72,9 @@ class User extends Authenticatable
     public function historiqueDisponibilites(): HasMany
     {
         return $this->hasMany(HistoriqueDisponibilite::class, 'enseignant_id');
+    }
+    public function isScolarite(): bool
+    {
+        return $this->can('diplomas.manage');
     }
 }

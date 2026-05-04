@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('seances:liberer-depasses')->everyThirtyMinutes()->runInBackground();
+Schedule::command('diplomas:send-pickup-reminders')->dailyAt('08:00');

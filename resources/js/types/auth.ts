@@ -14,6 +14,9 @@ export type User = {
 
 export type Auth = {
     user: User;
+    isScolarite: boolean;
+    roles: string[];
+    permissions: string[];
 };
 
 export type TwoFactorSetupData = {

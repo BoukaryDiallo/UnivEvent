@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -35,15 +36,46 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
-                'roles' => $request->user() ? $request->user()->getRoleNames() : [],
-                'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
+                'user' => $user,
+                'isScolarite' => (bool) $user?->isScolarite(),
+                'roles' => $user ? $user->getRoleNames() : [],
+                'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'notifications' => $user
+                ? $this->buildNotificationsShare($user)
+                : ['unread_count' => 0, 'recent' => []],
+        ];
+    }
+
+    /**
+     * @return array{unread_count: int, recent: array<int, array<string, mixed>>}
+     */
+    private function buildNotificationsShare($user): array
+    {
+        $unread = $user->unreadNotifications()->latest()->limit(10)->get();
+
+        $count = $unread->count() < 10
+            ? $unread->count()
+            : $user->unreadNotifications()->count();
+
+        return [
+            'unread_count' => $count,
+            'recent' => $unread
+                ->map(fn (DatabaseNotification $n) => [
+                    'id' => $n->id,
+                    'title' => $n->data['title'] ?? 'Notification',
+                    'tracking_code' => $n->data['tracking_code'] ?? null,
+                    'status_label' => $n->data['status_label'] ?? null,
+                    'created_at' => $n->created_at->toIso8601String(),
+                ])
+                ->all(),
         ];
     }
 }

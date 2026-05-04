@@ -1,13 +1,15 @@
 <?php
 
+use App\Http\Middleware\EnsureScolarite;
+use App\Http\Middleware\EnsureStudent;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
-use Spatie\Permission\Middleware\PermissionMiddleware as MiddlewarePermissionMiddleware;
-use Spatie\Permission\Middleware\RoleMiddleware as MiddlewareRoleMiddleware;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -25,8 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'role' => MiddlewareRoleMiddleware::class,
-            'permission' => MiddlewarePermissionMiddleware::class,
+            'student' => EnsureStudent::class,
+            'scolarite' => EnsureScolarite::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

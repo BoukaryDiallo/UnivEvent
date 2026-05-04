@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, Calendar1, CalendarClock, CalendarRange, Eye, FolderGit2, History, LayoutGrid, NotebookPen, ShieldEllipsis, User } from 'lucide-react';
+import { Bell, BookOpen,ClipboardCheck, GraduationCap, PieChart, Calendar1, CalendarClock, CalendarRange, Eye, FolderGit2, History, LayoutGrid, NotebookPen, ShieldEllipsis, User } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -15,9 +15,11 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { dashboard as adminDashboard } from '@/routes/admin';
+import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
+import { index as adminPickupSlotsIndex } from '@/routes/admin/pickup-slots';
+import { index as diplomasIndex } from '@/routes/diplomas';
 import type { NavItem } from '@/types';
-
-
 
 const footerNavItems: NavItem[] = [
     {
@@ -33,21 +35,41 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    
+    const { hasRole, can } = useAuth();
+    const canManageDiplomas = can('diplomas.manage');
 
-        const { hasRole, can } = useAuth();
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Retraits de diplômes',
+            href: diplomasIndex(),
+            icon: GraduationCap,
+        },
+    ];
 
-        const mainNavItems: NavItem[] = [
-            //Nous utiliserons le seul dashboard en affcihant les infos
-            // selons les rôles et permissions (recommandé) de l'utilisateur connecté
-            
+    if (canManageDiplomas) {
+        mainNavItems.push(
             {
-                title: 'Dashboard',
-                href: dashboard(),
-                icon: LayoutGrid,
-            }
-            
-        ];
+                title: 'Tableau de bord scolarité',
+                href: adminDashboard(),
+                icon: PieChart,
+            },
+            {
+                title: 'Dossiers à instruire',
+                href: adminDiplomasIndex(),
+                icon: ClipboardCheck,
+            },
+            {
+                title: 'Créneaux de retrait',
+                href: adminPickupSlotsIndex(),
+                icon: CalendarRange,
+            },
+        );
+    }
 
 
         if(hasRole('admin')){
@@ -68,8 +90,8 @@ export function AppSidebar() {
 
 
         if (hasRole('admin') || can('manage users')) {
-            mainNavItems.push(
-                {
+        mainNavItems.push(
+            {
                 title: 'Gestion des rôles',
                 href: '/admin/users',
                 icon: User,
@@ -131,6 +153,7 @@ export function AppSidebar() {
             );
         }
 
+    
 
     return (
         <Sidebar collapsible="icon" variant="inset">
