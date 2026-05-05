@@ -1,14 +1,14 @@
 import { Head, usePage } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Users, Calendar, MapPin, CheckCircle } from 'lucide-react';
 import { Link } from '@inertiajs/react';
-import { calculer as depouillementCalculer } from '@/routes/depouillement';
-import AppLayout from '@/layouts/app-layout';
+import { ArrowLeft, Users, Calendar, MapPin, CheckCircle } from 'lucide-react';
 import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge';
-import type { PageProps } from '@/types/app';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { calculer as depouillementCalculer } from '@/routes/depouillement';
+import type { PageProps } from '@/types/app';
 
 interface Election {
     id_election: number;

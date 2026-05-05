@@ -1,14 +1,14 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
+import { ArrowLeft, User, Users, FileText, Upload, AlertCircle, CheckCircle, Info, GraduationCap, Building2 } from 'lucide-react';
 import {useState} from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { store as candidaturesStore } from '@/routes/candidatures';
-import { ArrowLeft, User, Users, FileText, Upload, AlertCircle, CheckCircle, Info, GraduationCap, Building2 } from 'lucide-react';
 import type { PageProps } from '@/types/app';
 
 type Props = PageProps<{

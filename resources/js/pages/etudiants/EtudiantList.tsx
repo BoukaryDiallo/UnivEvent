@@ -1,11 +1,11 @@
 import { usePage, Link, router } from '@inertiajs/react'
 import { Head } from '@inertiajs/react'
-import {destroy,index as etudiantsIndex,edit as etudiantsEdit,create as etudiantsCreate} from '@/routes/etudiants';
-import AppLayout from '@/layouts/app-layout'
+import { User } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import CrudList from '@/components/ui/crud-list'
-import { Badge } from '@/components/ui/badge'
-import { User } from 'lucide-react'
+import AppLayout from '@/layouts/app-layout'
+import {destroy,index as etudiantsIndex,edit as etudiantsEdit,create as etudiantsCreate} from '@/routes/etudiants';
 import type { PageProps } from '@/types/app'
 
 type Etudiant = {

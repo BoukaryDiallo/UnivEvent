@@ -1,8 +1,8 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { ArrowLeftIcon, EditIcon, GraduationCap, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { ArrowLeftIcon, EditIcon, GraduationCap, Building2 } from 'lucide-react';
 import {index as filiereIndex,edit as filiereEdit} from '@/routes/filiere';
 import type { BreadcrumbItem } from '@/types';
 

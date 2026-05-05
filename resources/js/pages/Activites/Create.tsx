@@ -1,8 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react'
+import { X, Plus } from 'lucide-react'
 import AppLayout from '@/layouts/app-layout'
 import { dashboard } from '@/routes'
 import type { BreadcrumbItem } from '@/types'
-import { X, Plus } from 'lucide-react'
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

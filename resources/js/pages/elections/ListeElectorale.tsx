@@ -1,11 +1,11 @@
 import { Head, usePage } from '@inertiajs/react';
+import { ArrowLeft, Users, Building2, GraduationCap, CheckCircle, AlertCircle, Download, Eye } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import AppLayout from '@/layouts/app-layout';
-import { ArrowLeft, Users, Building2, GraduationCap, CheckCircle, AlertCircle, Download, Eye } from 'lucide-react';
 import type { PageProps } from '@/types/app';
 
 interface Election {

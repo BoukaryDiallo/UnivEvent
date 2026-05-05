@@ -1,5 +1,6 @@
-import { Election, Candidature } from './election';
-import { VoteResult, VoteStats } from './vote';
+import type { Election, Candidature } from './election';
+import type { VoteResult} from './vote';
+import { VoteStats } from './vote';
 
 export type ResultatProps = {
     workflow?: {

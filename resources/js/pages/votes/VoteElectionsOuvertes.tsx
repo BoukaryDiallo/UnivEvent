@@ -1,10 +1,10 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { CheckCircle2, AlertCircle, Vote, Calendar, Clock, Users, ArrowRight, Building2, GraduationCap } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import AppLayout from '@/layouts/app-layout';
-import { CheckCircle2, AlertCircle, Vote, Calendar, Clock, Users, ArrowRight, Building2, GraduationCap } from 'lucide-react';
 import { candidats as votesCandidats } from '@/routes/votes';
 import type { PageProps } from '@/types/app';
 

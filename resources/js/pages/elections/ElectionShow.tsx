@@ -1,12 +1,13 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
+import { route } from 'ziggy-js';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { PageProps } from '@/types/app';
 
 interface Election {
@@ -44,7 +45,7 @@ export default function ElectionShow() {
 
     const generateList = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('elections.generer-liste', election.id_election));
+        router.post(route('elections.generer-liste', election.id_election));
     };
 
     return (

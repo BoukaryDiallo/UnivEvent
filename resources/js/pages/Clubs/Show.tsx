@@ -1,7 +1,4 @@
-import { BreadcrumbItem } from '@/types';
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
-import { useState } from 'react';
 import { 
   Building2, 
   Users, 
@@ -19,6 +16,7 @@ import {
   MessageSquare,
   Send
 } from 'lucide-react';
+import { useState } from 'react';
 import { 
   Sheet, 
   SheetContent, 
@@ -26,6 +24,8 @@ import {
   SheetTitle, 
   SheetTrigger 
 } from '@/components/ui/sheet';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
 
 interface Props {
   club: any;
@@ -113,7 +113,11 @@ export default function ClubShow({ club }: Props) {
 
   const handlePostMessage = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!forumForm.data.contenu.trim()) return
+
+    if (!forumForm.data.contenu.trim()) {
+return
+}
+
     forumForm.post(`/clubs/${club.id}/forum`, {
       onSuccess: () => forumForm.reset('contenu'),
       preserveScroll: true

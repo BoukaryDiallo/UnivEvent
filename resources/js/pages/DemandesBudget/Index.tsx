@@ -1,8 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react'
+import { Check, X, Wallet } from 'lucide-react'
 import AppLayout from '@/layouts/app-layout'
 import { dashboard } from '@/routes'
 import type { BreadcrumbItem } from '@/types'
-import { Check, X, Wallet } from 'lucide-react'
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,6 +37,7 @@ export default function DemandesBudgetIndex({ demandes }: Props) {
 
   const handleRejeter = (id: number) => {
     const commentaire = prompt('Motif du rejet:')
+
     if (commentaire) {
       setData('commentaire', commentaire)
       put(`/demandes-budget/${id}/rejeter`)

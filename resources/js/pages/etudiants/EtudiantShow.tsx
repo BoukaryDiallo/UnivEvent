@@ -1,7 +1,7 @@
 import { Head, usePage, router } from '@inertiajs/react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import {index as etudiantsIndex} from '@/routes/etudiants';
 import type { PageProps } from '@/types/app';

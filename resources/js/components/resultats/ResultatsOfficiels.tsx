@@ -1,11 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { router } from '@inertiajs/react'
 import { Trophy, ArrowRight, Crown } from 'lucide-react'
 import { useState } from 'react'
-import { router } from '@inertiajs/react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import resultatsRoutes from '@/routes/resultats'
 
 interface Resultat {
@@ -32,12 +32,13 @@ interface Resultat {
 interface Election {
     id_election: number
     titre: string
-    description: string
+    description: string | null
     date_debut: string
     date_fin: string
     statut: string
     tour: number
     type: string
+    date_fin_candidatures?: string
 }
 
 interface ResultatsOfficielsProps {
@@ -46,6 +47,14 @@ interface ResultatsOfficielsProps {
     totalVotes: number
     totalVoters: number
     participationRate: number
+    showPublishButton?: boolean
+    etatResultats?: {
+        winner: any
+        secondTourNeeded: boolean
+        equality: boolean
+        majority: boolean
+        type: "second_tour" | "elected" | "no_results" | "no_majority"
+    }
 }
 
 export default function ResultatsOfficiels({

@@ -23,11 +23,13 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
     const toggleItem = (title: string) => {
         setOpenItems((prev) => {
             const newSet = new Set(prev);
+
             if (newSet.has(title)) {
                 newSet.delete(title);
             } else {
                 newSet.add(title);
             }
+
             return newSet;
         });
     };

@@ -1,9 +1,9 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import CrudList from '@/components/ui/crud-list';
 import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge';
-import { index as electionsIndex, create as electionsCreate, admin as electionsAdmin } from '@/routes/elections';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import CrudList from '@/components/ui/crud-list';
+import AppLayout from '@/layouts/app-layout';
+import { index as electionsIndex, create as electionsCreate, admin as electionsAdmin } from '@/routes/elections';
 import type { PageProps } from '@/types/app';
 
 interface Election {

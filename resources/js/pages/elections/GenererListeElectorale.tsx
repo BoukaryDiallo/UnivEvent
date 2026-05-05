@@ -1,11 +1,11 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
+import { ArrowLeft, Users, Building2, GraduationCap, Settings, Info } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { ArrowLeft, Users, Building2, GraduationCap, Settings, Info } from 'lucide-react';
 import type { PageProps } from '@/types/app';
 
 interface Election {

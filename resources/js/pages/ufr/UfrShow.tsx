@@ -1,8 +1,8 @@
 import { Head } from '@inertiajs/react';
+import { ArrowLeft, Pencil, Building2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Pencil, Building2 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import {index as ufrIndex,edit as ufrEdit} from '@/routes/ufr';
 import type { BreadcrumbItem } from '@/types';

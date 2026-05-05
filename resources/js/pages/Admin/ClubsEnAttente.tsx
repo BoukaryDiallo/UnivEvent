@@ -1,8 +1,8 @@
 import { Head, Link } from '@inertiajs/react'
+import { Check, X, Clock, Building2, Mail, User, Tag } from 'lucide-react'
 import AppLayout from '@/layouts/app-layout'
 import { dashboard } from '@/routes'
 import type { BreadcrumbItem } from '@/types'
-import { Check, X, Clock, Building2, Mail, User, Tag } from 'lucide-react'
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

@@ -64,9 +64,12 @@ export function getPdfUrl(path: string | null | undefined): string {
  * Vérifie si un fichier est une image
  */
 export function isImageFile(path: string | null | undefined): boolean {
-    if (!path) return false;
+    if (!path) {
+return false;
+}
 
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+
     return imageExtensions.some(ext => path.toLowerCase().endsWith(ext));
 }
 
@@ -74,7 +77,9 @@ export function isImageFile(path: string | null | undefined): boolean {
  * Vérifie si un fichier est un PDF
  */
 export function isPdfFile(path: string | null | undefined): boolean {
-    if (!path) return false;
+    if (!path) {
+return false;
+}
 
     return path.toLowerCase().endsWith('.pdf');
 }
@@ -92,8 +97,12 @@ export function getFileInfo(path: string | null | undefined): { name: string; ic
     const isImage = isImageFile(path);
 
     let icon = '📄';
-    if (isPdf) icon = '📑';
-    else if (isImage) icon = '🖼️';
+
+    if (isPdf) {
+icon = '📑';
+} else if (isImage) {
+icon = '🖼️';
+}
 
     return { name: fileName, icon, isPdf, isImage };
 }

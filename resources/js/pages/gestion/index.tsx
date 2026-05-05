@@ -1,9 +1,9 @@
 import { Head, Link } from '@inertiajs/react'
+import { Building2, Calendar as CalendarIcon, MapPin, Wallet, Users as UsersIcon, LayoutDashboard, Eye, Plus, Clock, ArrowUpRight, TrendingUp, Activity, Zap, Ban, CheckCircle, XCircle } from 'lucide-react'
+import { useState } from 'react'
 import AppLayout from '@/layouts/app-layout'
 import { dashboard } from '@/routes'
 import type { BreadcrumbItem } from '@/types'
-import { useState } from 'react'
-import { Building2, Calendar as CalendarIcon, MapPin, Wallet, Users as UsersIcon, LayoutDashboard, Eye, Plus, Clock, ArrowUpRight, TrendingUp, Activity, Zap, Ban, CheckCircle, XCircle } from 'lucide-react'
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -45,6 +45,7 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
 
     const handleSuspendre = (clubId: number) => {
         const motif = prompt('Motif de la suspension:');
+
         if (motif) {
             const form = document.createElement('form');
             form.method = 'POST';
@@ -75,6 +76,7 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
 
     const handleDissoudre = (clubId: number) => {
         const motif = prompt('Motif de la dissolution:');
+
         if (motif) {
             const form = document.createElement('form');
             form.method = 'POST';
@@ -149,6 +151,7 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
 
     const handleRejectLocal = (id: number) => {
         const commentaire = prompt('Motif du rejet :');
+
         if (commentaire) {
             const form = document.createElement('form');
             form.method = 'POST';
@@ -202,6 +205,7 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
 
     const handleRejectBudget = (id: number) => {
         const commentaire = prompt('Motif du rejet :');
+
         if (commentaire) {
             const form = document.createElement('form');
             form.method = 'POST';
@@ -329,6 +333,7 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
                     <nav className="flex gap-2">
                         {tabs.map((tab) => {
                             const Icon = tab.icon
+
                             return (
                                 <button
                                     key={tab.id}

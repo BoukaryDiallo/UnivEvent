@@ -1,7 +1,9 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
+import { AlertCircle, CheckCircle2, ArrowLeft, Vote, User, FileText, Clock, Users } from 'lucide-react';
+import { useState } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
     Dialog,
     DialogContent,
@@ -11,8 +13,6 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
-import { AlertCircle, CheckCircle2, ArrowLeft, Vote, User, FileText, Clock, Users } from 'lucide-react';
-import { useState } from 'react';
 import type { PageProps } from '@/types/app';
 
 interface Election {

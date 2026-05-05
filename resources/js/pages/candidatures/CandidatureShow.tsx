@@ -1,10 +1,10 @@
 import { Head, usePage, router } from '@inertiajs/react';
+import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import AppLayout from '@/layouts/app-layout';
 import { destroy as candidaturesDestroy, edit as candidaturesEdit, index as candidaturesIndex } from '@/routes/candidatures';
-import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge';
-import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { PageProps } from '@/types/app';
 
 type Candidature = {

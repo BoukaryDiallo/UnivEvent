@@ -1,8 +1,8 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import CrudList from '@/components/ui/crud-list';
 import { Badge } from '@/components/ui/badge';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import CrudList from '@/components/ui/crud-list';
+import AppLayout from '@/layouts/app-layout';
 import resultatsRoutes from '@/routes/resultats';
 import type { PageProps } from '@/types/app';
 

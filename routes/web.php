@@ -23,9 +23,6 @@ Route::inertia('/', 'welcome', [
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-  
-    // Administration
     Route::middleware(['role:admin'])->group(function () {
         Route::get('gestion', [GestionController::class, 'index'])->name('gestion');
         Route::get('roles', [UserController::class, 'index'])->name('roles');
@@ -36,3 +33,4 @@ require __DIR__.'/settings.php';
 require __DIR__.'/clubs.php';
 require __DIR__.'/elections.php';
 require __DIR__.'/academic.php';
+require __DIR__.'/module1.php';

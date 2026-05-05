@@ -1,5 +1,5 @@
 import { User } from './auth';
-import { Election, Candidature } from './election';
+import type { Election, Candidature } from './election';
 
 export type Vote = {
     id: number;

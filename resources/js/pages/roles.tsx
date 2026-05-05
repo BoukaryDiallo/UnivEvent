@@ -1,9 +1,9 @@
 import { Head, usePage } from '@inertiajs/react';
+import { Edit, Trash2, Power, PowerOff, Plus, Users as UsersIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard, roles } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
-import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Power, PowerOff, Plus, Users as UsersIcon } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

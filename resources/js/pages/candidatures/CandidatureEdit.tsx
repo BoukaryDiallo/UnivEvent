@@ -1,11 +1,11 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { update as candidaturesUpdate, show as candidaturesShow, index as candidaturesIndex } from '@/routes/candidatures';
 import type { PageProps } from '@/types/app';

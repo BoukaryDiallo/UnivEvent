@@ -31,9 +31,12 @@ export function getImageUrl(path: string | null | undefined, fallback: string = 
  * Vérifie si une URL est une image valide
  */
 export function isValidImage(path: string | null | undefined): boolean {
-    if (!path) return false;
+    if (!path) {
+return false;
+}
     
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+
     return imageExtensions.some(ext => path.toLowerCase().endsWith(ext));
 }
 
@@ -46,5 +49,6 @@ export function getPlaceholderImage(size: 'small' | 'medium' | 'large' = 'medium
         medium: '/placeholder.svg',
         large: '/placeholder-large.svg'
     };
+
     return sizes[size];
 }

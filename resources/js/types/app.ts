@@ -1,6 +1,4 @@
-import type { Page as InertiaPage } from '@inertiajs/react';
-
-export type PageProps<T = {}> = InertiaPage<{
+export type PageProps<T = Record<string, any>> = {
     auth: {
         user: {
             id: number;
@@ -9,5 +7,5 @@ export type PageProps<T = {}> = InertiaPage<{
         };
     };
     errors: Record<string, string>;
-}> & T;
+} & T;
 

@@ -1,11 +1,11 @@
-import { useState } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
-import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge'
 import {
     Users, Vote, Trophy, BarChart3, Settings,
     ArrowLeft
 } from 'lucide-react'
+import { useState } from 'react'
+import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Election, ElectionAdminLayoutProps } from '@/types/election'
 
 export default function ElectionAdminLayout({

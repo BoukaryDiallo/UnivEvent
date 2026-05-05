@@ -1,11 +1,11 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
+import { ArrowLeft, Upload, User, GraduationCap, Building2, Calendar } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Upload, User, GraduationCap, Building2, Calendar } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import {store as etudiantsStore} from '@/routes/etudiants';
 import type { PageProps } from '@/types/app';

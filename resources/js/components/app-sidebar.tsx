@@ -1,4 +1,15 @@
 import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, FolderGit2, LayoutGrid, ShieldEllipsis, User, Vote, Users, Trophy, List, ChevronDown, Building2, GraduationCap } from 'lucide-react';
+import AppLogo from '@/components/app-logo';
+import { NavFooter } from '@/components/nav-footer';
+import { NavMain } from '@/components/nav-main';
+import { NavUser } from '@/components/nav-user';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
     Sidebar,
     SidebarContent,
@@ -8,45 +19,46 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-
-import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
-
-import {
-    BookOpen,
-    FolderGit2,
-    LayoutGrid,
-    Vote,
-    Users,
-    Trophy,
-    List,
-    Settings,
-    ChevronDown,
-    Building2,
-    GraduationCap,
-} from 'lucide-react';
+import { useAuth } from '@/hooks/module1/useAuth';
 
 import { dashboard } from '@/routes';
+import type { NavItem } from '@/types';
 
 export function AppSidebar() {
     const { auth } = usePage().props as any;
     const role = auth?.user?.role;
+    const { hasRole, can } = useAuth();
 
-    const mainNavItems = [
+    const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
             href: dashboard(),
             icon: LayoutGrid,
-        },
+        }
     ];
+
+    if (hasRole('admin') || can('manage users')) {
+        mainNavItems.push(
+            {
+                title: 'Gestion des rôles',
+                href: '/admin/users',
+                icon: User,
+            },
+            {
+                title: 'Permissions',
+                href: '/admin/permissions',
+                icon: ShieldEllipsis,
+            },
+        );
+    }
+
+    if (hasRole('enseignant')) {
+        // Ajouter les liens pour les enseignants ici si nécessaire
+    }
+
+    if (hasRole('etudiant')) {
+        // Ajouter les liens pour les étudiants ici si nécessaire
+    }
 
     const footerNavItems = [
         {
@@ -67,7 +79,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard.url()} prefetch>
+                            <Link href={dashboard()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

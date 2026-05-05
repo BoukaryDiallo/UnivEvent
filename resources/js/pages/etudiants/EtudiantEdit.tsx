@@ -1,11 +1,11 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
+import { ArrowLeft, User, GraduationCap, Calendar, Camera } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, User, GraduationCap, Calendar, Camera } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import {index as etudiantsIndex,update as etudiantsUpdate} from '@/routes/etudiants';
 import type { PageProps } from '@/types/app';
@@ -171,7 +171,7 @@ export default function EtudiantEdit() {
                                     <Input
                                         id="photo"
                                         type="file"
-                                        onChange={(e) => setData('photo', e.target.files?.[0])}
+                                        onChange={(e) => setData('photo', e.target.files?.[0] || null)}
                                         className="w-full"
                                     />
                                 </div>

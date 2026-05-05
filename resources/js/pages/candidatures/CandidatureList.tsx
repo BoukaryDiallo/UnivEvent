@@ -1,9 +1,9 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import CrudList from '@/components/ui/crud-list';
 import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge';
-import { valider,refuser,show as candidaturesShow, destroy as candidaturesDestroy } from '@/routes/candidatures';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import CrudList from '@/components/ui/crud-list';
+import AppLayout from '@/layouts/app-layout';
+import { valider,refuser,show as candidaturesShow, destroy as candidaturesDestroy } from '@/routes/candidatures';
 import type { PageProps } from '@/types/app';
 
 type Candidature = {

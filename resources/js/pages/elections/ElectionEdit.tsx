@@ -1,11 +1,11 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import elections from '@/routes/elections';
-import AppLayout from '@/layouts/app-layout';
 import ElectionForm from '@/components/elections/ElectionForm';
-import { TextLink } from '@/components/ui/text-link';
+import { Button } from '@/components/ui/button';
 import { NavigationBreadcrumb } from '@/components/ui/navigation-breadcrumb';
+import { TextLink } from '@/components/ui/text-link';
+import AppLayout from '@/layouts/app-layout';
+import elections from '@/routes/elections';
 import type { PageProps } from '@/types/app';
 
 interface Election {

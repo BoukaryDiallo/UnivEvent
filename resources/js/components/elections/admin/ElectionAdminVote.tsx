@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { TextLink } from '@/components/ui/text-link'
 import { Vote, Radio, Users, TrendingUp, BarChart3, Activity, Settings } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { TextLink } from '@/components/ui/text-link'
 import type { ElectionAdminVoteProps } from '@/types/election'
 
 export default function ElectionAdminVote({

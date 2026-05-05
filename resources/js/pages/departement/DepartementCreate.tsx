@@ -1,10 +1,10 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
+import { ArrowLeftIcon, Building2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeftIcon, Building2, Plus } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import {index as departementIndex,store as departementStore} from '@/routes/departement';
 import type { BreadcrumbItem } from '@/types';

@@ -1,9 +1,9 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import ElectionForm from '@/components/elections/ElectionForm';
-import { TextLink } from '@/components/ui/text-link';
 import { NavigationBreadcrumb } from '@/components/ui/navigation-breadcrumb';
+import { TextLink } from '@/components/ui/text-link';
+import AppLayout from '@/layouts/app-layout';
 import { store as electionsStore } from '@/routes/elections';
 import type { PageProps } from '@/types/app';
 
@@ -55,6 +55,7 @@ export default function ElectionCreate() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (mode === 'second_tour') {
             post(`/elections/${election?.id_election}/second-tour`);
         } else {

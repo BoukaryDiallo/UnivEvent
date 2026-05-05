@@ -1,14 +1,15 @@
 import { Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import { Link } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
+import { ArrowLeft, Trophy, Users, BarChart3, CheckCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Trophy, Users, BarChart3, CheckCircle } from 'lucide-react';
-import { Link } from '@inertiajs/react';
-import { usePage } from '@inertiajs/react';
+import AppLayout from '@/layouts/app-layout';
+import { publier as resultatsPublier } from '@/routes/resultats';
+import type { Election, Candidature } from '@/types';
 import type { PageProps } from '@/types/app';
-import { Election, Candidature } from '@/types';
 
 // Type Resultat pour les résultats d'élection
 export type Resultat = {
@@ -25,7 +26,6 @@ export type Resultat = {
     updated_at: string;
 };
 import { getImageUrl } from '@/utils/image';
-import { publier as resultatsPublier } from '@/routes/resultats';
 
 interface Props extends PageProps {
     election: Election;

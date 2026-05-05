@@ -1,22 +1,4 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import { useEffect, useMemo } from 'react';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/app-layout';
-import ElectionAdminLayout from '@/components/elections/admin/ElectionAdminLayout';
-import ElectionAdminInformations from '@/components/elections/admin/ElectionAdminInformations';
-import ElectionAdminCandidatures from '@/components/elections/admin/ElectionAdminCandidatures';
-import ElectionAdminVote from '@/components/elections/admin/ElectionAdminVote';
-import ElectionAdminResultats from '@/components/elections/admin/ElectionAdminResultats';
-import ElectionAdminDepouillement from '@/components/elections/admin/ElectionAdminDepouillement';
-import { ouvrir as electionsOuvrir, cloturer as electionsCloturer } from '@/routes/elections';
-import votes from '@/routes/votes';
-import { index as candidaturesIndex } from '@/routes/candidatures';
-import { show as resultatsShow } from '@/routes/resultats';
-import { calculer as depouillementCalculer, etat as depouillementEtat } from '@/routes/depouillement';
-import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import { 
     Users, 
     Calendar, 
@@ -30,6 +12,24 @@ import {
     FileText,
     Eye
 } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
+import ElectionAdminCandidatures from '@/components/elections/admin/ElectionAdminCandidatures';
+import ElectionAdminDepouillement from '@/components/elections/admin/ElectionAdminDepouillement';
+import ElectionAdminInformations from '@/components/elections/admin/ElectionAdminInformations';
+import ElectionAdminLayout from '@/components/elections/admin/ElectionAdminLayout';
+import ElectionAdminResultats from '@/components/elections/admin/ElectionAdminResultats';
+import ElectionAdminVote from '@/components/elections/admin/ElectionAdminVote';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import AppLayout from '@/layouts/app-layout';
+import { index as candidaturesIndex } from '@/routes/candidatures';
+import { calculer as depouillementCalculer, etat as depouillementEtat } from '@/routes/depouillement';
+import { ouvrir as electionsOuvrir, cloturer as electionsCloturer } from '@/routes/elections';
+import { show as resultatsShow } from '@/routes/resultats';
+import votes from '@/routes/votes';
 
 interface Election {
     id_election: number;
@@ -72,11 +72,13 @@ export default function ElectionAdmin() {
                 preserveState: true,
             });
         }, 2000);
+
         return () => clearInterval(interval);
     }, []);
 
     const stats = useMemo(() => {
         const participationRate = totalVoters > 0 ? Math.round((totalVotes / totalVoters) * 100) : 0;
+
         return {
             totalVotes,
             totalVoters,

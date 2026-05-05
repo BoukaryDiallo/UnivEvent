@@ -1,10 +1,10 @@
 import { usePage, Link, router } from '@inertiajs/react'
 import { Head, useForm } from '@inertiajs/react'
-import AppLayout from '@/layouts/app-layout'
-import {destroy,index as departementIndex,edit as departementEdit,create as departementCreate} from '@/routes/departement';
+import { Badge } from '@/components/ui/badge'
 import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import CrudList from '@/components/ui/crud-list'
-import { Badge } from '@/components/ui/badge'
+import AppLayout from '@/layouts/app-layout'
+import {destroy,index as departementIndex,edit as departementEdit,create as departementCreate} from '@/routes/departement';
 import type { PageProps } from '@/types/app'
 
 type Departement = {

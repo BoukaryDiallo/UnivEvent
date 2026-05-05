@@ -1,12 +1,12 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { ArrowLeftIcon, EditIcon, Building2, GraduationCap, Users, BarChart3 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import AppLayout from '@/layouts/app-layout';
-import { ArrowLeftIcon, EditIcon, Building2, GraduationCap, Users, BarChart3 } from 'lucide-react';
 import {index as departementIndex,edit as departementEdit,destroy as departementDestroy} from '@/routes/departement';
 import {index as filiereIndex} from '@/routes/filiere';
-import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { BreadcrumbItem } from '@/types';
 
 type Filiere = {

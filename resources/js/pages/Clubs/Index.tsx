@@ -1,9 +1,9 @@
 import { Head, Link, usePage } from '@inertiajs/react'
+import { Eye, Ban, XCircle, Plus, Building2, Shield, Users, Sparkles, CheckCircle } from 'lucide-react'
 import AppLayout from '@/layouts/app-layout'
-import { Club } from '@/types/club'
 import { dashboard } from '@/routes'
 import type { BreadcrumbItem } from '@/types'
-import { Eye, Ban, XCircle, Plus, Building2, Shield, Users, Sparkles, CheckCircle } from 'lucide-react'
+import type { Club } from '@/types/club'
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -29,14 +29,17 @@ export default function ClubsIndex({ clubs }: Props) {
     if (club.responsable?.id === user?.id) {
       return 'responsable';
     }
+
     if (club.adhesions && club.adhesions.some((a: any) => a.statut === 'approuvee')) {
       return 'membre';
     }
+
     return null;
   };
 
   const handleSuspendre = (clubId: number) => {
     const motif = prompt('Motif de la suspension:');
+
     if (motif) {
       const form = document.createElement('form');
       form.method = 'POST';
@@ -67,6 +70,7 @@ export default function ClubsIndex({ clubs }: Props) {
 
   const handleDissoudre = (clubId: number) => {
     const motif = prompt('Motif de la dissolution:');
+
     if (motif) {
       const form = document.createElement('form');
       form.method = 'POST';

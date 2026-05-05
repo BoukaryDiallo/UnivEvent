@@ -11,13 +11,16 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use App\Models\Club;
+use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'role', 'est_actif'])]
+use App\Models\Etudiant;
+
+#[Fillable(['name', 'email', 'password', 'est_actif'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
 
     /**
      * Get the attributes that should be cast.
@@ -33,7 +36,6 @@ class User extends Authenticatable
             'est_actif' => 'boolean'
         ];
     }
-
 
     public function isAdmin(){
         return $this->role === 'admin';

@@ -1,9 +1,9 @@
 import { Head, useForm } from '@inertiajs/react';
+import { ArrowLeftIcon, SaveIcon, Building, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeftIcon, SaveIcon, Building, Edit } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import {index as ufrIndex,update as ufrUpdate} from '@/routes/ufr';
 import type { BreadcrumbItem } from '@/types';

@@ -1,7 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
+import { router } from '@inertiajs/react'
 import { 
     Trophy, 
     BarChart3, 
@@ -14,9 +11,12 @@ import {
     AlertCircle,
     Eye
 } from 'lucide-react'
-import type { ElectionAdminDepouillementProps } from '@/types/election'
-import { router } from '@inertiajs/react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import resultatsRoutes from '@/routes/resultats'
+import type { ElectionAdminDepouillementProps } from '@/types/election'
 
 export default function ElectionAdminDepouillement({
     election,

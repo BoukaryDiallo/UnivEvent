@@ -1,8 +1,8 @@
 import { usePage, router } from '@inertiajs/react'
-import AppLayout from '@/layouts/app-layout'
-import CrudList from '@/components/ui/crud-list'
 import { Badge } from '@/components/ui/badge'
 import { useConfirmDialog } from '@/components/ui/confirm-dialog'
+import CrudList from '@/components/ui/crud-list'
+import AppLayout from '@/layouts/app-layout'
 import {destroy,index as ufrIndex,edit as ufrEdit,create as ufrCreate} from '@/routes/ufr';
 
 type Ufr = {

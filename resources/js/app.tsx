@@ -33,12 +33,14 @@ createInertiaApp({
         if (currentUserId !== null && newUserId !== null && currentUserId !== newUserId) {
             // Utilisateur changé, redirection vers la page de connexion
             window.location.href = '/login';
+
             return;
         }
 
         if (currentUserRole !== null && newUserRole !== null && currentUserRole !== newUserRole) {
             // Rôle changé, redirection vers la page de connexion
             window.location.href = '/login';
+
             return;
         }
 
@@ -48,6 +50,7 @@ createInertiaApp({
         // Vérifier si l'utilisateur est null mais était précédemment connecté
         if (currentUserId === null && props.initialPage.url !== '/login' && props.initialPage.url !== '/' && props.initialPage.url !== '/register') {
             window.location.href = '/login';
+
             return;
         }
 

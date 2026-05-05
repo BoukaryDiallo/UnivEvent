@@ -1,12 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
-import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge'
 import {
     UserCheck, Users, CheckCircle, TrendingUp, Settings,
     Calendar, MapPin, Info, FileText, Eye
 } from 'lucide-react'
+import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Election, ElectionAdminInformationsProps } from '@/types/election'
 
 export default function ElectionAdminInformations({

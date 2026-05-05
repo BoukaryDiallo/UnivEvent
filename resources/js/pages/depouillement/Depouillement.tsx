@@ -1,14 +1,14 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout  from '@/layouts/app-layout';
+import { useForm, usePage } from '@inertiajs/react';
+import { AlertCircle, BarChart3, TrendingUp, User,Trophy, CheckCircle, ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, BarChart3, TrendingUp, User,Trophy, CheckCircle, ArrowLeft } from 'lucide-react';
-import { useForm, usePage } from '@inertiajs/react';
-import { useState } from 'react';
-import { PageProps, Election, Candidature } from '@/types';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+import AppLayout  from '@/layouts/app-layout';
+import type { PageProps, Election, Candidature } from '@/types';
 
 interface Resultat {
     id_candidature: number;
@@ -71,6 +71,7 @@ export default function Depouillement() {
                 </Badge>
             );
         }
+
         return null;
     };
 

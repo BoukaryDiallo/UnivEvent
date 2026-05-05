@@ -1,39 +1,27 @@
 import { Head, usePage, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { router } from '@inertiajs/react';
 import { 
     Users, 
-    Calendar, 
-    CheckCircle, 
     Clock, 
     FileText, 
     TrendingUp,
     UserPlus,
-    BarChart3,
     Trophy,
-    Eye,
-    Edit,
-    Trash2,
-    Plus,
-    ArrowRight,
-    ArrowLeft,
-    UserCheck,
-    List,
     Vote,
+    AlertCircle,
     CheckCircle2,
-    AlertCircle
+    Calendar,
+    ArrowLeft
 } from 'lucide-react';
-import type { Election, WorkflowData, ElectionStats } from '@/types/election';
-import { useState, useEffect } from 'react';
-import { router } from '@inertiajs/react';
-import candidaturesRoutes from '@/routes/candidatures';
-import votesRoutes from '@/routes/votes';
-import resultatsRoutes from '@/routes/resultats';
 import ResultatsOfficiels from '@/components/resultats/ResultatsOfficiels';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import candidaturesRoutes from '@/routes/candidatures';
+import resultatsRoutes from '@/routes/resultats';
+import votesRoutes from '@/routes/votes';
+import type { Election, WorkflowData, ElectionStats } from '@/types/election';
 
 interface TimelinePost {
     id: number;
@@ -64,7 +52,7 @@ interface Props {
 }
 
 export default function ResultatsVote() {
-    const { workflow, stats, election, posts, resultatsAffiches, totalVotes, totalVoters, participationRate, showPublishButton, etatResultats } = usePage<Props>().props;
+    const { workflow, stats, election, resultatsAffiches, totalVotes, totalVoters, participationRate, showPublishButton, etatResultats } = usePage<Props>().props;
 
     // Si on affiche une seule élection (vue détaillée)
     if (election && resultatsAffiches) {
