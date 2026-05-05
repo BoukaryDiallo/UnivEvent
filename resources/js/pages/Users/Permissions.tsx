@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Head, router, useForm } from '@inertiajs/react';
 import { Shield, Plus, RefreshCw, Lock } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -17,6 +18,18 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: dashboard() },
     { title: 'Permissions', href: '#' },
 ];
+=======
+import { router, useForm } from '@inertiajs/react';
+import { useState } from 'react';
+
+// shadcn
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import AppLayout from '@/layouts/app-layout';
+>>>>>>> upstream/main
 
 export default function Permissions({ permissions, roles }: any) {
     const { data, setData, post, processing, reset } = useForm({ name: '' });

@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, ShieldEllipsis, User, Vote, Users, Trophy, List, ChevronDown, Building2, GraduationCap } from 'lucide-react';
+import { BookOpen, FolderGit2, LayoutGrid, ShieldEllipsis, User, Vote, Users, Trophy, List, ChevronDown, Building2, GraduationCap, Bell, ClipboardCheck, PieChart, Calendar1, CalendarClock, CalendarRange, Eye, History, NotebookPen } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -20,14 +20,31 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/module1/useAuth';
-
 import { dashboard } from '@/routes';
+import { dashboard as adminDashboard } from '@/routes/admin';
+import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
+import { index as adminPickupSlotsIndex } from '@/routes/admin/pickup-slots';
+import { index as diplomasIndex } from '@/routes/diplomas';
 import type { NavItem } from '@/types';
+
+const footerNavItems: NavItem[] = [
+    {
+        title: 'Repository',
+        href: 'https://github.com/laravel/react-starter-kit',
+        icon: FolderGit2,
+    },
+    {
+        title: 'Documentation',
+        href: 'https://laravel.com/docs/starter-kits#react',
+        icon: BookOpen,
+    },
+];
 
 export function AppSidebar() {
     const { auth } = usePage().props as any;
     const role = auth?.user?.role;
     const { hasRole, can } = useAuth();
+    const canManageDiplomas = can('diplomas.manage');
 
     const mainNavItems: NavItem[] = [
         {
@@ -52,12 +69,110 @@ export function AppSidebar() {
         );
     }
 
-    if (hasRole('enseignant')) {
-        // Ajouter les liens pour les enseignants ici si nécessaire
+    if (hasRole('admin') || can('manage elections')) {
+        mainNavItems.push({
+            title: 'Gestion Électorale',
+            icon: Vote,
+            items: [
+                {
+                    title: 'Élections',
+                    href: '/elections',
+                    icon: LayoutGrid,
+                },
+                {
+                    title: 'Candidatures',
+                    href: '/candidatures',
+                    icon: Users,
+                },
+                {
+                    title: 'Votes',
+                    href: '/votes',
+                    icon: Trophy,
+                },
+                {
+                    title: 'Résultats',
+                    href: '/resultats',
+                    icon: List,
+                },
+            ],
+        });
+    }
+
+    if (hasRole('admin') || can('manage ufr')) {
+        mainNavItems.push({
+            title: 'Structure Académique',
+            icon: Building2,
+            items: [
+                {
+                    title: 'UFR',
+                    href: '/ufr',
+                    icon: Building2,
+                },
+                {
+                    title: 'Départements',
+                    href: '/departements',
+                    icon: FolderGit2,
+                },
+                {
+                    title: 'Filières',
+                    href: '/filieres',
+                    icon: GraduationCap,
+                },
+                {
+                    title: 'Étudiants',
+                    href: '/etudiants',
+                    icon: Users,
+                },
+            ],
+        });
+    }
+
+    if (hasRole('admin')) {
+        mainNavItems.push(
+            {
+                title: 'Consultation',
+                href: '/consultation',
+                icon: Eye,
+            },
+            {
+                title: 'Emploi du Temps',
+                href: '/emploie-du-temps',
+                icon: Calendar1,
+            },
+        );
+    }
+
+    if (canManageDiplomas) {
+        mainNavItems.push(
+            {
+                title: 'Retraits de diplômes',
+                href: diplomasIndex(),
+                icon: GraduationCap,
+            },
+            {
+                title: 'Tableau de bord scolarité',
+                href: adminDashboard(),
+                icon: PieChart,
+            },
+            {
+                title: 'Dossiers à instruire',
+                href: adminDiplomasIndex(),
+                icon: ClipboardCheck,
+            },
+            {
+                title: 'Créneaux de retrait',
+                href: adminPickupSlotsIndex(),
+                icon: CalendarRange,
+            },
+        );
     }
 
     if (hasRole('etudiant')) {
-        // Ajouter les liens pour les étudiants ici si nécessaire
+        mainNavItems.push({
+            title: 'Votes',
+            href: '/votes',
+            icon: Vote,
+        });
     }
 
     const footerNavItems = [
@@ -73,13 +188,89 @@ export function AppSidebar() {
         },
     ];
 
+    if (hasRole('enseignant')) {
+        mainNavItems.push(
+            {
+                title: 'Gestion Électorale',
+                icon: Vote,
+                items: [
+                    {
+                        title: 'Élections',
+                        href: '/elections',
+                        icon: LayoutGrid,
+                    },
+                    {
+                        title: 'Candidatures',
+                        href: '/candidatures',
+                        icon: Users,
+                    },
+                    {
+                        title: 'Votes',
+                        href: '/votes',
+                        icon: Trophy,
+                    },
+                    {
+                        title: 'Résultats',
+                        href: '/resultats',
+                        icon: List,
+                    },
+                ],
+            },
+            {
+                title: 'Mes disponibilites',
+                href: '/dispos',
+                icon: CalendarClock,
+            },
+            {
+                title: 'Exceptions',
+                href: '/ecarts',
+                icon: CalendarRange,
+            },
+            {
+                title: 'Reservations',
+                href: '/mes-reservations',
+                icon: NotebookPen,
+            },
+            {
+                title: 'Historique',
+                href: '/historique-disponibilites',
+                icon: History,
+            },
+            {
+                title: 'Notifications',
+                href: '/mes-notifications',
+                icon: Bell,
+            },
+            {
+                title: 'Mon emploi du Temps',
+                href: '/emploie-du-temps/edt-enseignant',
+                icon: Calendar1,
+            },
+        );
+    }
+
+    if (hasRole('etudiant')) {
+        mainNavItems.push(
+            {
+                title: 'Votes',
+                href: '/votes',
+                icon: Vote,
+            },
+            {
+                title: 'Emploi du Temps',
+                href: '/emploie-du-temps/edt-etudiant',
+                icon: Calendar1,
+            }
+        );
+    }
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+<Link href={dashboard()}>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -89,135 +280,6 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
-
-                <SidebarMenu>
-
-         
-                    {role === 'etudiant' && (
-                        <SidebarMenuItem>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <SidebarMenuButton>
-                                        <Vote className="h-4 w-4" />
-                                        <span>Espace Élections</span>
-                                        <ChevronDown className="ml-auto h-4 w-4" />
-                                    </SidebarMenuButton>
-                                </DropdownMenuTrigger>
-
-                                <DropdownMenuContent sideOffset={12} align="start">
-                                    <DropdownMenuItem asChild>
-                                        <Link href="/espace-election" className="w-full">
-                                            <Vote className="mr-2 h-4 w-4" />
-                                            Espace élection
-                                        </Link>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </SidebarMenuItem>
-                    )}
-
-               
-    
-                    {role === 'admin' && (
-                        <>
-                            {/* Structure académique */}
-                            <SidebarMenuItem>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <SidebarMenuButton>
-                                            <Building2 className="h-4 w-4" />
-                                            <span>Structure académique</span>
-                                            <ChevronDown className="ml-auto h-4 w-4" />
-                                        </SidebarMenuButton>
-                                    </DropdownMenuTrigger>
-
-                                    <DropdownMenuContent sideOffset={12} align="start">
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/ufr" className="w-full">
-                                                <Building2 className="mr-2 h-4 w-4" />
-                                                UFR
-                                            </Link>
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/departement" className="w-full">
-                                                <FolderGit2 className="mr-2 h-4 w-4" />
-                                                Départements
-                                            </Link>
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/filiere" className="w-full">
-                                                <GraduationCap className="mr-2 h-4 w-4" />
-                                                Filières
-                                            </Link>
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/etudiants" className="w-full">
-                                                <Users className="mr-2 h-4 w-4" />
-                                                Étudiants
-                                            </Link>
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </SidebarMenuItem>
-
-                            {/* Gestion élections */}
-                            <SidebarMenuItem>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <SidebarMenuButton>
-                                            <Vote className="h-4 w-4" />
-                                            <span>Gestion des élections</span>
-                                            <ChevronDown className="ml-auto h-4 w-4" />
-                                        </SidebarMenuButton>
-                                    </DropdownMenuTrigger>
-
-                                    <DropdownMenuContent sideOffset={12} align="start">
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/elections" className="w-full">
-                                                <List className="mr-2 h-4 w-4" />
-                                                Élections
-                                            </Link>
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/candidatures" className="w-full">
-                                                <Users className="mr-2 h-4 w-4" />
-                                                Candidatures
-                                            </Link>
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/votes" className="w-full">
-                                                <Vote className="mr-2 h-4 w-4" />
-                                                Votes
-                                            </Link>
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/resultats" className="w-full">
-                                                <Trophy className="mr-2 h-4 w-4" />
-                                                Résultats
-                                            </Link>
-                                        </DropdownMenuItem>
-
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/espace-election" className="w-full">
-                                                <Vote className="mr-2 h-4 w-4" />
-                                                Espace Élections
-                                            </Link>
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </SidebarMenuItem>
-
-                            
-                        </>
-                    )}
-
-                </SidebarMenu>
             </SidebarContent>
 
             <SidebarFooter>

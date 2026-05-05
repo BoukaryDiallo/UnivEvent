@@ -4,13 +4,19 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use App\Models\Charge;
+use App\Models\Dispo;
+use App\Models\Ecart;
+use App\Models\HistoriqueDisponibilite;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use App\Models\Club;
 use Spatie\Permission\Traits\HasRoles;
 
 use App\Models\Etudiant;
@@ -20,20 +26,15 @@ use App\Models\Etudiant;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
+    use HasFactory, Notifiable, SoftDeletes, TwoFactorAuthenticatable, HasRoles;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
-            'est_actif' => 'boolean'
+            'est_actif' => 'boolean',
         ];
     }
 
@@ -49,16 +50,32 @@ class User extends Authenticatable
         return $this->role === 'enseignant';
     }
 
-    /**
-     * Get the etudiant associated with the user.
-     */
-    public function etudiant()
+    public function enseignant(): HasOne
     {
-        return $this->hasOne(Etudiant::class, 'id_user');
+        return $this->hasOne(Enseignant::class);
     }
 
-    public function isResponsable()
+    public function charge(): HasOne
     {
-        return Club::where('responsable_id', $this->id)->exists();
+        return $this->hasOne(Charge::class);
+    }
+
+    public function dispos(): HasMany
+    {
+        return $this->hasMany(Dispo::class);
+    }
+
+    public function ecarts(): HasMany
+    {
+        return $this->hasMany(Ecart::class);
+    }
+
+    public function historiqueDisponibilites(): HasMany
+    {
+        return $this->hasMany(HistoriqueDisponibilite::class, 'enseignant_id');
+    }
+    public function isScolarite(): bool
+    {
+        return $this->can('diplomas.manage');
     }
 }

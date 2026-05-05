@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
+use App\Contrats\DispoContrat;
+use App\Metiers\DispoMetier;
+use App\Policies\NotificationPolicy;
 use Carbon\CarbonImmutable;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use App\Models\Election;
@@ -17,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(DispoContrat::class, DispoMetier::class);
     }
 
     /**
@@ -28,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
         Election::observe(ElectionObserver::class);
         $this->configureDefaults();
 
-
+        Gate::policy(DatabaseNotification::class, NotificationPolicy::class);
     }
 
     /**

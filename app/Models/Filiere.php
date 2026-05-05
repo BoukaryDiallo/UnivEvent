@@ -2,10 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Filiere extends Model
 {
+    /* pour module 2 */
+    Use HasFactory;
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\Module2\FiliereFactory::new();
+    }
+    /* fin module 2 */
+
     protected $table = 'filieres';
     protected $primaryKey = 'id_filiere';
     public $incrementing = true;
@@ -14,6 +24,7 @@ class Filiere extends Model
     protected $fillable = [
         'nom',
         'id_departement',
+        'code'
     ];
 
     /*
@@ -27,5 +38,12 @@ class Filiere extends Model
     public function departement()
     {
         return $this->belongsTo(Departement::class, 'id_departement');
+    }
+
+
+    // module 2
+    public function emploisDuTemps()
+    {
+        return $this->hasMany(EmploiDuTemps::class, 'filiere_id', 'id_filiere');
     }
 }

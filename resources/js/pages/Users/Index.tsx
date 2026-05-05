@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Head, useForm, router } from '@inertiajs/react';
 import {
     UserPlus, Users as UsersIcon, GraduationCap, Shield, RefreshCw, Mail, Lock, User
@@ -8,11 +9,38 @@ import {
     AlertDialog, AlertDialogAction, AlertDialogCancel,
     AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
     AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+=======
+import { Head, useForm } from '@inertiajs/react';
+import { 
+    UserPlus, 
+    Users as UsersIcon, 
+    GraduationCap, 
+    Shield,
+    RefreshCw,
+    Mail,
+    Lock,
+    User
+} from 'lucide-react';
+import { useState } from 'react';
+
+// shadcn UI
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+>>>>>>> upstream/main
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+<<<<<<< HEAD
     Card, CardContent, CardHeader, CardTitle, CardDescription
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,10 +49,34 @@ import {
     DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+=======
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+
+>>>>>>> upstream/main
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import AppLayout from '@/layouts/app-layout';
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/main
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
@@ -268,6 +320,7 @@ export default function Users({ users, roles }: any) {
                                                                         checked={(selectedRoles[user.id] ?? []).includes(role.name)}
                                                                         onCheckedChange={(checked) => {
                                                                             setSelectedRoles(prev => {
+<<<<<<< HEAD
                                                                                 const current = prev[user.id] ?? [];
 
                                                                                 return {
@@ -276,6 +329,14 @@ export default function Users({ users, roles }: any) {
                                                                                         ? [...current, role.name]
                                                                                         : current.filter(r => r !== role.name)
                                                                                 };
+=======
+                                                                                const current = prev[user.id] || user.roles.map((r: any) => r.name);
+                                                                                const updated = checked
+                                                                                    ? [...current, role.name]
+                                                                                    : current.filter(r => r !== role.name);
+
+                                                                                return { ...prev, [user.id]: updated };
+>>>>>>> upstream/main
                                                                             });
                                                                         }}
                                                                     />

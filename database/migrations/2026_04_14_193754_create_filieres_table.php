@@ -16,6 +16,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger('id_departement');
             $table->string('nom');
+            $table->string('code', 10)->unique();
 
             $table->timestamps();
             $table->softDeletes();

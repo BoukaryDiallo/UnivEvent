@@ -48,6 +48,10 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
+        if ($user?->isEnseignant()) {
+            $user->enseignant?->delete();
+        }
+
         Auth::logout();
 
         $user->delete();

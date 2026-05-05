@@ -3,19 +3,14 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RbacSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Permissions pour le système de vote et gestion
@@ -25,6 +20,8 @@ class RbacSeeder extends Seeder
             'create',
             'update',
             'delete',
+            // Module 8 — Retraits de diplômes
+            'diplomas.manage',     // toutes les actions scolarité (file, dossiers, agenda, validation, rejet, remise, archivage, créneaux)
             
             // Permissions pour les élections
             'manage elections',
@@ -66,12 +63,10 @@ class RbacSeeder extends Seeder
             Permission::firstOrCreate(['name' => $perm]);
         }
 
-        // Roles
         $admin = Role::firstOrCreate(['name' => 'admin']);
         $enseignant = Role::firstOrCreate(['name' => 'enseignant']);
         $etudiant = Role::firstOrCreate(['name' => 'etudiant']);
 
-        // Admin a toutes les permissions
         $admin->syncPermissions(Permission::all());
 
         // Enseignant : permissions pour gérer les cours et les élections
@@ -102,16 +97,13 @@ class RbacSeeder extends Seeder
             'manage activities'
         ]);
 
-
-        // admin par defaut
         $admin = User::firstOrCreate(
             ['email' => 'admin@gmail.com'],
             [
                 'name' => 'Admin',
-                'password' => bcrypt('password')
-            ]
+                'password' => bcrypt('password'),
+            ],
         );
         $admin->assignRole('admin');
-
     }
 }
