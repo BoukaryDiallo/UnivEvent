@@ -15,11 +15,11 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/module1/useAuth';
 import { dashboard } from '@/routes';
-import type { NavItem } from '@/types';
 import { dashboard as adminDashboard } from '@/routes/admin';
 import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
 import { index as adminPickupSlotsIndex } from '@/routes/admin/pickup-slots';
 import { index as diplomasIndex } from '@/routes/diplomas';
+import type { NavItem } from '@/types';
 
 const footerNavItems: NavItem[] = [
     {

@@ -1,6 +1,19 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import type { FormEvent} from 'react';
 import { useRef } from 'react';
+import {
+    destroy as destroyDocument,
+    download as downloadDocument,
+    store as storeDocument,
+} from '@/actions/App/Http/Controllers/DiplomaDocumentController';
+import {
+    exportPdf as exportRequest,
+    submit as submitRequest,
+} from '@/actions/App/Http/Controllers/DiplomaRequestController';
+import {
+    destroy as destroyAppointment,
+    store as bookAppointment,
+} from '@/actions/App/Http/Controllers/PickupAppointmentController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,22 +28,9 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
+import { index as diplomasIndex } from '@/routes/diplomas';
 import type { BreadcrumbItem } from '@/types';
 import { DiplomaStatusBadge } from './status-badge';
-import {
-    destroy as destroyDocument,
-    download as downloadDocument,
-    store as storeDocument,
-} from '@/actions/App/Http/Controllers/DiplomaDocumentController';
-import {
-    exportPdf as exportRequest,
-    submit as submitRequest,
-} from '@/actions/App/Http/Controllers/DiplomaRequestController';
-import {
-    destroy as destroyAppointment,
-    store as bookAppointment,
-} from '@/actions/App/Http/Controllers/PickupAppointmentController';
-import { index as diplomasIndex } from '@/routes/diplomas';
 
 type Option = { value: string; label: string };
 

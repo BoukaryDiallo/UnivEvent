@@ -1,11 +1,11 @@
 import { Head, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
+import { update as updateSlot } from '@/actions/App/Http/Controllers/Admin/PickupSlotController';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
+import { index as adminSlotsIndex } from '@/routes/admin/pickup-slots';
 import type { BreadcrumbItem } from '@/types';
 import { SlotForm } from './slot-form';
-import { update as updateSlot } from '@/actions/App/Http/Controllers/Admin/PickupSlotController';
-import { index as adminSlotsIndex } from '@/routes/admin/pickup-slots';
 
 type Props = {
     slot: {

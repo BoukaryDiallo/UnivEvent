@@ -1,6 +1,15 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import type { FormEvent} from 'react';
 import { useState } from 'react';
+import { validateDocument as validateDocumentAction } from '@/actions/App/Http/Controllers/Admin/DiplomaDocumentController';
+import {
+    archive as archiveAction,
+    deliver as deliverAction,
+    markReadyForPickup as markReadyAction,
+    reject as rejectAction,
+    validateDossier as validateDossierAction,
+} from '@/actions/App/Http/Controllers/Admin/DiplomaRequestController';
+import { download as downloadDocument } from '@/actions/App/Http/Controllers/DiplomaDocumentController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,17 +25,8 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
 import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
-import type { BreadcrumbItem } from '@/types';
-import { validateDocument as validateDocumentAction } from '@/actions/App/Http/Controllers/Admin/DiplomaDocumentController';
-import {
-    archive as archiveAction,
-    deliver as deliverAction,
-    markReadyForPickup as markReadyAction,
-    reject as rejectAction,
-    validateDossier as validateDossierAction,
-} from '@/actions/App/Http/Controllers/Admin/DiplomaRequestController';
-import { download as downloadDocument } from '@/actions/App/Http/Controllers/DiplomaDocumentController';
 import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
+import type { BreadcrumbItem } from '@/types';
 
 type DocumentRow = {
     id: number;

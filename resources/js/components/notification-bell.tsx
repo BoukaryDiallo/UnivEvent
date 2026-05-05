@@ -1,5 +1,9 @@
 import { router, usePage } from '@inertiajs/react';
 import { Bell } from 'lucide-react';
+import {
+    read as readNotification,
+    readAll as readAllNotifications,
+} from '@/actions/App/Http/Controllers/NotificationController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,10 +15,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { NotificationsShare } from '@/types/global';
-import {
-    read as readNotification,
-    readAll as readAllNotifications,
-} from '@/actions/App/Http/Controllers/NotificationController';
 
 const formatRelative = (iso: string) => {
     const diffMs = Date.now() - new Date(iso).getTime();

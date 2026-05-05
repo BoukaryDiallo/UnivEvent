@@ -9,8 +9,8 @@ import {
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
-import type { BreadcrumbItem } from '@/types';
 import { index as adminDiplomasIndex, show as adminDiplomasShow } from '@/routes/admin/diplomas';
+import type { BreadcrumbItem } from '@/types';
 
 type Option = { value: string; label: string };
 

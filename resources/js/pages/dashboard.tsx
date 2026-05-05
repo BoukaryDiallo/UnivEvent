@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import AppLayout from '@/layouts/app-layout';
 import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
 import { dashboard } from '@/routes';
-import type { BreadcrumbItem } from '@/types';
 import { create as createRequest, index as diplomasIndex, show as showRequest } from '@/routes/diplomas';
+import type { BreadcrumbItem } from '@/types';
 
 type ActiveRequest = {
     id: number;
