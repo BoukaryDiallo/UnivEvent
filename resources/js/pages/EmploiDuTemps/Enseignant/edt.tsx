@@ -1,13 +1,12 @@
 import { Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { BreadcrumbItem } from '@/types';
-import { dashboard } from '@/routes';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import Pagination from '@/components/edt/paginate';
+import { Download } from 'lucide-react';
 import { formatDate } from '@/components/edt/formatDate';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import { dashboard } from '@/routes';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { 

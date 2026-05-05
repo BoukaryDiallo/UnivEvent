@@ -1,9 +1,9 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { useState } from 'react';
 import { CalendarDays, Clock3, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import InputError from '@/components/input-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -235,6 +235,7 @@ const [ecartErrors, setEcartErrors] = useState<Record<string, string>>({});
                                                 errors.date = 'La date est requise';
                                             } else {
                                                 const existing = ecarts.some(e => e.date === ecart.data.date);
+
                                                 if (existing) {
                                                     errors.date = 'Cette date est déjà enregistrée';
                                                 }
@@ -245,6 +246,7 @@ const [ecartErrors, setEcartErrors] = useState<Record<string, string>>({});
                                             } else {
                                                 const debut = new Date(`2000-01-01T${ecart.data.debut}:00`);
                                                 const fin = new Date(`2000-01-01T${ecart.data.fin}:00`);
+
                                                 if (fin <= debut) {
                                                     errors.time = 'L\'heure de fin doit être après l\'heure de début';
                                                 }
@@ -252,6 +254,7 @@ const [ecartErrors, setEcartErrors] = useState<Record<string, string>>({});
                                             
                                             if (Object.keys(errors).length > 0) {
                                                 setEcartErrors(errors);
+
                                                 return;
                                             }
                                             
@@ -266,7 +269,10 @@ const [ecartErrors, setEcartErrors] = useState<Record<string, string>>({});
                                             <Label>Date</Label>
                                             <Input type="date" value={ecart.data.date} onChange={(event) => {
                                                 ecart.setData('date', event.target.value);
-                                                if (ecartErrors.date) setEcartErrors({...ecartErrors, date: ''});
+
+                                                if (ecartErrors.date) {
+setEcartErrors({...ecartErrors, date: ''});
+}
                                             }} />
                                             {ecartErrors.date && (
                                                 <div className="text-sm text-destructive">{ecartErrors.date}</div>
@@ -278,14 +284,20 @@ const [ecartErrors, setEcartErrors] = useState<Record<string, string>>({});
                                                 <Label>Début</Label>
                                                 <Input type="time" value={ecart.data.debut} onChange={(event) => {
                                                     ecart.setData('debut', event.target.value);
-                                                    if (ecartErrors.time) setEcartErrors({...ecartErrors, time: ''});
+
+                                                    if (ecartErrors.time) {
+setEcartErrors({...ecartErrors, time: ''});
+}
                                                 }} />
                                             </div>
                                             <div className="grid gap-2">
                                                 <Label>Fin</Label>
                                                 <Input type="time" value={ecart.data.fin} onChange={(event) => {
                                                     ecart.setData('fin', event.target.value);
-                                                    if (ecartErrors.time) setEcartErrors({...ecartErrors, time: ''});
+
+                                                    if (ecartErrors.time) {
+setEcartErrors({...ecartErrors, time: ''});
+}
                                                 }} />
                                             </div>
                                             {ecartErrors.time && (

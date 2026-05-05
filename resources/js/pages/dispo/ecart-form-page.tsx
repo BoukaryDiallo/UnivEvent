@@ -1,6 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import InputError from '@/components/input-error';
 import { DispoShell } from '@/components/dispo/entete';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
+import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
+import type { BreadcrumbItem } from '@/types';
 import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
 import { index as adminPickupSlotsIndex } from '@/routes/admin/pickup-slots';
-import type { BreadcrumbItem } from '@/types';
-import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
 
 type StatusCount = { value: string; label: string; count: number };
 

@@ -2,9 +2,9 @@ import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { create as createRoute, index as diplomasIndex, show as showRoute } from '@/routes/diplomas';
 import type { BreadcrumbItem } from '@/types';
 import { DiplomaStatusBadge } from './status-badge';
+import { create as createRoute, index as diplomasIndex, show as showRoute } from '@/routes/diplomas';
 
 type DiplomaRequestRow = {
     id: number;

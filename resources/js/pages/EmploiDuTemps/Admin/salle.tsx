@@ -1,21 +1,20 @@
-import { Form, Head, Link, router, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Edit, Eye, Search, Trash } from 'lucide-react';
+import { Head, useForm } from '@inertiajs/react';
+import { Edit, Search, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import type { BreadcrumbItem } from '@/types';
-import { dashboard } from '@/routes';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Field, FieldGroup } from '@/components/ui/field';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { toast, Toaster } from 'sonner';
-import { Spinner } from '@/components/ui/spinner';
-import InputError from '@/components/input-error';
 import Pagination from '@/components/edt/paginate';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import { Field, FieldGroup } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import { dashboard } from '@/routes';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: dashboard() },
@@ -26,7 +25,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Salle({ salles }: { salles: any[] }) {
 
-    const [select, setSelect] = useState<null | {}>(null)
+    const [select, setSelect] = useState<null | object>(null)
     const [action, setAction] = useState< null | string >(null)
     // const [sup, setSup] = useState< boolean >(false)
     const salle = useForm({
@@ -36,7 +35,9 @@ export default function Salle({ salles }: { salles: any[] }) {
     
     const filtreData = useMemo(()=>{
 
-        if(!salles.data || !Array.isArray(salles.data)) return []
+        if(!salles.data || !Array.isArray(salles.data)) {
+return []
+}
 
         let resultat = salles.data
         
@@ -56,7 +57,10 @@ export default function Salle({ salles }: { salles: any[] }) {
 
     async function modifierSalle(e: React.FormEvent) {
         e.preventDefault()
-        if(!select) return
+
+        if(!select) {
+return
+}
 
         salle.put(`/salles/${select?.id}/modifier`,{
             
@@ -68,7 +72,7 @@ export default function Salle({ salles }: { salles: any[] }) {
 
             }),
 
-            onError: ((e)=>{
+            onError: (()=>{
                 
                 toast.error(salle.errors.nom || 'Erreur lors de l\'ajout de la salle')
                 
@@ -81,7 +85,10 @@ export default function Salle({ salles }: { salles: any[] }) {
 
     async function supprimerSalle(e: React.FormEvent) {
         e.preventDefault()
-        if(!select?.id) return
+
+        if(!select?.id) {
+return
+}
 
         salle.delete(`/salles/${select?.id}/supprimer`,{
             
@@ -93,7 +100,7 @@ export default function Salle({ salles }: { salles: any[] }) {
 
             }),
 
-            onError: ((e)=>{
+            onError: (()=>{
                 
                 toast.error(salle.errors.nom || 'Erreur lors de l\'ajout de la salle')
                 
@@ -115,7 +122,9 @@ export default function Salle({ salles }: { salles: any[] }) {
 
                 <div className='relative max-w-xl'>
                     <Input type='text' value={search}
-                        onChange={(e)=>{setSearch(e.target.value)}}
+                        onChange={(e)=>{
+setSearch(e.target.value)
+}}
                         placeholder='Rechercher une salle...'
                         className=' px-8 py-5'
                     />
@@ -182,7 +191,9 @@ export default function Salle({ salles }: { salles: any[] }) {
 
         
         <Dialog open={action === 'modif'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-sm">
@@ -197,7 +208,9 @@ export default function Salle({ salles }: { salles: any[] }) {
                         <Field>
                             <Label htmlFor="nom">Nom de la salle</Label>
                             <Input id="nom" name="nom" value={salle.data.nom}
-                                onChange={(e)=>{salle.setData('nom', e.target.value) }} placeholder='Ex: Amphi H' />
+                                onChange={(e)=>{
+salle.setData('nom', e.target.value) 
+}} placeholder='Ex: Amphi H' />
                             <InputError message={salle.errors.nom} />
                         </Field>
                     </FieldGroup>
@@ -217,7 +230,9 @@ export default function Salle({ salles }: { salles: any[] }) {
 
 
         <Dialog open={action === 'sup'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-sm">

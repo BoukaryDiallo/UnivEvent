@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { FormEvent, useRef } from 'react';
+import type { FormEvent} from 'react';
+import { useRef } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +15,8 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
+import { DiplomaStatusBadge } from './status-badge';
 import {
     destroy as destroyDocument,
     download as downloadDocument,
@@ -28,8 +31,6 @@ import {
     store as bookAppointment,
 } from '@/actions/App/Http/Controllers/PickupAppointmentController';
 import { index as diplomasIndex } from '@/routes/diplomas';
-import type { BreadcrumbItem } from '@/types';
-import { DiplomaStatusBadge } from './status-badge';
 
 type Option = { value: string; label: string };
 
@@ -101,8 +102,14 @@ const formatDateTime = (iso: string) =>
     new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
 
 const formatSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} o`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
+    if (bytes < 1024) {
+return `${bytes} o`;
+}
+
+    if (bytes < 1024 * 1024) {
+return `${(bytes / 1024).toFixed(0)} Ko`;
+}
+
     return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
 };
 
@@ -131,30 +138,45 @@ export default function DiplomaRequestShow({
             preserveScroll: true,
             onSuccess: () => {
                 uploadForm.reset('file');
-                if (fileInputRef.current) fileInputRef.current.value = '';
+
+                if (fileInputRef.current) {
+fileInputRef.current.value = '';
+}
             },
         });
     };
 
     const handleDelete = (documentId: number) => {
-        if (!confirm('Supprimer cette pièce ?')) return;
+        if (!confirm('Supprimer cette pièce ?')) {
+return;
+}
+
         router.delete(destroyDocument([request.id, documentId]).url, {
             preserveScroll: true,
         });
     };
 
     const handleSubmit = () => {
-        if (!confirm('Soumettre cette demande ? Vous ne pourrez plus la modifier.')) return;
+        if (!confirm('Soumettre cette demande ? Vous ne pourrez plus la modifier.')) {
+return;
+}
+
         router.post(submitRequest(request.id).url, {}, { preserveScroll: true });
     };
 
     const handleBook = (slotId: number) => {
-        if (!confirm('Réserver ce créneau ?')) return;
+        if (!confirm('Réserver ce créneau ?')) {
+return;
+}
+
         router.post(bookAppointment([request.id, slotId]).url, {}, { preserveScroll: true });
     };
 
     const handleCancelAppointment = (appointmentId: number) => {
-        if (!confirm('Annuler ce rendez-vous ?')) return;
+        if (!confirm('Annuler ce rendez-vous ?')) {
+return;
+}
+
         router.delete(destroyAppointment([request.id, appointmentId]).url, {
             preserveScroll: true,
         });

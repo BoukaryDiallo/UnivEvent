@@ -2,9 +2,9 @@ import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
 import { show as showRequest } from '@/routes/admin/diplomas';
 import { index as adminSlotsIndex } from '@/routes/admin/pickup-slots';
-import type { BreadcrumbItem } from '@/types';
 
 type Appointment = {
     id: number;

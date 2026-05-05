@@ -2,13 +2,13 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
 import {
     agenda as agendaRoute,
     create as createSlot,
     destroy as destroySlot,
     edit as editSlot,
 } from '@/routes/admin/pickup-slots';
-import type { BreadcrumbItem } from '@/types';
 
 type Slot = {
     id: number;
@@ -34,7 +34,10 @@ const formatSlot = (iso: string) =>
 
 export default function AdminPickupSlotsIndex({ slots }: Props) {
     const handleDelete = (id: number) => {
-        if (!confirm('Supprimer ce créneau ?')) return;
+        if (!confirm('Supprimer ce créneau ?')) {
+return;
+}
+
         router.delete(destroySlot(id).url, { preserveScroll: true });
     };
 

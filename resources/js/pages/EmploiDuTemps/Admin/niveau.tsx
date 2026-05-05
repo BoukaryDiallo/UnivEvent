@@ -1,21 +1,19 @@
-import { Form, Head, Link, router, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Edit, Eye, Search, Trash } from 'lucide-react';
+import {  Head, useForm } from '@inertiajs/react';
+import { Edit, Search, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import type { BreadcrumbItem } from '@/types';
-import { dashboard } from '@/routes';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Field, FieldGroup } from '@/components/ui/field';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { toast, Toaster } from 'sonner';
-import { Spinner } from '@/components/ui/spinner';
-import InputError from '@/components/input-error';
 import Pagination from '@/components/edt/paginate';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import { Field, FieldGroup } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import { dashboard } from '@/routes';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: dashboard() },
@@ -26,7 +24,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Niveau({ niveaux }: { niveaux: any[] }) {
 
-    const [select, setSelect] = useState<null | {}>(null)
+    const [select, setSelect] = useState<null | any>(null)
     const [action, setAction] = useState< null | string >(null)
     // const [sup, setSup] = useState< boolean >(false)
     const niveau = useForm({
@@ -38,7 +36,9 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
 
     const filtreData = useMemo(()=>{
     
-            if(!niveaux.data || !Array.isArray(niveaux.data)) return []
+            if(!niveaux.data || !Array.isArray(niveaux.data)) {
+return []
+}
     
             let resultat = niveaux.data
             
@@ -60,9 +60,17 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
 
     function validateNiveau(){
 
-        if(!niveau.data.code.trim()) return false
-        if(!niveau.data.nom.trim()) return false
-        if(niveau.data.ordre < 1) return false
+        if(!niveau.data.code.trim()) {
+return false
+}
+
+        if(!niveau.data.nom.trim()) {
+return false
+}
+
+        if(niveau.data.ordre < 1) {
+return false
+}
 
         return true
     }
@@ -71,8 +79,14 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
 
     async function modifierNiveau(e: React.FormEvent) {
         e.preventDefault()
-        if(!select) return
-        if(!validateNiveau()) return
+
+        if(!select) {
+return
+}
+
+        if(!validateNiveau()) {
+return
+}
 
         niveau.put(`/niveaux/${select?.id}/modifier`,{
             
@@ -102,7 +116,10 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
 
     async function supprimerNiveau(e: React.FormEvent) {
         e.preventDefault()
-        if(!select?.id) return
+
+        if(!select?.id) {
+return
+}
 
         niveau.delete(`/niveaux/${select?.id}/supprimer`,{
             
@@ -114,7 +131,7 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
 
             }),
 
-            onError: ((e)=>{
+            onError: (()=>{
                 
                 toast.error('Erreur lors de la suppresiion')
                 
@@ -135,7 +152,9 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
             <div className="p-6 space-y-6">
                 <div className='relative max-w-xl'>
                     <Input type='text' value={search}
-                        onChange={(e)=>{setSearch(e.target.value)}}
+                        onChange={(e)=>{
+setSearch(e.target.value)
+}}
                         placeholder='Rechercher par libellé, code...'
                         className=' px-8 py-5'
                     />
@@ -205,7 +224,9 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
 
         
         <Dialog open={action === 'modif'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-sm">
@@ -220,13 +241,17 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
                         <Field>
                             <Label htmlFor="nom">Cyle</Label>
                             <Input id="nom" name="nom" value={niveau.data.nom}
-                                onChange={(e)=>{niveau.setData('nom', e.target.value) }} placeholder='Ex: Licence 1' />
+                                onChange={(e)=>{
+niveau.setData('nom', e.target.value) 
+}} placeholder='Ex: Licence 1' />
                             
                         </Field>
                         <Field>
                             <Label htmlFor="code">Code de référence</Label>
                             <Input id="code" name="code" value={niveau.data.code}
-                                onChange={(e)=>{niveau.setData('code', e.target.value) }} placeholder='Ex: Licence 1 équivaut à L1' />
+                                onChange={(e)=>{
+niveau.setData('code', e.target.value) 
+}} placeholder='Ex: Licence 1 équivaut à L1' />
                            
                         </Field>
                         <Field>
@@ -251,7 +276,9 @@ export default function Niveau({ niveaux }: { niveaux: any[] }) {
 
 
         <Dialog open={action === 'sup'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-sm">

@@ -1,21 +1,19 @@
-import { Form, Head, Link, router, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Edit, Eye, Search, Trash } from 'lucide-react';
+import { Head,useForm } from '@inertiajs/react';
+import { Edit, Search, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import type { BreadcrumbItem } from '@/types';
-import { dashboard } from '@/routes';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Field, FieldGroup } from '@/components/ui/field';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { toast, Toaster } from 'sonner';
-import { Spinner } from '@/components/ui/spinner';
-import InputError from '@/components/input-error';
 import Pagination from '@/components/edt/paginate';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import { Field, FieldGroup } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import { dashboard } from '@/routes';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: dashboard() },
@@ -26,7 +24,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Niveau({ matieres }: { matieres: any[] }) {
 
-    const [select, setSelect] = useState<null | {}>(null)
+    const [select, setSelect] = useState<null | object>(null)
     const [action, setAction] = useState< null | string >(null)
     // const [sup, setSup] = useState< boolean >(false)
     const matiere = useForm({
@@ -41,7 +39,9 @@ export default function Niveau({ matieres }: { matieres: any[] }) {
 
     const filtreData = useMemo(()=>{
 
-        if(!matieres.data || !Array.isArray(matieres.data)) return []
+        if(!matieres.data || !Array.isArray(matieres.data)) {
+return []
+}
 
         let resultat = matieres.data
         
@@ -63,11 +63,25 @@ export default function Niveau({ matieres }: { matieres: any[] }) {
 
     function validateMatiere(){
 
-        if(!matiere.data.code.trim()) return false
-        if(!matiere.data.intitule.trim()) return false
-        if(matiere.data.volume_horaire_cm < 0) return false
-        if(matiere.data.volume_horaire_td < 0) return false
-        if(matiere.data.volume_horaire_tp < 0) return false
+        if(!matiere.data.code.trim()) {
+return false
+}
+
+        if(!matiere.data.intitule.trim()) {
+return false
+}
+
+        if(matiere.data.volume_horaire_cm < 0) {
+return false
+}
+
+        if(matiere.data.volume_horaire_td < 0) {
+return false
+}
+
+        if(matiere.data.volume_horaire_tp < 0) {
+return false
+}
 
         return true
     }
@@ -76,8 +90,14 @@ export default function Niveau({ matieres }: { matieres: any[] }) {
 
     async function modifierMatiere(e: React.FormEvent) {
         e.preventDefault()
-        if(!select) return
-        if(!validateMatiere()) return
+
+        if(!select) {
+return
+}
+
+        if(!validateMatiere()) {
+return
+}
 
         matiere.put(`/matieres/${select?.id}/modifier`,{
             
@@ -107,7 +127,10 @@ export default function Niveau({ matieres }: { matieres: any[] }) {
 
     async function supprimerMatiere(e: React.FormEvent) {
         e.preventDefault()
-        if(!select?.id) return
+
+        if(!select?.id) {
+return
+}
 
         matiere.delete(`/matieres/${select?.id}/supprimer`,{
             
@@ -119,7 +142,7 @@ export default function Niveau({ matieres }: { matieres: any[] }) {
 
             }),
 
-            onError: ((e)=>{
+            onError: (()=>{
                 
                 toast.error('Erreur lors de la suppresiion')
                 
@@ -141,7 +164,9 @@ export default function Niveau({ matieres }: { matieres: any[] }) {
 
                 <div className='relative max-w-xl'>
                     <Input type='text' value={search}
-                        onChange={(e)=>{setSearch(e.target.value)}}
+                        onChange={(e)=>{
+setSearch(e.target.value)
+}}
                         placeholder='Rechercher par libellé, code...'
                         className=' px-8 py-5'
                     />
@@ -218,7 +243,9 @@ export default function Niveau({ matieres }: { matieres: any[] }) {
 
         
         <Dialog open={action === 'modif'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-sm">
@@ -233,13 +260,17 @@ export default function Niveau({ matieres }: { matieres: any[] }) {
                         <Field>
                             <Label htmlFor="intitule">Module</Label>
                             <Input id="intitule" name="intitule" value={matiere.data.intitule}
-                                onChange={(e)=>{matiere.setData('intitule', e.target.value) }} placeholder='Ex: Algèbre de Bool...' />
+                                onChange={(e)=>{
+matiere.setData('intitule', e.target.value) 
+}} placeholder='Ex: Algèbre de Bool...' />
                             
                         </Field>
                         <Field>
                             <Label htmlFor="code">Code de référence</Label>
                             <Input id="code" name="code" value={matiere.data.code}
-                                onChange={(e)=>{matiere.setData('code', e.target.value) }} placeholder='Ex: NF00L1' />
+                                onChange={(e)=>{
+matiere.setData('code', e.target.value) 
+}} placeholder='Ex: NF00L1' />
                             
                         </Field>
                         <div className='space-y-6'>
@@ -284,7 +315,9 @@ export default function Niveau({ matieres }: { matieres: any[] }) {
 
 
         <Dialog open={action === 'sup'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-sm">
