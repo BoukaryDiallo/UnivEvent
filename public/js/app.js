@@ -1,0 +1,1 @@
+console.log("UnivEvent frontend chargé");

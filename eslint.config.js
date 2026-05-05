@@ -31,7 +31,7 @@ export default [
     ...typescript.configs.recommended,
     {
         ...react.configs.flat.recommended,
-        ...react.configs.flat['jsx-runtime'], // Required for React 17+
+        ...react.configs.flat['jsx-runtime'], // Requis pour React 17+
         languageOptions: {
             globals: {
                 ...globals.browser,
@@ -118,7 +118,7 @@ export default [
             'resources/js/wayfinder/**',
         ],
     },
-    prettier, // Turn off all rules that might conflict with Prettier
+    prettier, // Désactiver toutes les règles qui pourraient entrer en conflit avec Prettier
     {
         plugins: {
             '@stylistic': stylistic,
