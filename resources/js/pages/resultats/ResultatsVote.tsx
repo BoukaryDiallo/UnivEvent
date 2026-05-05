@@ -100,31 +100,11 @@ export default function ResultatsVote() {
     
     // Définition des fonctions pour les boutons
    const handleCandidater = (election: Election) => {
-        console.log("🚀 handleCandidater appelé");
-        console.log("📋 Élection reçue:", election);
-        console.log("🆔 ID élection:", election.id_election);
-        
-        // Vérifier les routes Wayfinder
-        console.log("🔍 Routes candidatures:", candidaturesRoutes);
-        console.log("🔍 Routes create:", candidaturesRoutes.create);
-        console.log("🔍 Routes create.election:", candidaturesRoutes.create?.election);
-        
-        // Générer l'URL
-        const url = candidaturesRoutes.create.election.url({ election: election.id_election });
-        console.log("🌐 URL générée:", url);
-        console.log("🌐 Type d'URL:", typeof url);
-        
-        // Vérifier router
-        console.log("🔧 Router disponible:", typeof router);
-        console.log("🔧 Router visit:", typeof router.visit);
-        
-        console.log("📡 Tentative de redirection vers:", url);
-        
         try {
+            const url = candidaturesRoutes.create.election.url({ election: election.id_election });
             router.visit(url);
-            console.log("✅ router.visit appelé avec succès");
         } catch (error) {
-            console.error("❌ Erreur lors de router.visit:", error);
+            console.error("Erreur lors de la redirection vers les candidatures:", error);
         }
     };
 

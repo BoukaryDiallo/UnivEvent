@@ -35,3 +35,4 @@ Route::middleware(['auth'])->group(function () {
 require __DIR__.'/settings.php';
 require __DIR__.'/clubs.php';
 require __DIR__.'/elections.php';
+require __DIR__.'/academic.php';

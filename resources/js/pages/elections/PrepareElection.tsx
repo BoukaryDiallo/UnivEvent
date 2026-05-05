@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Users, Calendar, MapPin, CheckCircle } from 'lucide-react';
 import { Link } from '@inertiajs/react';
-import { show as depouillementShow } from '@/routes/depouillement';
+import { calculer as depouillementCalculer } from '@/routes/depouillement';
 import AppLayout from '@/layouts/app-layout';
 import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge';
 import type { PageProps } from '@/types/app';
@@ -148,7 +148,7 @@ export default function PrepareElection() {
                                         </a>
                                     </Button>
                                     <Button variant="destructive" asChild>
-                                        <a href={depouillementShow.url({ election: election.id_election })}>
+                                        <a href={depouillementCalculer.url({ election: election.id_election })}>
                                             Lancer le dépouillement
                                         </a>
                                     </Button>

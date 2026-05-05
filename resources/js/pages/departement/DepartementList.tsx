@@ -1,7 +1,7 @@
 import { usePage, Link, router } from '@inertiajs/react'
 import { Head, useForm } from '@inertiajs/react'
 import AppLayout from '@/layouts/app-layout'
-import departement from '@/routes/departement';
+import {destroy,index as departementIndex,edit as departementEdit,create as departementCreate} from '@/routes/departement';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import CrudList from '@/components/ui/crud-list'
 import { Badge } from '@/components/ui/badge'
@@ -59,16 +59,10 @@ export default function DepartementList() {
 
   const actions = [
     {
-      label: 'Voir',
-      onClick: () => {},
-      asChild: true as const,
-      href: (departementItem: Departement) => departement.show.url(departementItem.id_departement)
-    },
-    {
       label: 'Modifier',
       onClick: () => {},
       asChild: true as const,
-      href: (departementItem: Departement) => departement.edit.url(departementItem.id_departement)
+      href: (departementItem: Departement) => departementEdit.url(departementItem.id_departement)
     },
     {
       label: 'Supprimer',
@@ -86,7 +80,7 @@ export default function DepartementList() {
         actions={actions}
         title="Liste des Départements"
         description="Gestion des départements universitaires"
-        createUrl={departement.create.url()}
+        createUrl={departementCreate.url()}
         createLabel="Nouveau Département"
         searchPlaceholder="Rechercher un département..."
         searchFields={['nom']}

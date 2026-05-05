@@ -1,7 +1,7 @@
 import { usePage, Link, router } from '@inertiajs/react'
 import { Head } from '@inertiajs/react'
 import AppLayout from '@/layouts/app-layout'
-import filiereRoutes from '@/routes/filiere'
+import {destroy,index as filiereIndex,edit as filiereEdit,create as filiereCreate} from '@/routes/filiere';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import CrudList from '@/components/ui/crud-list'
 import { Badge } from '@/components/ui/badge'
@@ -35,7 +35,7 @@ export default function FiliereList() {
     confirm({
       title: 'Supprimer la filière',
       description: 'Êtes-vous sûr de vouloir supprimer cette filière ?',
-      onConfirm: () => router.delete(filiereRoutes.destroy.url(id)),
+      onConfirm: () => router.delete(destroy.url(id)),
       variant: 'destructive'
     })
   }
@@ -87,16 +87,10 @@ export default function FiliereList() {
 
   const actions = [
     {
-      label: 'Voir',
-      onClick: () => {},
-      asChild: true as const,
-      href: (filiere: Filiere) => filiereRoutes.show.url(filiere.id_filiere)
-    },
-    {
       label: 'Modifier',
       onClick: () => {},
       asChild: true as const,
-      href: (filiere: Filiere) => filiereRoutes.edit.url(filiere.id_filiere)
+      href: (filiere: Filiere) => filiereEdit.url(filiere.id_filiere)
     },
     {
       label: 'Supprimer',
@@ -114,7 +108,7 @@ export default function FiliereList() {
         actions={actions}
         title="Liste des Filières"
         description="Gestion des filières de formation"
-        createUrl={filiereRoutes.create.url()}
+        createUrl={filiereCreate.url()}
         createLabel="Nouvelle Filière"
         searchPlaceholder="Rechercher une filière..."
         searchFields={['code', 'nom']}

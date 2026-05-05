@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Pencil, Building2 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
-import ufrRoute from '@/routes/ufr';
+import {index as ufrIndex,edit as ufrEdit} from '@/routes/ufr';
 import type { BreadcrumbItem } from '@/types';
 import type { PageProps } from '@/types/app';
 
@@ -26,7 +26,7 @@ export default function UfrShow({ ufr }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Gestion des UFR',
-            href: ufrRoute.index.url(),
+            href: ufrIndex.url(),
         },
         {
             title: ufr.nom,
@@ -56,14 +56,14 @@ export default function UfrShow({ ufr }: Props) {
                     <div className="flex gap-2">
 
                         <Button variant="outline" asChild>
-                            <a href={ufrRoute.index.url()}>
+                            <a href={ufrIndex.url()}>
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                 Retour
                             </a>
                         </Button>
 
                         <Button asChild>
-                            <a href={ufrRoute.edit.url(ufr.id_ufr)}>
+                            <a href={ufrEdit.url(ufr.id_ufr)}>
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Modifier
                             </a>

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
-import etudiants from '@/routes/etudiants';
+import {index as etudiantsIndex} from '@/routes/etudiants';
 import type { PageProps } from '@/types/app';
 
 interface Etudiant {
@@ -36,7 +36,7 @@ export default function EtudiantShow() {
             <div className="container mt-5">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-blue-600 font-bold">Détails Étudiant</h2>
-                    <Button variant="secondary" onClick={() => router.get(etudiants.index.url())}>
+                    <Button variant="secondary" onClick={() => router.get(etudiantsIndex.url())}>
                         Retour
                     </Button>
                 </div>

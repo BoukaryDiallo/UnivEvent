@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, User, GraduationCap, Calendar, Camera } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
-import { update as etudiantsUpdate } from '@/routes/etudiants';
+import {index as etudiantsIndex,update as etudiantsUpdate} from '@/routes/etudiants';
 import type { PageProps } from '@/types/app';
 
 interface Etudiant {
@@ -49,136 +49,146 @@ export default function EtudiantEdit() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(etudiants.update.url({ etudiant: etudiant.id }));
+        put(etudiantsUpdate.url(etudiant.id));
     };
 
     return (
         <AppLayout>
             <Head title="Modifier un Étudiant" />
-            <div className="container mt-5">
-                {/* Boutons retour et annuler */}
-                <div className="mb-4 flex gap-2">
-                    <Button variant="outline" onClick={() => router.get(etudiants.index.url())}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Retour à la liste
-                    </Button>
-                    <Button variant="secondary" onClick={() => router.get(etudiants.show.url({ etudiant: etudiant.id }))}>
-                        Annuler
-                    </Button>
-                </div>
-                
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-center text-green-600">Modifier un Étudiant</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {Object.keys(errors).length > 0 && (
-                            <Alert className="mb-4 border-red-200 bg-red-50">
-                                <AlertDescription>
-                                    <ul className="mb-0">
-                                        {Object.values(errors).map((error, index) => (
-                                            <li key={index}>{error}</li>
-                                        ))}
-                                    </ul>
-                                </AlertDescription>
-                            </Alert>
-                        )}
-                        <form onSubmit={submit} encType="multipart/form-data" className="space-y-4">
-                            <div>
-                                <Label htmlFor="name">Nom</Label>
-                                <Input
-                                    id="name"
-                                    type="text"
-                                    value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
-                                />
+            <div className="min-h-screen bg-gray-50 py-8">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-8 shadow-lg mb-8">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                                <User className="h-8 w-8" />
                             </div>
                             <div>
-                                <Label htmlFor="INE">INE</Label>
-                                <Input
-                                    id="INE"
-                                    type="text"
-                                    value={etudiant.INE}
-                                    readOnly
-                                />
+                                <h1 className="text-3xl font-bold">Modifier un Étudiant</h1>
+                                <p className="text-blue-100 mt-2">Mettre à jour les informations de l'étudiant</p>
                             </div>
-                            <div>
-                                <Label htmlFor="id_filiere">Filière</Label>
-                                <Select value={data.id_filiere} onValueChange={(value) => setData('id_filiere', value)}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="-- Choisir --" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {filieres.map((fil) => (
-                                            <SelectItem key={fil.id_filiere} value={fil.id_filiere.toString()}>
-                                                {fil.nom}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label htmlFor="niveau">Niveau</Label>
-                                <Select value={data.niveau} onValueChange={(value) => setData('niveau', value)}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Object.entries(niveaux).map(([value, label]) => (
-                                            <SelectItem key={value} value={value}>
-                                                {label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label htmlFor="date_naissance">Date de naissance</Label>
-                                <Input
-                                    id="date_naissance"
-                                    type="date"
-                                    value={data.date_naissance}
-                                    onChange={(e) => setData('date_naissance', e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="photo">Photo</Label>
-                                {etudiant.photo && (
-                                    <div className="mb-3">
-                                        <p className="text-sm text-gray-600 mb-2">Photo actuelle :</p>
-                                        <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 shadow-sm">
-                                            <img
-                                                src={`/storage/${etudiant.photo}`}
-                                                alt="Photo actuelle"
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
+                        </div>
+                    </div>
+
+                    {/* Formulaire */}
+                    <Card className="shadow-xl border-0">
+                        <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
+                            <CardTitle className="text-blue-700 flex items-center gap-2">
+                                <GraduationCap className="h-5 w-5" />
+                                Modifier les informations
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8">
+                            {Object.keys(errors).length > 0 && (
+                                <Alert className="mb-6 border-red-200 bg-red-50">
+                                    <AlertDescription>
+                                        <ul className="mb-0 space-y-1">
+                                            {Object.values(errors).map((error, index) => (
+                                                <li key={index} className="text-red-700">{error}</li>
+                                            ))}
+                                        </ul>
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                            <form onSubmit={submit} encType="multipart/form-data" className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="name" className="text-sm font-medium text-gray-700">Nom complet</Label>
+                                        <Input
+                                            id="name"
+                                            type="text"
+                                            value={data.name}
+                                            onChange={(e) => setData('name', e.target.value)}
+                                            placeholder="Nom de l'étudiant"
+                                            className="w-full"
+                                        />
                                     </div>
-                                )}
-                                <Input
-                                    id="photo"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setData('photo', e.target.files?.[0] || null)}
-                                />
-                            </div>
-                            <div className="flex justify-between">
-                                <Button variant="outline" onClick={() => router.get(etudiants.index.url())}>
-                                    <ArrowLeft className="h-4 w-4 mr-2" />
-                                    Retour
-                                </Button>
-                                <div className="flex gap-2">
-                                    <Button variant="secondary" onClick={() => router.get(etudiants.show.url({ etudiant: etudiant.id }))}>
-                                        Annuler
+                                    <div className="space-y-2">
+                                        <Label htmlFor="id_filiere" className="text-sm font-medium text-gray-700">Filière</Label>
+                                        <Select value={data.id_filiere} onValueChange={(value) => setData('id_filiere', value)}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="-- Sélectionner une filière --" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {filieres.map((fil) => (
+                                                    <SelectItem key={fil.id_filiere} value={fil.id_filiere.toString()}>
+                                                        {fil.nom}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="INE" className="text-sm font-medium text-gray-700">INE</Label>
+                                    <Input
+                                        id="INE"
+                                        type="text"
+                                        value={etudiant.INE}
+                                        readOnly
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="niveau" className="text-sm font-medium text-gray-700">Niveau</Label>
+                                    <Select value={data.niveau} onValueChange={(value) => setData('niveau', value)}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Sélectionner un niveau" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {Object.entries(niveaux).map(([value, label]) => (
+                                                <SelectItem key={value} value={value}>
+                                                    {label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="date_naissance" className="text-sm font-medium text-gray-700">Date de naissance</Label>
+                                    <Input
+                                        id="date_naissance"
+                                        type="date"
+                                        value={data.date_naissance}
+                                        onChange={(e) => setData('date_naissance', e.target.value)}
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="photo" className="text-sm font-medium text-gray-700">Photo</Label>
+                                    {etudiant.photo && (
+                                        <div className="mb-3">
+                                            <p className="text-sm text-gray-600 mb-2">Photo actuelle :</p>
+                                            <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 shadow-sm">
+                                                <img
+                                                    src={`/storage/${etudiant.photo}`}
+                                                    alt="Photo actuelle"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                    <Input
+                                        id="photo"
+                                        type="file"
+                                        onChange={(e) => setData('photo', e.target.files?.[0])}
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-3 pt-6">
+                                    <Button type="button" variant="outline" onClick={() => router.get(etudiantsIndex.url())} className="px-6">
+                                        <ArrowLeft className="mr-2 h-4 w-4" />
+                                        Retour à la liste
                                     </Button>
-                                    <Button type="submit" disabled={processing}>
-                                        Mettre à jour
+                                    <Button type="submit" disabled={processing} className="px-6">
+                                        <User className="mr-2 h-4 w-4" />
+                                        {processing ? 'Mise à jour...' : 'Mettre à jour'}
                                     </Button>
                                 </div>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
+                            </form>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </AppLayout>
     );

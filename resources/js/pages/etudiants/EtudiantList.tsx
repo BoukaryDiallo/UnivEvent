@@ -1,6 +1,6 @@
 import { usePage, Link, router } from '@inertiajs/react'
 import { Head } from '@inertiajs/react'
-import etudiants from '@/routes/etudiants';
+import {destroy,index as etudiantsIndex,edit as etudiantsEdit,create as etudiantsCreate} from '@/routes/etudiants';
 import AppLayout from '@/layouts/app-layout'
 import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import CrudList from '@/components/ui/crud-list'
@@ -40,7 +40,7 @@ export default function EtudiantList() {
     confirm({
       title: 'Supprimer l\'étudiant',
       description: 'Êtes-vous sûr de vouloir supprimer cet étudiant ?',
-      onConfirm: () => router.delete(etudiants.destroy.url(id)),
+      onConfirm: () => router.delete(destroy.url(id)),
       variant: 'destructive'
     })
   }
@@ -109,16 +109,10 @@ export default function EtudiantList() {
 
   const actions = [
     {
-      label: 'Voir',
-      onClick: () => {},
-      asChild: true as const,
-      href: (etudiant: Etudiant) => etudiants.show.url(etudiant.id)
-    },
-    {
       label: 'Modifier',
       onClick: () => {},
       asChild: true as const,
-      href: (etudiant: Etudiant) => etudiants.edit.url(etudiant.id)
+      href: (etudiant: Etudiant) => etudiantsEdit.url(etudiant.id)
     },
     {
       label: 'Supprimer',
@@ -136,7 +130,7 @@ export default function EtudiantList() {
         actions={actions}
         title="Liste des Étudiants"
         description="Gestion des étudiants inscrits"
-        createUrl={etudiants.create.url()}
+        createUrl={etudiantsCreate.url()}
         createLabel="Ajouter un étudiant"
         searchPlaceholder="Rechercher par nom ou INE..."
         searchFields={['INE']}

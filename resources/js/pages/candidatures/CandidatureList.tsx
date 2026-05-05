@@ -23,7 +23,6 @@ type Props = PageProps<{
 
 export default function CandidatureList() {
     const { candidatures } = usePage<Props>().props;
-    console.log(candidatures);
     const { confirm, ConfirmDialog } = useConfirmDialog();
 
     const handleDelete = (candidature: Candidature) => {

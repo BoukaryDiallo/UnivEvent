@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { ArrowLeftIcon, EditIcon, GraduationCap, Building2 } from 'lucide-react';
-import filiereRoutes from '@/routes/filiere';
+import {index as filiereIndex,edit as filiereEdit} from '@/routes/filiere';
 import type { BreadcrumbItem } from '@/types';
 
 type Filiere = {
@@ -25,7 +25,7 @@ export default function FiliereShow() {
   const { filiere } = usePage<{ filiere: Filiere }>().props;
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Filières', href: filiereRoutes.index.url() },
+    { title: 'Filières', href: filiereIndex.url() },
     { title: filiere.nom },
   ];
 
@@ -38,13 +38,13 @@ export default function FiliereShow() {
           <h1 className="text-3xl font-bold tracking-tight">Détails de la Filière</h1>
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <Link href={filiereRoutes.index.url()}>
+              <Link href={filiereIndex.url()}>
                 <ArrowLeftIcon className="mr-2 h-4 w-4" />
                 Retour
               </Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href={filiereRoutes.edit.url(filiere.id_filiere)}>
+              <Link href={filiereEdit.url(filiere.id_filiere)}>
                 <EditIcon className="mr-2 h-4 w-4" />
                 Modifier
               </Link>

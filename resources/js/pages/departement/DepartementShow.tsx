@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { ArrowLeftIcon, EditIcon, Building2, GraduationCap, Users, BarChart3 } from 'lucide-react';
-import departementRoutes from '@/routes/departement';
-import filiereRoutes from '@/routes/filiere';
+import {index as departementIndex,edit as departementEdit,destroy as departementDestroy} from '@/routes/departement';
+import {index as filiereIndex} from '@/routes/filiere';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { BreadcrumbItem } from '@/types';
 
@@ -41,7 +41,7 @@ export default function DepartementShow() {
   const { confirm, ConfirmDialog } = useConfirmDialog();
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Départements', href: departementRoutes.index.url() },
+    { title: 'Départements', href: departementIndex.url() },
     { title: departement.nom },
   ];
 
@@ -49,7 +49,7 @@ export default function DepartementShow() {
     confirm({
       title: 'Supprimer le département',
       description: 'Êtes-vous sûr de vouloir supprimer ce département ?',
-      onConfirm: () => router.delete(departementRoutes.destroy.url(departement.id_departement)),
+      onConfirm: () => router.delete(departementDestroy.url(departement.id_departement)),
       variant: 'destructive'
     });
   };
@@ -66,13 +66,13 @@ export default function DepartementShow() {
           </div>
           <div className="flex gap-2">
             <Button asChild variant="outline">
-              <Link href={departementRoutes.index.url()}>
+              <Link href={departementIndex.url()}>
                 <ArrowLeftIcon className="mr-2 h-4 w-4" />
                 Retour
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href={departementRoutes.edit.url(departement.id_departement)}>
+              <Link href={departementEdit.url(departement.id_departement)}>
                 <EditIcon className="mr-2 h-4 w-4" />
                 Modifier
               </Link>
@@ -125,7 +125,7 @@ export default function DepartementShow() {
                           )}
                           <Badge>{filiere.etudiants_count || 0} étudiants</Badge>
                           <Button variant="ghost" size="sm" asChild>
-                            <Link href={filiereRoutes.show.url(filiere.id_filiere)}>
+                            <Link href={filiereIndex.url()}>
                               Voir
                             </Link>
                           </Button>

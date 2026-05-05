@@ -6,5 +6,5 @@ document.getElementById('candidatureForm').addEventListener('submit', (e) => {
 ///////////////////////// LISTE DES CANDIDATS//////////////////////////////////////
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Liste des candidats chargée.');
+    // Liste des candidats chargée
 });

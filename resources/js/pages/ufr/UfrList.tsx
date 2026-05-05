@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/app-layout'
 import CrudList from '@/components/ui/crud-list'
 import { Badge } from '@/components/ui/badge'
 import { useConfirmDialog } from '@/components/ui/confirm-dialog'
-import {destroy,index as ufrIndex,show as ufrShow,edit as ufrEdit,create as ufrCreate} from '@/routes/ufr';
+import {destroy,index as ufrIndex,edit as ufrEdit,create as ufrCreate} from '@/routes/ufr';
 
 type Ufr = {
   id_ufr: number
@@ -43,12 +43,6 @@ export default function List() {
   ]
 
   const actions = [
-    {
-      label: 'Voir',
-      onClick: () => {},
-      asChild: true as const,
-      href: (ufr: Ufr) => ufrShow.url(ufr.id_ufr)
-    },
     {
       label: 'Modifier',
       onClick: () => {},

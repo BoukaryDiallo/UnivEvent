@@ -32,8 +32,6 @@ export default function VoteElectionsOuvertes() {
         ? elections
         : Object.values(elections ?? {});
 
-    console.log(elections);
-
     return (
         <AppLayout>
             <Head title="Participez aux Élections" />
