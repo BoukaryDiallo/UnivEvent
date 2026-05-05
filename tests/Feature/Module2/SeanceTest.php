@@ -65,7 +65,7 @@ class SeanceTest extends TestCase
             'updated_at'          => now(),
         ]);
 
-        // Crée un enseignant avec son user
+        
         $enseignantUser = User::factory()->create();
         $enseignantId = DB::table('enseignants')->insertGetId([
             'user_id'    => $enseignantUser->id,
@@ -77,7 +77,7 @@ class SeanceTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        // Mock du service DispoContrat
+       
         $prise = Prise::create([
             'user_id' => $this->admin->id,
             'date'    => now()->addDays(10)->format('Y-m-d'),
@@ -109,7 +109,7 @@ class SeanceTest extends TestCase
         ];
     }
 
-    // ✅ CAS 1 : Ajout réussi
+   
     public function test_ajout_seance_reussi(): void
     {
         $this->actingAs($this->admin)
@@ -123,7 +123,7 @@ class SeanceTest extends TestCase
         ]);
     }
 
-    // ❌ CAS 2 : Conflit de jour (même jour dans le même EDT)
+   
     public function test_conflit_jour_meme_edt(): void
     {
         // Crée une séance existante le Lundi
@@ -143,7 +143,7 @@ class SeanceTest extends TestCase
             ->assertSessionHasErrors('conflit');
     }
 
-    // ❌ CAS 3 : Conflit de salle
+   
     public function test_conflit_salle(): void
     {
         // Crée un autre EDT qui chevauche les mêmes dates
@@ -168,7 +168,7 @@ class SeanceTest extends TestCase
             ->assertSessionHasErrors('conflit');
     }
 
-    // ❌ CAS 4 : Conflit enseignant
+
     public function test_conflit_enseignant(): void
     {
         $autreEdt = EmploiDuTemps::factory()->create([
@@ -203,7 +203,7 @@ class SeanceTest extends TestCase
             ->assertSessionHasErrors('conflit');
     }
 
-    // ❌ CAS 5 : Validation — champs requis manquants
+    
     public function test_validation_champs_requis(): void
     {
         $this->actingAs($this->admin)
@@ -215,7 +215,7 @@ class SeanceTest extends TestCase
             ]);
     }
 
-    // ❌ CAS 6 : Type de séance invalide
+  
     public function test_type_seance_invalide(): void
     {
         $this->actingAs($this->admin)
@@ -224,7 +224,7 @@ class SeanceTest extends TestCase
             ->assertSessionHasErrors('type_seance');
     }
 
-    // ❌ CAS 7 : EDT inexistant
+    
     public function test_edt_inexistant(): void
     {
         $this->actingAs($this->admin)
@@ -232,7 +232,7 @@ class SeanceTest extends TestCase
             ->assertStatus(404);
     }
 
-    // ❌ CAS 8 : Non authentifié
+
     public function test_non_authentifie_redirige(): void
     {
         $this->post(route('emploie-du-temps.ajouter-seance', $this->edt->id), $this->payload)
