@@ -1,30 +1,17 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, useForm } from '@inertiajs/react';
+import { 
+    UserPlus, 
+    Users as UsersIcon, 
+    GraduationCap, 
+    Shield,
+    RefreshCw,
+    Mail,
+    Lock,
+    User
+} from 'lucide-react';
 import { useState } from 'react';
 
 // shadcn UI
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription
-} from "@/components/ui/card";
-
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -37,21 +24,34 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-    UserPlus, 
-    Users as UsersIcon, 
-    GraduationCap, 
-    Shield,
-    RefreshCw,
-    Mail,
-    Lock,
-    User
-} from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
-import type { BreadcrumbItem } from '@/types';
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import AppLayout from '@/layouts/app-layout';
+
 import { dashboard } from '@/routes';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -111,6 +111,7 @@ export default function Users({ users, roles }: any) {
             'teacher': 'default',
             'student': 'secondary',
         };
+
         return colors[roleName.toLowerCase()] || 'outline';
     };
 
@@ -292,6 +293,7 @@ export default function Users({ users, roles }: any) {
                                                                                 const updated = checked
                                                                                     ? [...current, role.name]
                                                                                     : current.filter(r => r !== role.name);
+
                                                                                 return { ...prev, [user.id]: updated };
                                                                             });
                                                                         }}

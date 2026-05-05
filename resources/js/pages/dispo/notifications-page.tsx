@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { DispoShell } from '@/components/dispo/entete';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import type { BreadcrumbItem } from '@/types';
 import type { LigneNotification, ResumeDispo, UserDispo } from '@/types/dispo';
 

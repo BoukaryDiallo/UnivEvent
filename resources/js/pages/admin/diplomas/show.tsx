@@ -1,5 +1,15 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
+import type { FormEvent} from 'react';
+import { useState } from 'react';
+import { validateDocument as validateDocumentAction } from '@/actions/App/Http/Controllers/Admin/DiplomaDocumentController';
+import {
+    archive as archiveAction,
+    deliver as deliverAction,
+    markReadyForPickup as markReadyAction,
+    reject as rejectAction,
+    validateDossier as validateDossierAction,
+} from '@/actions/App/Http/Controllers/Admin/DiplomaRequestController';
+import { download as downloadDocument } from '@/actions/App/Http/Controllers/DiplomaDocumentController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,18 +24,9 @@ import {
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
-import { download as downloadDocument } from '@/actions/App/Http/Controllers/DiplomaDocumentController';
-import { validateDocument as validateDocumentAction } from '@/actions/App/Http/Controllers/Admin/DiplomaDocumentController';
-import {
-    archive as archiveAction,
-    deliver as deliverAction,
-    markReadyForPickup as markReadyAction,
-    reject as rejectAction,
-    validateDossier as validateDossierAction,
-} from '@/actions/App/Http/Controllers/Admin/DiplomaRequestController';
+import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
 import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
 import type { BreadcrumbItem } from '@/types';
-import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
 
 type DocumentRow = {
     id: number;
@@ -96,8 +97,14 @@ const formatDateTime = (iso: string) =>
     new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
 
 const formatSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} o`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
+    if (bytes < 1024) {
+return `${bytes} o`;
+}
+
+    if (bytes < 1024 * 1024) {
+return `${(bytes / 1024).toFixed(0)} Ko`;
+}
+
     return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
 };
 
@@ -125,12 +132,18 @@ export default function AdminDiplomaRequestShow({ request, can }: Props) {
     };
 
     const handleValidateDossier = () => {
-        if (!confirm('Valider ce dossier ? L\'étudiant pourra ensuite être informé de son statut.')) return;
+        if (!confirm('Valider ce dossier ? L\'étudiant pourra ensuite être informé de son statut.')) {
+return;
+}
+
         router.post(validateDossierAction(request.id).url, {}, { preserveScroll: true });
     };
 
     const handleMarkReady = () => {
-        if (!confirm('Marquer ce dossier comme prêt à retirer ?')) return;
+        if (!confirm('Marquer ce dossier comme prêt à retirer ?')) {
+return;
+}
+
         router.post(markReadyAction(request.id).url, {}, { preserveScroll: true });
     };
 
@@ -158,7 +171,10 @@ export default function AdminDiplomaRequestShow({ request, can }: Props) {
     };
 
     const handleArchive = () => {
-        if (!confirm('Archiver ce dossier ? Les pièces resteront consultables.')) return;
+        if (!confirm('Archiver ce dossier ? Les pièces resteront consultables.')) {
+return;
+}
+
         router.post(archiveAction(request.id).url, {}, { preserveScroll: true });
     };
 

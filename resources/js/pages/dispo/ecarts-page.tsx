@@ -26,6 +26,7 @@ function formatPeriode(date: string, dateFin?: string | null) {
     if (!dateFin || dateFin === date) {
         return formatDate(date);
     }
+
     return `${formatDate(date)} - ${formatDate(dateFin)}`;
 }
 

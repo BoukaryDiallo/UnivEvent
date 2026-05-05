@@ -1,13 +1,13 @@
-import AppLayout from '@/layouts/app-layout';
 import { router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
 // shadcn
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import AppLayout from '@/layouts/app-layout';
 
 export default function Permissions({ permissions, roles }: any) {
 

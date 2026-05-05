@@ -42,4 +42,3 @@ require __DIR__.'/module1.php';
 require __DIR__.'/dispo.php';
 require __DIR__.'/module2.php';
 require __DIR__.'/settings.php';
-

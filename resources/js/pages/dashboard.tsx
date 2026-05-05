@@ -2,10 +2,10 @@ import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
+import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
 import { dashboard } from '@/routes';
 import { create as createRequest, index as diplomasIndex, show as showRequest } from '@/routes/diplomas';
 import type { BreadcrumbItem } from '@/types';
-import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
 
 type ActiveRequest = {
     id: number;

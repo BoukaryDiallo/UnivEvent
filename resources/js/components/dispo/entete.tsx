@@ -9,7 +9,6 @@ export function DispoShell({
     description,
     breadcrumbs,
     resume,
-    user,
     showResume = true,
 }: {
     children: React.ReactNode;

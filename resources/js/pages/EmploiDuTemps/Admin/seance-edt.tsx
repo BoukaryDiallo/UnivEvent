@@ -1,21 +1,21 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { BreadcrumbItem } from '@/types';
-import { dashboard } from '@/routes';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertCircle, CheckCircle2, Edit, Trash } from 'lucide-react';
+import { useState } from 'react';
+import { toast, Toaster } from 'sonner';
 import { formatDate } from '@/components/edt/formatDate';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Spinner } from '@/components/ui/spinner';
-import { toast, Toaster } from 'sonner';
-import { AlertCircle, CheckCircle2, Edit, Trash } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Spinner } from '@/components/ui/spinner';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
+import { dashboard } from '@/routes';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { 
@@ -31,7 +31,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 
-export default function gestionSeance({ 
+export default function GestionSeance({ 
     seances, emplois, matieresSeance, sallesSeance, userEnseignants,
     creneaux
 }: { 
@@ -39,11 +39,11 @@ export default function gestionSeance({
     userEnseignants: any[], creneaux: any[]
 }) {
     
-    const [select, setSelect] = useState<null | {}>(null)
+    const [select, setSelect] = useState<null | object>(null)
     const [action, setAction] = useState< null | string >(null)
     const [dispo, setDispo] = useState<any>(null);
     const [loading, setLoading] = useState(false);
-    const [champsModifies, setChampsModifies] = useState(false);
+    const [, setChampsModifies] = useState(false);
 const [valeursOriginales, setValeursOriginales] = useState<any>(null);
 
  const [loadingLib, setLoadingLib] = useState(false);
@@ -64,10 +64,12 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
     async function checkDisponibilite() {
         if (!form.data.enseignant_id) {
             toast.info("Veuillez sélectionner un enseignant");
+
             return;
         }
 
         setLoading(true);
+
         try {
             const params = new URLSearchParams({
                 user_id: form.data.enseignant_id,
@@ -81,7 +83,7 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
             const data = await response.json();
             
             setDispo(data);
-        } catch (error) {
+        } catch {
             setDispo({ ok: false, message: "Erreur de connexion" });
         } finally {
             setLoading(false);
@@ -91,34 +93,48 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
     function validateSeance() {
         if (!form.data.enseignant_id) {
             toast.error('Veuillez sélectionner un enseignant');
+
             return false;
         }
+
         if (!form.data.creneau_id) {
             toast.error('Veuillez sélectionner un créneau');
+
             return false;
         }
+
         if (!form.data.matiere_id) {
             toast.error('Veuillez sélectionner un module');
+
             return false;
         }
+
         if (!form.data.salle_id) {
             toast.error('Veuillez sélectionner une salle');
+
             return false;
         }
+
         if (!form.data.jour_semaine) {
             toast.error('Veuillez sélectionner un jour');
+
             return false;
         }
+
         return true;
     }
 
 
     async function modifierSeance(e: any) {
         e.preventDefault()
-        if (!validateSeance()) return;
+
+        if (!validateSeance()) {
+return;
+}
 
         if (aChangeChampsRequisDispo() && !dispo?.ok) {
             toast.error('Veuillez vérifier la disponibilité de l\'enseignant');
+
             return;
         }
 
@@ -157,7 +173,10 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
     }
 
     function aChangeChampsRequisDispo() {
-        if (!valeursOriginales) return false;
+        if (!valeursOriginales) {
+return false;
+}
+
         return (
             form.data.enseignant_id !== valeursOriginales.enseignant_id ||
             form.data.creneau_id !== valeursOriginales.creneau_id ||
@@ -167,7 +186,10 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
 
     async function supprimerSeance(e: any) {
         e.preventDefault()
-        if (!select?.id) return
+
+        if (!select?.id) {
+return
+}
 
         try {
             const response = await fetch(`/emploie-du-temps/${select?.id}/supprimer-seance`, {
@@ -196,14 +218,17 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
             } else {
                 toast.error('Erreur lors de la suppression');
             }
-        } catch (error) {
+        } catch {
             toast.error('Erreur lors de la suppression');
         }
     }
 
     function libererEns(e: any) {
         e.preventDefault();
-        if (!select?.id || loadingLib) return;
+
+        if (!select?.id || loadingLib) {
+return;
+}
 
         setLoadingLib(true);
 
@@ -376,7 +401,9 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
         </AppLayout>
 
         <Dialog open={action === 'modif'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
                 <DialogContent className="sm:max-w-xl">
@@ -421,6 +448,7 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
                                         value={form.data.creneau_id} 
                                         onValueChange={(value) => {
                                             const selectedCreneau = creneaux.find(c => c.id.toString() === value);
+
                                             if (selectedCreneau) {
                                                 form.setData('creneau_id', value);
                                                 form.setData('check_debut', selectedCreneau.heure_debut.substring(0, 5));
@@ -528,7 +556,9 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
                                 <Field>
                                     <FieldLabel htmlFor="description">Description (optionnel)</FieldLabel>
                                     <Textarea id="description" name='description'
-                                        value={form.data.description} onChange={(e) => {form.setData('description', e.target.value)}}
+                                        value={form.data.description} onChange={(e) => {
+form.setData('description', e.target.value)
+}}
                                         placeholder="Une brève description du cours..." />
                                 </Field>
 
@@ -573,7 +603,7 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
                                                 description: ''
                                             })
                                             setDispo(null)
-                                            form.reset(),
+                                            form.reset()
                                             setAction(null)
                                             setSelect(null)
                                         }}
@@ -592,7 +622,9 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
 
 
         <Dialog open={action === 'sup'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-sm">
@@ -621,7 +653,9 @@ const [valeursOriginales, setValeursOriginales] = useState<any>(null);
         </Dialog>
 
         <Dialog open={action === 'liberer'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-sm">

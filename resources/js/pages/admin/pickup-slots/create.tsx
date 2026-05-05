@@ -1,8 +1,8 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import type { FormEvent } from 'react';
+import { store as storeSlot } from '@/actions/App/Http/Controllers/Admin/PickupSlotController';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { store as storeSlot } from '@/actions/App/Http/Controllers/Admin/PickupSlotController';
 import { index as adminSlotsIndex } from '@/routes/admin/pickup-slots';
 import type { BreadcrumbItem } from '@/types';
 import { SlotForm } from './slot-form';

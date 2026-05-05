@@ -34,7 +34,10 @@ const formatSlot = (iso: string) =>
 
 export default function AdminPickupSlotsIndex({ slots }: Props) {
     const handleDelete = (id: number) => {
-        if (!confirm('Supprimer ce créneau ?')) return;
+        if (!confirm('Supprimer ce créneau ?')) {
+return;
+}
+
         router.delete(destroySlot(id).url, { preserveScroll: true });
     };
 

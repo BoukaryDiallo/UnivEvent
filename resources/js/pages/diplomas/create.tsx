@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import type { FormEvent } from 'react';
+import { store } from '@/actions/App/Http/Controllers/DiplomaRequestController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,6 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
-import { store } from '@/actions/App/Http/Controllers/DiplomaRequestController';
 import { index as diplomasIndex } from '@/routes/diplomas';
 import type { BreadcrumbItem } from '@/types';
 

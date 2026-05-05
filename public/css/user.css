@@ -1,0 +1,15 @@
+/*/////////////////////////////////////CREATION DES USERS////////////////////////*/
+
+form {
+    border-left: 5px solid #198754;
+}
+h2 {
+    font-weight: 600;
+}
+.btn-success {
+    background-color: #198754;
+    border: none;
+}
+.btn-success:hover {
+    background-color: #157347;
+}

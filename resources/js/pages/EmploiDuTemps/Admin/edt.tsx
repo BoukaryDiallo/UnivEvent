@@ -1,24 +1,23 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {Table, TableBody, TableHeader, TableHead, TableRow, TableCell} from '@/components/ui/table'
+import {useForm} from '@inertiajs/react';
+import { Plus, Eye, Download, Search, Share, Trash2, Edit, PlusSquare, CheckCircle2, AlertCircle, Mail, Calendar1 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Toaster, toast } from 'sonner';
+import { formatDate, inputDate } from '@/components/edt/formatDate';
+import Pagination from '@/components/edt/paginate';
 import { Button } from '@/components/ui/button';
-import { Plus, Eye, Download, LayoutGrid, Search, Share, Trash2, Edit, PlusSquare, CheckCircle2, AlertCircle, Timer, Mail, Calendar1 } from 'lucide-react';
-import type { BreadcrumbItem } from '@/types';
-import { dashboard, roles } from '@/routes';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState, useEffect, useMemo } from 'react';
-import {useForm} from '@inertiajs/react';
-import { Toaster, toast } from 'sonner';
-import InputError from '@/components/input-error';
-import { Spinner } from '@/components/ui/spinner';
-import Pagination from '@/components/edt/paginate';
-import { formatDate, inputDate } from '@/components/edt/formatDate';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Spinner } from '@/components/ui/spinner';
+import {Table, TableBody, TableHeader, TableHead, TableRow, TableCell} from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
+import { dashboard} from '@/routes';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -102,7 +101,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     const filtreData = useMemo(()=>{
 
-        if(!emplois.data || !Array.isArray(emplois.data)) return []
+        if(!emplois.data || !Array.isArray(emplois.data)) {
+return []
+}
 
         let resultat = emplois.data
         
@@ -124,12 +125,17 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     function PublierEdt(e: React.FormEvent){
         e.preventDefault()
-        if(!select?.id) return
+
+        if(!select?.id) {
+return
+}
+
         form.post(`/emploie-du-temps/${select?.id}/publier`,{
             onSuccess: () => {
                 setAction(null)
                 form.reset()
-                toast.success('Emploi du temps publié')},
+                toast.success('Emploi du temps publié')
+},
 
             onError: () => toast.error('Erreur! Veuillez réessayer')
         })
@@ -138,13 +144,33 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     function validateEdt(){
 
-        if(!form.data.titre.trim()) return false
-        if(!form.data.semestre.trim()) return false
-        if(!form.data.annee_academique_id) return false
-        if(!form.data.filiere_id) return false
-        if(!form.data.niveau_id) return false
-        if(!form.data.date_debut) return false
-        if(!form.data.date_fin) return false
+        if(!form.data.titre.trim()) {
+return false
+}
+
+        if(!form.data.semestre.trim()) {
+return false
+}
+
+        if(!form.data.annee_academique_id) {
+return false
+}
+
+        if(!form.data.filiere_id) {
+return false
+}
+
+        if(!form.data.niveau_id) {
+return false
+}
+
+        if(!form.data.date_debut) {
+return false
+}
+
+        if(!form.data.date_fin) {
+return false
+}
 
         return true
     }
@@ -153,7 +179,11 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     function handleCreerEdt(e: React.FormEvent){
         e.preventDefault();
-        if(!validateEdt()) return
+
+        if(!validateEdt()) {
+return
+}
+
         form.post('/emploie-du-temps/ajouter', {
             onSuccess: () => {
                 setAction(null)
@@ -172,12 +202,17 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     function handleModifEdt(e: React.FormEvent){
         e.preventDefault();
-        if(!validateEdt()) return
+
+        if(!validateEdt()) {
+return
+}
+
         form.put(`/emploie-du-temps/${select?.id}/modifier`, {
             onSuccess: () => {
                 setAction(null)
                 form.reset()
-                toast.success('Emploi du temps mis à jour')},
+                toast.success('Emploi du temps mis à jour')
+},
 
             onError: (errors: any) => {
                 if (errors.conflit) {
@@ -196,7 +231,10 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     async function ajouterSalle(e: React.FormEvent) {
         e.preventDefault()
-        if (!salle.data.nom.trim()) return
+
+        if (!salle.data.nom.trim()) {
+return
+}
 
         salle.post('/salles/ajouter',{
             onSuccess: (()=>{
@@ -219,14 +257,19 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     function validateCreneau(){
 
-        if(creneau.data.heure_fin < creneau.data.heure_debut) return false
+        if(creneau.data.heure_fin < creneau.data.heure_debut) {
+return false
+}
 
         return true
     }
 
     async function ajouterCreneau(e: React.FormEvent) {
         e.preventDefault()
-        if (!validateCreneau()) return
+
+        if (!validateCreneau()) {
+return
+}
 
         creneau.post('/creneaux/ajouter',{
             onSuccess: (()=>{
@@ -246,20 +289,42 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     function validateMatiere(){
 
-        if(!matiere.data.code.trim()) return false
-        if(!matiere.data.intitule.trim()) return false
-        if(matiere.data.volume_horaire_cm < 0) return false
-        if(matiere.data.volume_horaire_td < 0) return false
-        if(matiere.data.volume_horaire_tp < 0) return false
+        if(!matiere.data.code.trim()) {
+return false
+}
+
+        if(!matiere.data.intitule.trim()) {
+return false
+}
+
+        if(matiere.data.volume_horaire_cm < 0) {
+return false
+}
+
+        if(matiere.data.volume_horaire_td < 0) {
+return false
+}
+
+        if(matiere.data.volume_horaire_tp < 0) {
+return false
+}
 
         return true
     }
 
     function validateNiveau(){
 
-        if(!niveau.data.code.trim()) return false
-        if(!niveau.data.nom.trim()) return false
-        if(niveau.data.ordre < 1) return false
+        if(!niveau.data.code.trim()) {
+return false
+}
+
+        if(!niveau.data.nom.trim()) {
+return false
+}
+
+        if(niveau.data.ordre < 1) {
+return false
+}
 
         return true
     }
@@ -267,10 +332,12 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
     async function checkDisponibilite() {
         if (!formSeance.data.enseignant_id) {
             toast.info("Veuillez sélectionner un enseignant");
+
             return;
         }
 
         setLoading(true);
+
         try {
             const params = new URLSearchParams({
                 user_id: formSeance.data.enseignant_id,
@@ -284,7 +351,7 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
             const data = await response.json();
             
             setDispo(data);
-        } catch (error) {
+        } catch  {
             setDispo({ ok: false, message: "Erreur de connexion" });
         } finally {
             setLoading(false);
@@ -294,24 +361,34 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
     function validateSeance() {
     if (!formSeance.data.enseignant_id) {
         toast.error('Veuillez sélectionner un enseignant');
+
         return false;
     }
+
     if (!formSeance.data.creneau_id) {
         toast.error('Veuillez sélectionner un créneau');
+
         return false;
     }
+
     if (!formSeance.data.matiere_id) {
         toast.error('Veuillez sélectionner un module');
+
         return false;
     }
+
     if (!formSeance.data.salle_id) {
         toast.error('Veuillez sélectionner une salle');
+
         return false;
     }
+
     if (!formSeance.data.jour_semaine) {
         toast.error('Veuillez sélectionner un jour');
+
         return false;
     }
+
     return true;
     }
 
@@ -319,9 +396,14 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
     
     async function ajouterSeance(e: React.FormEvent) {
         e.preventDefault()
-        if (!validateSeance()) return;
+
+        if (!validateSeance()) {
+return;
+}
+
         if (!dispo?.ok) {
             toast.error('Veuillez vérifier la disponibilité de l\'enseignant');
+
             return;
         }
 
@@ -359,7 +441,10 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     async function ajouterMatiere(e: React.FormEvent) {
         e.preventDefault()
-        if (!validateMatiere()) return
+
+        if (!validateMatiere()) {
+return
+}
 
         matiere.post('/matieres/ajouter',{
             onSuccess: (()=>{
@@ -385,7 +470,10 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     async function ajouterNiveau(e: React.FormEvent) {
         e.preventDefault()
-        if (!validateNiveau()) return
+
+        if (!validateNiveau()) {
+return
+}
 
         niveau.post('/niveaux/ajouter',{
             onSuccess: (()=>{
@@ -412,7 +500,10 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     async function supprimerEdt(e: React.FormEvent) {
         e.preventDefault()
-        if(!select?.id) return
+
+        if(!select?.id) {
+return
+}
 
         form.delete(`/emploie-du-temps/${select?.id}/supprimer`,{
             
@@ -424,7 +515,7 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
             }),
 
-            onError: ((e)=>{
+            onError: (()=>{
                 
                 toast.error('Erreur lors de la suppression')
                 
@@ -438,7 +529,10 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     function envoyezEdtParEmail(e: any) {
         e.preventDefault();
-        if (!select?.id || loadingSend) return;
+
+        if (!select?.id || loadingSend) {
+return;
+}
 
         setLoadingSend(true);
 
@@ -482,28 +576,27 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
     async function configurerAnne(e:any) {
         e.preventDefault()
-        if(!validateAn()) return
 
-        try {
-            an.post('/emploie-du-temps/config-annee', {
-                onSuccess: (()=> {
-                    toast.success('Configuration réussie')
-                    setAction(null)
-                    an.reset()
-                }),
-
-                onError: ((errors)=> {
-                    if(errors.conflit){
-                        toast.error(errors.conflit)
-                    }else{
-                        toast.error('Erreur veuillez ressayer')
-                    }
-                    
-                })
-            })
-        } catch (error) {
-            
+        if(!validateAn()) {
+            return
         }
+
+        an.post('/emploie-du-temps/config-annee', {
+            onSuccess: (()=> {
+                toast.success('Configuration réussie')
+                setAction(null)
+                an.reset()
+            }),
+
+            onError: ((errors)=> {
+                if(errors.conflit){
+                    toast.error(errors.conflit)
+                }else{
+                    toast.error('Erreur veuillez ressayer')
+                }
+                
+            })
+        })
     }
 
   
@@ -627,7 +720,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                 <div className="flex items-center justify-between">
                     <div className='relative w-xl'>
                         <Input type='text' value={search}
-                            onChange={(e)=>{setSearch(e.target.value)}}
+                            onChange={(e)=>{
+setSearch(e.target.value)
+}}
                             placeholder='Rechercher un emploi du temps...'
                             className=' px-8 py-5'
                         />
@@ -805,7 +900,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
         
             <Dialog open={action === 'matieres'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
                 <DialogContent className="sm:max-w-sm">
@@ -820,13 +917,17 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                         <Field>
                         <Label htmlFor="intitule">Initulé du cours</Label>
                         <Input id="intitule" name="intitule" value={matiere.data.intitule} 
-                            onChange={(e)=>{matiere.setData('intitule', e.target.value)}} placeholder='Nom du cours' />
+                            onChange={(e)=>{
+matiere.setData('intitule', e.target.value)
+}} placeholder='Nom du cours' />
                         </Field>
 
                         <Field>
                         <Label htmlFor="code">Code</Label>
                         <Input id="code" name="code" value={matiere.data.code} 
-                            onChange={(e)=>{matiere.setData('code', e.target.value)}} placeholder='Code unique du cours' />
+                            onChange={(e)=>{
+matiere.setData('code', e.target.value)
+}} placeholder='Code unique du cours' />
                           
                         </Field>
 
@@ -874,7 +975,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
             </Dialog>
         
         <Dialog open={action === 'edt'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-xl">
@@ -1015,7 +1118,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
 
         <Dialog open={action === 'modif'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-xl">
@@ -1159,7 +1264,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
         
             <Dialog open={action === 'niveaux'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
                 <DialogContent className="sm:max-w-sm">
@@ -1174,14 +1281,18 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                         <Field>
                         <Label htmlFor="intitule">Cycle</Label>
                         <Input id="nom" name="nom" value={niveau.data.nom} 
-                            onChange={(e)=>{niveau.setData('nom', e.target.value)}} placeholder='Ex: Licence 1' />
+                            onChange={(e)=>{
+niveau.setData('nom', e.target.value)
+}} placeholder='Ex: Licence 1' />
                             
                         </Field>
 
                         <Field>
                         <Label htmlFor="code">Code de référence</Label>
                         <Input id="code" name="code" value={niveau.data.code} 
-                            onChange={(e)=>{niveau.setData('code', e.target.value)}} placeholder='Ex: Licence 1 aura comme code L1' />
+                            onChange={(e)=>{
+niveau.setData('code', e.target.value)
+}} placeholder='Ex: Licence 1 aura comme code L1' />
                             
                         </Field>
 
@@ -1205,7 +1316,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
             </Dialog>
 
             <Dialog open={action === 'sup'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                     
                 <DialogContent className="sm:max-w-sm">
@@ -1233,7 +1346,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
             </Dialog>
 
             <Dialog open={action === 'send-email'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                     
                 <DialogContent className="sm:max-w-sm">
@@ -1270,7 +1385,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
             </Dialog>
 
             <Dialog open={action === 'pub'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                     
                 <DialogContent className="sm:max-w-sm">
@@ -1299,7 +1416,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
 
         
             <Dialog open={action === 'salles'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
                     <DialogContent className="sm:max-w-sm">
@@ -1314,7 +1433,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                                 <Field>
                                     <Label htmlFor="nom">Nom de la salle</Label>
                                     <Input id="nom" name="nom" value={salle.data.nom}
-                                        onChange={(e)=>{salle.setData('nom', e.target.value)}} placeholder='Ex: Amphi H' />
+                                        onChange={(e)=>{
+salle.setData('nom', e.target.value)
+}} placeholder='Ex: Amphi H' />
                                     {/* <InputError message={salle.errors.nom} /> */}
                                 </Field>
                             </FieldGroup>
@@ -1333,7 +1454,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
             </Dialog>
 
             <Dialog open={action === 'annee'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
                     <DialogContent className="sm:max-w-sm">
@@ -1353,14 +1476,18 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                                     <Label htmlFor="date_debut">Date de début</Label>
                                     <Input
                                      id="date_debut" name="date_debut" value={an.data.nom}
-                                        onChange={(e)=>{an.setData('date_debut', e.target.value)}} 
+                                        onChange={(e)=>{
+an.setData('date_debut', e.target.value)
+}} 
                                         placeholder='Ex: 2025' />
                                 </Field>
                                 <Field>
                                     <Label htmlFor="date_fin">Date de début</Label>
                                     <Input
                                      id="date_fin" name="date_fin" value={an.data.nom}
-                                        onChange={(e)=>{an.setData('date_fin', e.target.value)}} 
+                                        onChange={(e)=>{
+an.setData('date_fin', e.target.value)
+}} 
                                         placeholder='Ex: 2026' />
                                 </Field>
                                 </div>
@@ -1386,7 +1513,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
             </Dialog>
 
             <Dialog open={action === 'creneaux'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
                     <DialogContent className="sm:max-w-sm">
@@ -1403,7 +1532,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                                     <Input 
                                         type='time'
                                         id="heure_debut" name="heure_debut" value={creneau.data.heure_debut}
-                                        onChange={(e)=>{creneau.setData('heure_debut', e.target.value)}} />
+                                        onChange={(e)=>{
+creneau.setData('heure_debut', e.target.value)
+}} />
                                     
                                 </Field>
                                  <Field>
@@ -1411,7 +1542,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                                     <Input 
                                         type='time'
                                         id="heure_fin" name="heure_fin" value={creneau.data.heure_fin}
-                                        onChange={(e)=>{creneau.setData('heure_fin', e.target.value)}} />
+                                        onChange={(e)=>{
+creneau.setData('heure_fin', e.target.value)
+}} />
                                     
                                 </Field>
                             </FieldGroup>
@@ -1434,7 +1567,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
             </Dialog>
 
             <Dialog open={action === 'ajout-seance'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
                 <DialogContent className="sm:max-w-xl">
@@ -1474,6 +1609,7 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                                         onValueChange={(value) => {
                                             
                                             const selectedCreneau = creneaux.find(c => c.id.toString() === value);
+
                                             if (selectedCreneau) {
                                                 
                                                 formSeance.setData('creneau_id', value);
@@ -1578,7 +1714,9 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                                 <Field>
                                     <FieldLabel htmlFor="description">Description (optionnel)</FieldLabel>
                                     <Textarea id="description" name='description'
-                                        value={formSeance.data.description} onChange={(e) => {formSeance.setData('description', e.target.value)}}
+                                        value={formSeance.data.description} onChange={(e) => {
+formSeance.setData('description', e.target.value)
+}}
                                         placeholder="Une brève description du cours..." />
                                 </Field>
 
@@ -1621,7 +1759,7 @@ export default function Edt({ emplois, matieres, totalCreneau, filieres, salles,
                                                 description: ''
                                             })
                                             setDispo(null)
-                                            formSeance.reset(),
+                                            formSeance.reset()
                                             setAction(null)
                                             setSelect(null)
                                         }}

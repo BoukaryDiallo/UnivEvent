@@ -11,7 +11,7 @@ class AnneeAcademiqueFactory extends Factory
 
     public function definition(): array
     {
-        $debut = $this->faker->numberBetween(2020, 2025);
+        $debut = $this->faker->unique()->numberBetween(2000, 2050);
 
         return [
             'libelle'      => "{$debut}-" . ($debut + 1),

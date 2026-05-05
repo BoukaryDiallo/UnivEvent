@@ -1,21 +1,19 @@
-import { Form, Head, Link, router, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Edit, Eye, Search, Trash } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import type { BreadcrumbItem } from '@/types';
-import { dashboard } from '@/routes';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Field, FieldGroup } from '@/components/ui/field';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { Head, useForm } from '@inertiajs/react';
+import { Edit,Trash } from 'lucide-react';
+import { useState } from 'react';
 import { toast, Toaster } from 'sonner';
-import { Spinner } from '@/components/ui/spinner';
-import InputError from '@/components/input-error';
 import Pagination from '@/components/edt/paginate';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import { Field, FieldGroup } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { Table, TableBody, TableCell,TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import { dashboard } from '@/routes';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: dashboard() },
@@ -26,7 +24,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Creneau({ creneaux }: { creneaux: any[] }) {
 
-    const [select, setSelect] = useState<null | {}>(null)
+    const [select, setSelect] = useState<null | object>(null)
     const [action, setAction] = useState< null | string >(null)
     // const [sup, setSup] = useState< boolean >(false)
     const creneau = useForm({
@@ -37,15 +35,23 @@ export default function Creneau({ creneaux }: { creneaux: any[] }) {
 
      function validateCreneau(){
 
-        if(creneau.data.heure_fin < creneau.data.heure_debut) return false
+        if(creneau.data.heure_fin < creneau.data.heure_debut) {
+return false
+}
 
         return true
     }
 
     async function modifierSalle(e: React.FormEvent) {
         e.preventDefault()
-        if(!select) return
-        if(!validateCreneau()) return
+
+        if(!select) {
+return
+}
+
+        if(!validateCreneau()) {
+return
+}
 
         creneau.put(`/creneaux/${select?.id}/modifier`,{
             
@@ -57,7 +63,7 @@ export default function Creneau({ creneaux }: { creneaux: any[] }) {
 
             }),
 
-            onError: ((e)=>{
+            onError: (()=>{
                 
                 toast.error('Erreur Veuilez reesayer')
                 
@@ -70,7 +76,10 @@ export default function Creneau({ creneaux }: { creneaux: any[] }) {
 
     async function supprimerCreneau(e: React.FormEvent) {
         e.preventDefault()
-        if(!select?.id) return
+
+        if(!select?.id) {
+return
+}
 
         creneau.delete(`/creneaux/${select?.id}/supprimer`,{
             
@@ -82,7 +91,7 @@ export default function Creneau({ creneaux }: { creneaux: any[] }) {
 
             }),
 
-            onError: ((e)=>{
+            onError: (()=>{
                 
                 toast.error('Erreur Veuillez reessayer')
                 
@@ -171,7 +180,9 @@ export default function Creneau({ creneaux }: { creneaux: any[] }) {
 
         
         <Dialog open={action === 'modif'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-sm">
@@ -186,14 +197,18 @@ export default function Creneau({ creneaux }: { creneaux: any[] }) {
                         <Field>
                             <Label htmlFor="heure_debut">Nom de la creneau</Label>
                             <Input type='time' id="heure_debut" name="heure_debut" value={creneau.data.heure_debut}
-                                onChange={(e)=>{creneau.setData('heure_debut', e.target.value) }} />
+                                onChange={(e)=>{
+creneau.setData('heure_debut', e.target.value) 
+}} />
                             
                         </Field>
 
                         <Field>
                             <Label htmlFor="heure_fin">Nom de la creneau</Label>
                             <Input type='time' id="heure_fin" name="heure_fin" value={creneau.data.heure_fin}
-                                onChange={(e)=>{creneau.setData('heure_fin', e.target.value) }} />
+                                onChange={(e)=>{
+creneau.setData('heure_fin', e.target.value) 
+}} />
                             
                         </Field>
 
@@ -219,7 +234,9 @@ export default function Creneau({ creneaux }: { creneaux: any[] }) {
 
 
         <Dialog open={action === 'sup'} onOpenChange={(open) => {
-                if (!open) setAction(null)
+                if (!open) {
+setAction(null)
+}
             }}>
                 
             <DialogContent className="sm:max-w-sm">
