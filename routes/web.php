@@ -11,6 +11,14 @@ Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('gestion', [GestionController::class, 'index'])->name('gestion');
+        Route::get('roles', [UserController::class, 'index'])->name('roles');
+    });
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('enseignant/inscription', [EnseignantAuthController::class, 'inscription'])->name('enseignant.inscription');
     Route::post('enseignant/inscription', [EnseignantAuthController::class, 'enregistrer'])->name('enseignant.enregistrer');
@@ -42,3 +50,6 @@ require __DIR__.'/module1.php';
 require __DIR__.'/dispo.php';
 require __DIR__.'/module2.php';
 require __DIR__.'/settings.php';
+require __DIR__.'/clubs.php';
+require __DIR__.'/elections.php';
+require __DIR__.'/academic.php';

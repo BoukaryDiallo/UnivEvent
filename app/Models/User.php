@@ -19,6 +19,8 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
+use App\Models\Etudiant;
+
 #[Fillable(['name', 'email', 'password', 'est_actif'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
@@ -35,7 +37,6 @@ class User extends Authenticatable
             'est_actif' => 'boolean',
         ];
     }
-
 
     public function isAdmin(){
         return $this->role === 'admin';

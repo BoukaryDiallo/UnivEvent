@@ -1,50 +1,26 @@
-import { Head, useForm } from '@inertiajs/react';
-import { 
-    UserPlus, 
-    Users as UsersIcon, 
-    GraduationCap, 
-    Shield,
-    RefreshCw,
-    Mail,
-    Lock,
-    User
+import { Head, useForm, router } from '@inertiajs/react';
+import {
+    UserPlus, Users as UsersIcon, GraduationCap, Shield, RefreshCw, Mail, Lock, User
 } from 'lucide-react';
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
 // shadcn UI
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+    AlertDialog, AlertDialogAction, AlertDialogCancel,
+    AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+    AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription
+    Card, CardContent, CardHeader, CardTitle, CardDescription
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+    Dialog, DialogContent, DialogDescription, DialogFooter,
+    DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -54,14 +30,8 @@ import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-    },
-    {
-        title: 'Gestion des utilisateurs',
-        href: '#',
-    },
+    { title: 'Dashboard', href: dashboard() },
+    { title: 'Gestion des utilisateurs', href: '#' },
 ];
 
 export default function Users({ users, roles }: any) {
@@ -72,62 +42,104 @@ export default function Users({ users, roles }: any) {
         roles: [] as string[],
     });
 
-    const [selectedRoles, setSelectedRoles] = useState<{ [key: number]: string[] }>({});
-    const [openCreateDialog, setOpenCreateDialog] = useState(false);
-    // const [activeTab, setActiveTab] = useState("create");
+    
+    const [selectedRoles, setSelectedRoles] = useState<{ [key: number]: string[] }>(() => {
+        const init: { [key: number]: string[] } = {};
+        users.forEach((u: any) => {
+            init[u.id] = u.roles.map((r: any) => r.name);
+        });
 
-    function ajoutUser (e: any) {
+        return init;
+    });
+
+    const [openCreateDialog, setOpenCreateDialog] = useState(false);
+    const [loadingRoles, setLoadingRoles] = useState<{ [key: number]: boolean }>({});
+    const [loadingPromote, setLoadingPromote] = useState<{ [key: number]: boolean }>({});
+
+    function ajoutUser(e: any) {
         e.preventDefault();
         post('/admin/users', {
+            preserveScroll: true,
+            preserveState: false,
             onSuccess: () => {
                 reset();
                 setOpenCreateDialog(false);
             }
         });
-    };
+    }
 
-    function updateRoles (userId: number) {
-        post(`/admin/users/${userId}/roles`, {
-            roles: selectedRoles[userId] || []
+   
+
+    
+    function updateRoles(userId: number) {
+        setLoadingRoles(prev => ({ ...prev, [userId]: true }));
+        router.post(`/admin/users/${userId}/roles`, {
+            roles: selectedRoles[userId] ?? [],
+        }, {
+            preserveScroll: true,
+            preserveState: true, 
+            onFinish: () => setLoadingRoles(prev => ({ ...prev, [userId]: false })),
         });
-    };
+    }
 
-    function promouvoir (userId: number) {
-        post(`/admin/users/${userId}/promote-user`);
-    };
+    
+    function promouvoir(userId: number) {
+        setLoadingPromote(prev => ({ ...prev, [userId]: true }));
+        router.post(`/admin/users/${userId}/promote-user`, {}, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                
+                setSelectedRoles(prev => ({
+                    ...prev,
+                    [userId]: [...(prev[userId] ?? []).filter(r => r !== 'enseignant'), 'enseignant']
+                }));
+            },
+            onFinish: () => setLoadingPromote(prev => ({ ...prev, [userId]: false })),
+        });
+    }
 
-    function getInitials (name: string) {
-        return name
-            .split(' ')
-            .map(word => word[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2);
-    };
+    function getInitials(name: string) {
+        return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    }
 
-    function getRoleColor (roleName: string) {
+    function getRoleColor(roleName: string) {
         const colors: { [key: string]: string } = {
             'admin': 'destructive',
-            'teacher': 'default',
-            'student': 'secondary',
+            'enseignant': 'default',
+            'etudiant': 'secondary',
         };
 
         return colors[roleName.toLowerCase()] || 'outline';
-    };
+    }
+
+    useEffect(() => {
+        setSelectedRoles(prev => {
+            const updated = { ...prev };
+            users.forEach((u: any) => {
+                if (!(u.id in updated)) {
+                    updated[u.id] = u.roles.map((r: any) => r.name);
+                }
+
+                if (!(u.id in updated)) {
+                    updated[u.id] = u.roles.map((r: any) => r.name);
+                }
+            });
+
+            return updated;
+        });
+    }, [users]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Gestion des utilisateurs" />
-
             <div className="flex flex-col gap-6 p-6">
-                
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Gestion des utilisateurs</h1>
-                        <p className="text-muted-foreground">
-                            Gérez les utilisateurs, leurs rôles et permissions
-                        </p>
+                        <p className="text-muted-foreground">Gérez les utilisateurs, leurs rôles et permissions</p>
                     </div>
+
                     <Dialog open={openCreateDialog} onOpenChange={setOpenCreateDialog}>
                         <DialogTrigger asChild>
                             <Button className="gap-2">
@@ -148,68 +160,46 @@ export default function Users({ users, roles }: any) {
                                         <Label htmlFor="name">Nom complet</Label>
                                         <div className="relative">
                                             <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                            <Input
-                                                id="name"
-                                                placeholder="Jean Dupont"
-                                                className="pl-9"
-                                                value={data.name}
-                                                onChange={e => setData('name', e.target.value)}
-                                                required
-                                            />
+                                            <Input id="name" placeholder="Jean Dupont" className="pl-9"
+                                                value={data.name} onChange={e => setData('name', e.target.value)} required />
                                         </div>
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="email">Email</Label>
                                         <div className="relative">
                                             <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                            <Input
-                                                id="email"
-                                                type="email"
-                                                placeholder="jean@exemple.com"
-                                                className="pl-9"
-                                                value={data.email}
-                                                onChange={e => setData('email', e.target.value)}
-                                                required
-                                            />
+                                            <Input id="email" type="email" placeholder="jean@exemple.com" className="pl-9"
+                                                value={data.email} onChange={e => setData('email', e.target.value)} required />
                                         </div>
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="password">Mot de passe</Label>
                                         <div className="relative">
                                             <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                            <Input
-                                                id="password"
-                                                type="password"
-                                                placeholder="••••••••"
-                                                className="pl-9"
-                                                value={data.password}
-                                                onChange={e => setData('password', e.target.value)}
-                                                required
-                                            />
+                                            <Input id="password" type="password" placeholder="••••••••" className="pl-9"
+                                                value={data.password} onChange={e => setData('password', e.target.value)} required />
                                         </div>
                                     </div>
                                     <div className="grid gap-2">
                                         <Label>Rôles</Label>
-                                        <div className="rounded-lg border p-4">
-                                            <div className="space-y-2">
-                                                {roles.map((role: any) => (
-                                                    <div key={role.id} className="flex items-center space-x-2">
-                                                        <Checkbox
-                                                            id={`create-role-${role.name}`}
-                                                            value={role.name}
-                                                            onCheckedChange={(checked) => {
-                                                                const newRoles = checked
-                                                                    ? [...data.roles, role.name]
-                                                                    : data.roles.filter(r => r !== role.name);
-                                                                setData('roles', newRoles);
-                                                            }}
-                                                        />
-                                                        <Label htmlFor={`create-role-${role.name}`} className="cursor-pointer">
-                                                            {role.name}
-                                                        </Label>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                        <div className="rounded-lg border p-4 space-y-2">
+                                            {roles.map((role: any) => (
+                                                <div key={role.id} className="flex items-center space-x-2">
+                                                    <Checkbox
+                                                        id={`create-role-${role.name}`}
+                                                        checked={data.roles.includes(role.name)}
+                                                        onCheckedChange={(checked) => {
+                                                            setData('roles', checked
+                                                                ? [...data.roles, role.name]
+                                                                : data.roles.filter(r => r !== role.name)
+                                                            );
+                                                        }}
+                                                    />
+                                                    <Label htmlFor={`create-role-${role.name}`} className="cursor-pointer">
+                                                        {role.name}
+                                                    </Label>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
@@ -228,20 +218,13 @@ export default function Users({ users, roles }: any) {
 
                 <Separator />
 
-                
                 <Card>
                     <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <CardTitle className="flex items-center gap-2">
-                                    <UsersIcon className="h-5 w-5" />
-                                    Liste des utilisateurs
-                                </CardTitle>
-                                <CardDescription>
-                                    Total : {users.length} utilisateur(s)
-                                </CardDescription>
-                            </div>
-                        </div>
+                        <CardTitle className="flex items-center gap-2">
+                            <UsersIcon className="h-5 w-5" />
+                            Liste des utilisateurs
+                        </CardTitle>
+                        <CardDescription>Total : {users.length} utilisateur(s)</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ScrollArea className="h-[calc(100vh-300px)]">
@@ -250,7 +233,6 @@ export default function Users({ users, roles }: any) {
                                     <Card key={user.id} className="overflow-hidden">
                                         <CardContent className="p-0">
                                             <div className="flex flex-col divide-y">
-                                                {/* En-tête utilisateur */}
                                                 <div className="flex items-start gap-4 p-4 md:items-center">
                                                     <Avatar className="h-12 w-12">
                                                         <AvatarFallback className="bg-primary/10 text-primary">
@@ -264,11 +246,11 @@ export default function Users({ users, roles }: any) {
                                                                 <p className="text-sm text-muted-foreground">{user.email}</p>
                                                             </div>
                                                             <div className="flex flex-wrap gap-2">
-                                                                {user.roles.map((role: any) => (
-                                                                    <Badge key={role.id} variant={getRoleColor(role.name)}>
-                                                                        {role.name === 'teacher' && <GraduationCap className="mr-1 h-3 w-3" />}
-                                                                        {role.name === 'admin' && <Shield className="mr-1 h-3 w-3" />}
-                                                                        {role.name}
+                                                                {(selectedRoles[user.id] ?? []).map((roleName: string) => (
+                                                                    <Badge key={roleName} variant={getRoleColor(roleName) as any}>
+                                                                        {roleName === 'enseignant' && <GraduationCap className="mr-1 h-3 w-3" />}
+                                                                        {roleName === 'admin' && <Shield className="mr-1 h-3 w-3" />}
+                                                                        {roleName}
                                                                     </Badge>
                                                                 ))}
                                                             </div>
@@ -276,9 +258,7 @@ export default function Users({ users, roles }: any) {
                                                     </div>
                                                 </div>
 
-                                                
                                                 <div className="flex flex-col gap-4 p-4 md:flex-row md:items-end md:justify-between">
-                                                    
                                                     <div className="flex-1 space-y-2">
                                                         <Label className="text-sm font-medium">Modifier les rôles</Label>
                                                         <div className="flex flex-wrap gap-4">
@@ -286,15 +266,17 @@ export default function Users({ users, roles }: any) {
                                                                 <div key={role.id} className="flex items-center space-x-2">
                                                                     <Checkbox
                                                                         id={`${user.id}-${role.name}`}
-                                                                        defaultChecked={user.roles.some((r: any) => r.name === role.name)}
+                                                                        checked={(selectedRoles[user.id] ?? []).includes(role.name)}
                                                                         onCheckedChange={(checked) => {
                                                                             setSelectedRoles(prev => {
-                                                                                const current = prev[user.id] || user.roles.map((r: any) => r.name);
-                                                                                const updated = checked
-                                                                                    ? [...current, role.name]
-                                                                                    : current.filter(r => r !== role.name);
+const current = prev[user.id] ?? user.roles.map((r: any) => r.name);
 
-                                                                                return { ...prev, [user.id]: updated };
+return {
+    ...prev,
+    [user.id]: checked
+        ? [...current, role.name]
+        : current.filter(r => r !== role.name)
+};
                                                                             });
                                                                         }}
                                                                     />
@@ -306,26 +288,19 @@ export default function Users({ users, roles }: any) {
                                                         </div>
                                                     </div>
 
-                                                    
                                                     <div className="flex gap-2">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
+                                                        <Button size="sm" variant="outline"
                                                             onClick={() => updateRoles(user.id)}
-                                                            className="gap-2"
-                                                        >
-                                                            <RefreshCw className="h-3 w-3" />
+                                                            disabled={loadingRoles[user.id]}
+                                                            className="gap-2">
+                                                            <RefreshCw className={`h-3 w-3 ${loadingRoles[user.id] ? 'animate-spin' : ''}`} />
                                                             Mettre à jour les rôles
                                                         </Button>
-                                                        
+
                                                         <AlertDialog>
                                                             <AlertDialogTrigger asChild>
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="secondary"
-                                                                    className="gap-2"
-                                                                    disabled={user.roles.some((r: any) => r.name === 'teacher')}
-                                                                >
+                                                                <Button size="sm" variant="secondary" className="gap-2"
+                                                                    disabled={(selectedRoles[user.id] ?? []).includes('enseignant') || loadingPromote[user.id]}>
                                                                     <GraduationCap className="h-3 w-3" />
                                                                     Promouvoir enseignant
                                                                 </Button>

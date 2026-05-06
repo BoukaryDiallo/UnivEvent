@@ -13,7 +13,6 @@ let currentUserRole: string | null = null;
 
 // Écouter la navigation avant/arrière du navigateur
 window.addEventListener('popstate', () => {
-    console.log('Navigation avant/arrière du navigateur détectée - rechargement de la page pour vérifier l\'authentification');
     window.location.reload();
 });
 
@@ -33,7 +32,6 @@ createInertiaApp({
 
         if (currentUserId !== null && newUserId !== null && currentUserId !== newUserId) {
             // Utilisateur changé, redirection vers la page de connexion
-            console.log('Utilisateur changé de', currentUserId, 'à', newUserId, '- redirection vers la page de connexion');
             window.location.href = '/login';
 
             return;
@@ -41,7 +39,6 @@ createInertiaApp({
 
         if (currentUserRole !== null && newUserRole !== null && currentUserRole !== newUserRole) {
             // Rôle changé, redirection vers la page de connexion
-            console.log('Rôle changé de', currentUserRole, 'à', newUserRole, '- redirection vers la page de connexion');
             window.location.href = '/login';
 
             return;
@@ -52,7 +49,6 @@ createInertiaApp({
 
         // Vérifier si l'utilisateur est null mais était précédemment connecté
         if (currentUserId === null && props.initialPage.url !== '/login' && props.initialPage.url !== '/' && props.initialPage.url !== '/register') {
-            console.log('Aucun utilisateur connecté mais tentative d\'accès à une page protégée - redirection vers la page de connexion');
             window.location.href = '/login';
 
             return;

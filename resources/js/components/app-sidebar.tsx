@@ -1,9 +1,15 @@
-import { Link } from '@inertiajs/react';
-import { Bell, BookOpen,ClipboardCheck, GraduationCap, PieChart, Calendar1, CalendarClock, CalendarRange, Eye, FolderGit2, History, LayoutGrid, NotebookPen, ShieldEllipsis, User } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, FolderGit2, LayoutGrid, ShieldEllipsis, User, Vote, Users, Trophy, List, ChevronDown, Building2, GraduationCap, Bell, ClipboardCheck, PieChart, Calendar1, CalendarClock, CalendarRange, Eye, History, NotebookPen } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
     Sidebar,
     SidebarContent,
@@ -35,24 +41,124 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { hasRole, can } = useAuth();
+    const { hasRole, can, roles, permissions } = useAuth();
     const canManageDiplomas = can('diplomas.manage');
+
+    // Débogage
+    console.log('Sidebar - Roles:', roles);
+    console.log('Sidebar - Permissions:', permissions);
+    console.log('Sidebar - hasRole etudiant:', hasRole('etudiant'));
+    console.log('Sidebar - hasRole admin:', hasRole('admin'));
+    console.log('Sidebar - hasRole enseignant:', hasRole('enseignant'));
 
     const mainNavItems: NavItem[] = [
         {
             title: role === 'enseignant' ? 'Mon planning' : 'Dashboard',
             href: dashboard(),
             icon: LayoutGrid,
-        },
-        {
-            title: 'Retraits de diplômes',
-            href: diplomasIndex(),
-            icon: GraduationCap,
-        },
+        }
     ];
+
+    if (hasRole('admin') || can('manage users')) {
+        mainNavItems.push(
+            {
+                title: 'Gestion des rôles',
+                href: '/admin/users',
+                icon: User,
+            },
+            {
+                title: 'Permissions',
+                href: '/admin/permissions',
+                icon: ShieldEllipsis,
+            },
+        );
+    }
+
+    if (hasRole('admin') || can('manage elections')) {
+        mainNavItems.push({
+            title: 'Gestion des elections',
+            icon: Vote,
+            items: [
+                {
+                    title: 'Élections',
+                    href: '/elections',
+                    icon: LayoutGrid,
+                },
+                {
+                    title: 'Candidatures',
+                    href: '/candidatures',
+                    icon: Users,
+                },
+                {
+                    title: 'Votes',
+                    href: '/votes',
+                    icon: Trophy,
+                },
+                {
+                    title: 'Résultats',
+                    href: '/resultats',
+                    icon: List,
+                },
+                {
+                    title: 'Espace Élection',
+                    href: '/espace-election',
+                    icon: Trophy,
+                },
+            ],
+        });
+    }
+
+    if (hasRole('admin') || can('manage ufr')) {
+        mainNavItems.push({
+            title: 'Structure Académique',
+            icon: Building2,
+            items: [
+                {
+                    title: 'UFR',
+                    href: '/ufr',
+                    icon: Building2,
+                },
+                {
+                    title: 'Départements',
+                    href: '/departements',
+                    icon: FolderGit2,
+                },
+                {
+                    title: 'Filières',
+                    href: '/filieres',
+                    icon: GraduationCap,
+                },
+                {
+                    title: 'Étudiants',
+                    href: '/etudiants',
+                    icon: Users,
+                },
+            ],
+        });
+    }
+
+    if (hasRole('admin')) {
+        mainNavItems.push(
+            {
+                title: 'Consultation',
+                href: '/consultation',
+                icon: Eye,
+            },
+            {
+                title: 'Emploi du Temps',
+                href: '/emploie-du-temps',
+                icon: Calendar1,
+            },
+        );
+    }
 
     if (canManageDiplomas) {
         mainNavItems.push(
+            {
+                title: 'Retraits de diplômes',
+                href: diplomasIndex(),
+                icon: GraduationCap,
+            },
             {
                 title: 'Tableau de bord scolarité',
                 href: adminDashboard(),
@@ -71,89 +177,86 @@ export function AppSidebar() {
         );
     }
 
-
-        if(hasRole('admin')){
-            mainNavItems.push(
-                {
-                    title: 'Consultation',
-                    href: '/consultation',
-                    icon: Eye,
-                },
-                {
-                    title: 'Emploi du Temps',
-                    href: '/emploie-du-temps',
-                    icon: Calendar1,
-                },
-            )
-        }
-
-
-
-        if (hasRole('admin') || can('manage users')) {
+    if (hasRole('enseignant')) {
         mainNavItems.push(
             {
-                title: 'Gestion des rôles',
-                href: '/admin/users',
-                icon: User,
+                title: 'Gestion Électorale',
+                icon: Vote,
+                items: [
+                    {
+                        title: 'Élections',
+                        href: '/elections',
+                        icon: LayoutGrid,
+                    },
+                    {
+                        title: 'Candidatures',
+                        href: '/candidatures',
+                        icon: Users,
+                    },
+                    {
+                        title: 'Votes',
+                        href: '/votes',
+                        icon: Trophy,
+                    },
+                    {
+                        title: 'Résultats',
+                        href: '/resultats',
+                        icon: List,
+                    },
+                ],
             },
             {
-                title: 'Permissions',
-                href: '/admin/permissions',
-                icon: ShieldEllipsis,
+                title: 'Mes disponibilites',
+                href: '/dispos',
+                icon: CalendarClock,
+            },
+            {
+                title: 'Exceptions',
+                href: '/ecarts',
+                icon: CalendarRange,
+            },
+            {
+                title: 'Reservations',
+                href: '/mes-reservations',
+                icon: NotebookPen,
+            },
+            {
+                title: 'Historique',
+                href: '/historique-disponibilites',
+                icon: History,
+            },
+            {
+                title: 'Notifications',
+                href: '/mes-notifications',
+                icon: Bell,
+            },
+            {
+                title: 'Mon emploi du Temps',
+                href: '/emploie-du-temps/edt-enseignant',
+                icon: Calendar1,
             },
         );
-        }
+    }
 
-
-        if (hasRole('enseignant')) {
-            mainNavItems.push(
+    if (hasRole('etudiant')) {
+        mainNavItems.push({
+            title: 'Gestion des elections',
+            icon: Vote,
+            items: [
+                
                 {
-                    title: 'Mes disponibilites',
-                    href: '/dispos',
-                    icon: CalendarClock,
+                    title: 'Espace Élection',
+                    href: '/espace-election',
+                    icon: Trophy,
                 },
-                {
-                    title: 'Exceptions',
-                    href: '/ecarts',
-                    icon: CalendarRange,
-                },
-                {
-                    title: 'Reservations',
-                    href: '/mes-reservations',
-                    icon: NotebookPen,
-                },
-                {
-                    title: 'Historique',
-                    href: '/historique-disponibilites',
-                    icon: History,
-                },
-                {
-                    title: 'Notifications',
-                    href: '/mes-notifications',
-                    icon: Bell,
-                },
-                {
-                    title: 'Mon emploi du Temps',
-                    href: '/emploie-du-temps/edt-enseignant',
-                    icon: Calendar1,
-                },
-            
-            );
-        }
-
-
-        if (hasRole('etudiant')) {
-            mainNavItems.push(
-            {
-                    title: 'Emploi du Temps',
-                    href: '/emploie-du-temps/edt-etudiant',
-                    icon: Calendar1,
-                }
-            
-            );
-        }
-
-    
+            ],
+        });
+        mainNavItems.push({
+            title: 'Emploi du Temps',
+            href: '/emploie-du-temps/edt-etudiant',
+            icon: Calendar1,
+        });
+    }
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -161,7 +264,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()}>
+<Link href={dashboard()}>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
