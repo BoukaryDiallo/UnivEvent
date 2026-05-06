@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
-class DashboardController extends Controller
+class EventDashboardController extends Controller
 {
     public function __construct(private UpcomingEventReminderService $reminders)
     {

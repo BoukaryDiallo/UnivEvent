@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventDashboardController;
 use App\Http\Controllers\NotificationCenterController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -11,8 +11,8 @@ Route::inertia('/', 'welcome', [
 ])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('dashboard/evenements', [DashboardController::class, 'eventDashboard'])->name('dashboard.evenements');
+    Route::get('dashboard', [EventDashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard/evenements', [EventDashboardController::class, 'eventDashboard'])->name('dashboard.evenements');
     Route::get('notifications', [NotificationCenterController::class, 'index'])->name('notifications.index');
 
     Route::middleware('role:admin')->group(function () {

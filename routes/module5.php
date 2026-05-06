@@ -128,7 +128,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('inscriptions/{id}/approve', [\App\Http\Controllers\M5\InscriptionController::class, 'approve'])->name('inscriptions.approve');
         Route::patch('inscriptions/{id}/reject', [\App\Http\Controllers\M5\InscriptionController::class, 'reject'])->name('inscriptions.reject');
 
-        Route::get('dashboard', [\App\Http\Controllers\M5\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('dashboard', [\App\Http\Controllers\M5\EventDashboardController::class, 'index'])->name('dashboard');
 
         // Activities / Actualités
         Route::get('activities', [\App\Http\Controllers\M5\ActivityController::class, 'index'])->name('activities.index');
