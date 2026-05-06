@@ -134,6 +134,11 @@ class User extends Authenticatable
         return $this->hasMany(EvenementRole::class);
     }
 
+    public function assignments()
+    {
+        return $this->evenementAssignments();
+    }
+
     public function moderationRestrictions()
     {
         return $this->hasMany(EvenementModerationRestriction::class);

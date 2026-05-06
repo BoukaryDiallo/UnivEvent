@@ -433,6 +433,10 @@ class EvenementController extends Controller
 
     public function update(StoreEvenementRequest $request, Evenement $evenement)
     {
+        if (! $evenement->exists) {
+            $evenement = Evenement::findOrFail($request->route('evenement'));
+        }
+
         $this->authorize('update', $evenement);
         $validated = $request->validated();
         $this->ensureNoConflict($validated, $evenement->id);
@@ -482,6 +486,17 @@ class EvenementController extends Controller
             }
 
             $this->logActivity($evenement, $request->user()->id, 'modification', 'Evenement modifie', 'L evenement a ete mis a jour.');
+
+            if ($request->boolean('notify_participants') && $evenement->statut === 'publie') {
+                $this->notifications->notifyMany(
+                    $evenement->inscriptions()->where('statut', '!=', 'refuse')->with('utilisateur')->get()->pluck('utilisateur')->filter(),
+                    'evenement_modifie',
+                    'Evenement mis à jour',
+                    "L'événement \"{$evenement->titre}\" a été mis à jour par l'organisateur.",
+                    $evenement->id,
+                    ['evenement_id' => $evenement->id]
+                );
+            }
 
             return $evenement;
         });
@@ -562,6 +577,10 @@ class EvenementController extends Controller
 
     public function assignUser(Request $request, Evenement $evenement)
     {
+        if (! $evenement->exists) {
+            $evenement = Evenement::findOrFail($request->route('evenement'));
+        }
+
         $this->authorize('update', $evenement);
 
         $validated = $request->validate([
@@ -571,7 +590,12 @@ class EvenementController extends Controller
             'is_president_jury' => 'nullable|boolean',
         ]);
 
-        $this->roleService->assignUser($evenement, $validated['user_id'], $validated['role'], $validated);
+        try {
+            $this->roleService->assignUser($evenement, $validated['user_id'], $validated['role'], $validated);
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['user_id' => $e->getMessage()]);
+        }
+
         $this->refreshValidationStateAfterMutation($evenement, $request->user());
 
         return back()->with('status', 'user_assigned');
@@ -745,7 +769,7 @@ class EvenementController extends Controller
 
         $validated = $request->validate([
             'media' => 'required',
-            'media.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,pdf',
+            'media.*' => 'file|max:51200|mimes:jpg,jpeg,png,gif,pdf,mp4,webm',
             'description' => 'nullable|string|max:500',
             'is_public' => 'nullable|boolean',
             'download_allowed' => 'nullable|boolean',
@@ -1509,7 +1533,8 @@ class EvenementController extends Controller
 
     private function logActivity(Evenement $evenement, ?int $userId, string $type, string $label, ?string $description = null, array $meta = []): void
     {
-        $evenement->activities()->create([
+        \App\Models\EvenementActivity::create([
+            'evenement_id' => $evenement->id,
             'user_id' => $userId,
             'type' => $type,
             'label' => $label,
@@ -1926,13 +1951,13 @@ class EvenementController extends Controller
     )->values();
 
     // 👑 ADMIN → tous les événements
-    $allEventsForAdmin = $user->isAdmin() ? $mesEvenements : [];
+    $allEventsForAdmin = ($user && $user->role === 'admin') ? $mesEvenements : [];
 
     return Inertia::render('evenements/EventManagement', [
         'mesEvenements' => $mesEvenements,
         'allEventsForAdmin' => $allEventsForAdmin,
         'filters' => $filters,
-        'isAdmin' => $user->isAdmin(),
+        'isAdmin' => ($user && $user->role === 'admin'),
         'pendingEventsCount' => Evenement::where('validation_status', 'pending')->whereNotNull('submitted_at')->count(),
     ]);
 }

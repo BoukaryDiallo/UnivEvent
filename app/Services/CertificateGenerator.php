@@ -8,6 +8,7 @@ use App\Models\Resultat;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\Storage;
 
 class CertificateGenerator
@@ -39,22 +40,41 @@ class CertificateGenerator
 
     public function generate(Evenement $evenement, User $user, array $overrides = [], ?string $type = null): Certificat
     {
+        $resolvedType = $type ?? $this->resolveCertificateType($evenement, $user);
+        
         $existing = Certificat::query()
             ->where('evenement_id', $evenement->id)
             ->where('utilisateur_id', $user->id)
-            ->where('type', $type ?? $this->resolveCertificateType($evenement, $user))
+            ->where('type', $resolvedType)
             ->first();
 
         $code = $existing?->code_certificat ?? uniqid('CERT-');
-        $urlVerification = route('certificats.verifier', $code);
-        $resolvedType = $type ?? $this->resolveCertificateType($evenement, $user);
+        $urlVerification = route('module5.verify', $code);
         $payload = array_merge($this->buildPayload($evenement, $user, $resolvedType), $overrides);
         $template = $evenement->certificate_template_schema ?: $this->defaultTemplate();
 
-        $qr = (new Builder(
+        // 1. Verification QR (The certificate itself)
+        $verifyQr = (new Builder(
+            writer: new PngWriter(),
             data: $urlVerification,
-            size: 220,
-            margin: 8,
+            size: 150,
+            margin: 5,
+        ))->build();
+
+        // 2. Registration QR (The original ticket)
+        $inscription = InscriptionEvenement::where('evenement_id', $evenement->id)
+            ->where('utilisateur_id', $user->id)
+            ->first();
+        
+        $registrationQrData = $inscription && $inscription->access_token 
+            ? route('acces.scan', $inscription->access_token)
+            : 'N/A';
+
+        $regQr = (new Builder(
+            writer: new PngWriter(),
+            data: $registrationQrData,
+            size: 150,
+            margin: 5,
         ))->build();
 
         $certificat = $existing ?? Certificat::create([
@@ -64,30 +84,24 @@ class CertificateGenerator
             'code_certificat' => $code,
             'url_verification' => $urlVerification,
             'date_delivrance' => now(),
-            'statut' => 'prete',
+            'statut' => 'delivre',
         ]);
 
         $pdf = Pdf::loadView('certificats.modele', [
             'certificat' => $certificat->loadMissing(['utilisateur', 'evenement']),
-            'qrCode' => base64_encode($qr->getString()),
+            'qrCode' => base64_encode($verifyQr->getString()),
+            'registrationQr' => base64_encode($regQr->getString()),
             'payload' => $payload,
             'template' => $template,
         ]);
 
         $path = "certificats/{$code}.pdf";
-
         Storage::disk('public')->put($path, $pdf->output());
 
         $certificat->update([
             'fichier' => $path,
-            'url_verification' => $urlVerification,
-            'template_snapshot' => $template,
-            'overrides' => $overrides,
             'payload' => $payload,
-            'preview_generated_at' => now(),
-            'published_at' => now(),
-            'date_delivrance' => $certificat->date_delivrance ?? now(),
-            'statut' => 'delivre',
+            'template_snapshot' => $template,
         ]);
 
         return $certificat->fresh(['utilisateur', 'evenement']);
@@ -100,17 +114,21 @@ class CertificateGenerator
             ->where('utilisateur_id', $user->id)
             ->first();
 
+        $label = match($type) {
+            'attestation_intervenant' => 'Attestation de Conférencier',
+            'certificat_admission' => 'Certificat de Réussite',
+            default => 'Attestation de Participation',
+        };
+
         return [
-            'nom' => $user->name,
-            'prenom' => null,
+            'nom_complet' => $user->name,
             'titre_evenement' => $evenement->titre,
             'date_evenement' => optional($evenement->date_debut)->format('d/m/Y'),
+            'lieu' => $evenement->lieu ?: 'Plateforme UnivEvent',
+            'label_certificat' => $label,
             'rang' => $resultat?->classement,
-            'admission' => $resultat?->admission,
             'mention' => $resultat?->mention,
-            'type_certificat' => $type,
-            'signature' => $evenement->createur?->name,
-            'logo' => null,
+            'organisateur' => $evenement->createur?->name,
         ];
     }
 

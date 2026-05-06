@@ -15,10 +15,18 @@ class EventType extends Model
         'description',
         'features',
         'is_active',
+        'allow_organizer',
+        'allow_intervenant',
+        'allow_jury',
+        'allow_participant',
     ];
 
     protected $casts = [
         'features' => 'array',
         'is_active' => 'boolean',
+        'allow_organizer' => 'boolean',
+        'allow_intervenant' => 'boolean',
+        'allow_jury' => 'boolean',
+        'allow_participant' => 'boolean',
     ];
 }

@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Evenement;
 use App\Models\EvenementMedia;
 use App\Services\EventAuthorizationService;
+use App\Services\MediaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class EvenementMediaController extends Controller
 {
-    public function __construct(private EventAuthorizationService $authorization)
-    {
+    public function __construct(
+        private EventAuthorizationService $authorization,
+        private MediaService $mediaService
+    ) {
     }
 
     public function index()
@@ -23,24 +26,28 @@ class EvenementMediaController extends Controller
     {
         $validated = $request->validate([
             'evenement_id' => ['required', 'exists:evenements,id'],
-            'fichier' => ['required', 'file', 'max:10240'],
+            'fichier' => ['required', 'file', 'max:51200'], // 50MB
+            'description' => ['nullable', 'string', 'max:500'],
+            'confidentialite' => ['nullable', 'string'],
+            'is_public' => ['nullable', 'boolean'],
+            'is_cover' => ['nullable', 'boolean'],
         ]);
 
         $evenement = Evenement::findOrFail($validated['evenement_id']);
         $this->authorizeAction($request, $evenement);
 
-        $file = $request->file('fichier');
-        $path = Storage::disk('public')->put('evenements', $file);
+        try {
+            $this->mediaService->uploadMedia($evenement, $request->file('fichier'), [
+                'description' => $validated['description'] ?? null,
+                'confidentialite' => $validated['confidentialite'] ?? 'public',
+                'is_public' => $request->boolean('is_public', true),
+                'is_cover' => $request->boolean('is_cover', false),
+            ]);
+        } catch (\Exception $e) {
+            return back()->withErrors(['fichier' => $e->getMessage()]);
+        }
 
-        EvenementMedia::create([
-            'evenement_id' => $evenement->id,
-            'type' => str_contains((string) $file->getMimeType(), 'pdf') ? 'pdf' : 'image',
-            'chemin_fichier' => $path,
-            'nom_original' => $file->getClientOriginalName(),
-            'taille' => $file->getSize(),
-        ]);
-
-        return back();
+        return back()->with('success', 'Média ajouté avec succès.');
     }
 
     public function show(EvenementMedia $evenementMedia)
@@ -52,33 +59,25 @@ class EvenementMediaController extends Controller
     {
         $this->authorizeAction($request, $evenementMedia->evenement);
 
-        $request->validate([
-            'fichier' => ['required', 'file', 'max:10240'],
+        $validated = $request->validate([
+            'description' => ['nullable', 'string', 'max:500'],
+            'is_public' => ['nullable', 'boolean'],
+            'is_cover' => ['nullable', 'boolean'],
+            'confidentialite' => ['nullable', 'string'],
         ]);
 
-        Storage::disk('public')->delete($evenementMedia->chemin_fichier);
+        $this->mediaService->updateMedia($evenementMedia, $validated);
 
-        $file = $request->file('fichier');
-        $path = Storage::disk('public')->put('evenements', $file);
-
-        $evenementMedia->update([
-            'type' => str_contains((string) $file->getMimeType(), 'pdf') ? 'pdf' : 'image',
-            'chemin_fichier' => $path,
-            'nom_original' => $file->getClientOriginalName(),
-            'taille' => $file->getSize(),
-        ]);
-
-        return back();
+        return back()->with('success', 'Média mis à jour.');
     }
 
     public function destroy(Request $request, EvenementMedia $evenementMedia)
     {
         $this->authorizeAction($request, $evenementMedia->evenement);
 
-        Storage::disk('public')->delete($evenementMedia->chemin_fichier);
-        $evenementMedia->delete();
+        $this->mediaService->deleteMedia($evenementMedia);
 
-        return back();
+        return back()->with('success', 'Média supprimé.');
     }
 
     private function authorizeAction(Request $request, Evenement $evenement): void

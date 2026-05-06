@@ -53,7 +53,7 @@ class NotificationCenterController extends Controller
             ->take(18)
             ->values();
 
-        return Inertia::render('notifications/Index', [
+        return Inertia::render('module5/notifications/Index', [
             'stats' => [
                 'total' => EventNotification::query()->where('user_id', $user->id)->count(),
                 'unread' => EventNotification::query()->where('user_id', $user->id)->whereNull('read_at')->count(),

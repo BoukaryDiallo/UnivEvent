@@ -17,14 +17,18 @@ class EvenementResource extends JsonResource
     {
         $user = $request->user();
         $cover = $this->resource->preferredCoverMedia();
-        $currentInscription = $user && $this->relationLoaded('inscriptions')
-            ? $this->inscriptions->firstWhere('utilisateur_id', $user->id)
+        
+        $currentInscription = $user
+            ? ($this->relationLoaded('inscriptions') 
+                ? $this->inscriptions->firstWhere('utilisateur_id', $user->id)
+                : \App\Models\InscriptionEvenement::where('evenement_id', $this->id)->where('utilisateur_id', $user->id)->first())
             : null;
 
         return [
             'id' => $this->id,
             'titre' => $this->titre,
             'description' => $this->description,
+            'plain_description' => strip_tags($this->description),
             'type' => $this->type,
             'date_debut' => optional($this->date_debut)->toIso8601String(),
             'date_fin' => optional($this->date_fin)->toIso8601String(),
@@ -32,6 +36,10 @@ class EvenementResource extends JsonResource
             'lien_live' => $this->lien_live,
             'statut' => $this->statut,
             'visibilite' => $this->visibilite,
+            'allow_organizer' => (bool) $this->allow_organizer,
+            'allow_intervenant' => (bool) $this->allow_intervenant,
+            'allow_jury' => (bool) $this->allow_jury,
+            'allow_participant' => (bool) $this->allow_participant,
             'public_cible' => $this->public_cible,
             'inscription_requise' => (bool) $this->inscription_requise,
             'capacite_max' => $this->capacite_max,
@@ -52,25 +60,58 @@ class EvenementResource extends JsonResource
                 : (($this->validation_status === 'rejected')
                     ? 'rejected'
                     : (($this->validation_status === 'pending' && $this->submitted_at) ? 'pending' : 'draft')),
-            'participants_count' => $this->inscriptions_count ?? ($this->relationLoaded('inscriptions') ? $this->inscriptions->count() : 0),
-            'comments_count' => $this->comments_count ?? ($this->relationLoaded('comments') ? $this->comments->count() : 0),
-            'activity_count' => $this->activities_count ?? ($this->relationLoaded('activities') ? $this->activities->count() : 0),
-            'cover_url' => $cover ? Storage::url($cover->chemin_fichier) : null,
-            'roles' => $this->whenLoaded('roles', fn () => $this->roles->pluck('role')->values()->all()),
-            'createur' => $this->whenLoaded('createur', fn () => [
+            'workflow_state_label' => match($this->validation_status === 'approved' && $this->statut === 'publie'
+                ? 'published'
+                : (($this->validation_status === 'rejected')
+                    ? 'rejected'
+                    : (($this->validation_status === 'pending' && $this->submitted_at) ? 'pending' : 'draft'))) {
+                'published' => 'Publié',
+                'rejected' => 'Refusé',
+                'pending' => 'En attente de validation',
+                default => 'Brouillon',
+            },
+            'participants_count' => $this->inscriptions_count ?? ($this->relationLoaded('inscriptions') ? $this->inscriptions->count() : $this->inscriptions()->count()),
+            'comments_count' => $this->comments_count ?? ($this->relationLoaded('comments') ? $this->comments->count() : $this->comments()->count()),
+            'activity_count' => $this->activities_count ?? ($this->relationLoaded('activities') ? $this->activities->count() : $this->activities()->count()),
+            'likes_count' => $this->reactions()->where('type', 'like')->count(),
+            'liked_by_me' => $user ? $this->reactions()->where('user_id', $user->id)->where('type', 'like')->exists() : false,
+            'cover_url' => $cover ? asset('storage/' . $cover->chemin_fichier) : null,
+            'roles' => $this->roles ? $this->roles->pluck('role')->values()->all() : [],
+            'programmes' => $this->whenLoaded('programmes', fn () => $this->programmes->map(fn ($programme) => [
+                'id' => $programme->id,
+                'titre' => $programme->titre,
+                'description' => $programme->description,
+                'intervenant' => $programme->intervenant,
+                'date_programme' => optional($programme->date_programme)->toIso8601String(),
+                'heure_debut' => $programme->heure_debut,
+                'heure_fin' => $programme->heure_fin,
+                'salle' => $programme->salle,
+                'type_section' => $programme->type_section,
+                'ordre' => $programme->ordre,
+            ])->all()),
+            'medias' => $this->whenLoaded('medias', fn () => $this->medias->map(fn ($media) => [
+                'id' => $media->id,
+                'name' => $media->nom_fichier,
+                'url' => asset('storage/' . $media->chemin_fichier),
+                'type' => $media->type_fichier === 'image' ? 'image' : ($media->type_fichier === 'pdf' ? 'pdf' : 'autre'),
+                'size' => $media->taille_fichier,
+                'description' => $media->description,
+                'is_cover' => (bool) $media->is_cover,
+            ])->all()),
+            'createur' => [
                 'id' => $this->createur?->id,
                 'name' => $this->createur?->name,
                 'email' => $this->createur?->email,
                 'role' => $this->createur?->role,
-            ]),
+            ],
             'assignments' => $this->whenLoaded('assignments', fn () => $this->assignments->map(fn ($assignment) => [
                 'id' => $assignment->id,
                 'role' => $assignment->role,
                 'user' => [
-                    'id' => $assignment->user->id,
-                    'name' => $assignment->user->name,
-                    'email' => $assignment->user->email,
-                    'role' => $assignment->user->role,
+                    'id' => $assignment->user?->id,
+                    'name' => $assignment->user?->name,
+                    'email' => $assignment->user?->email,
+                    'role' => $assignment->user?->role,
                 ],
             ])->all()),
             'participation' => $currentInscription ? [

@@ -8,6 +8,7 @@ use App\Events\JuryScoresUpdated;
 use App\Models\Evenement;
 use App\Models\JuryDeliberation;
 use App\Models\JuryPanel;
+use App\Models\User;
 use App\Services\EventAuthorizationService;
 use App\Services\EventNotificationService;
 use App\Services\JuryWorkflowService;
@@ -123,17 +124,26 @@ class JuryController extends Controller
         return back();
     }
 
-    public function requestRevision(Request $request, Evenement $evenement, int $participantId)
+    public function requestRevision(Request $request, Evenement $evenement, User $participant)
     {
+        if (! $evenement->exists) {
+            $evenement = Evenement::findOrFail($request->route('evenement'));
+        }
+        if (! $participant->exists) {
+            $participant = User::findOrFail($request->route('participant'));
+        }
+
         abort_unless($this->authorization->isPresidentJury($evenement, $request->user()), 403);
+
 
         $validated = $request->validate([
             'reason' => ['required', 'string', 'max:1000'],
         ]);
 
         $panel = $this->workflow->ensurePanel($evenement);
-        $deliberation = $this->workflow->requestReview($panel, $participantId, $request->user(), $validated['reason']);
-        $this->workflow->reopenParticipantScores($panel, $participantId);
+        $this->workflow->requestReview($panel, $participant->id, $request->user(), $validated['reason']);
+
+        $this->workflow->reopenParticipantScores($panel, $participant->id);
 
         foreach ($evenement->assignments()->where('role', 'jury')->with('user')->get() as $assignment) {
             if ($assignment->user && $assignment->user->id !== $request->user()->id) {

@@ -159,27 +159,67 @@ class EventService
 
     public function suggestions(Evenement $event): array
     {
-        $event->loadMissing(['assignments', 'programmes', 'juryPanel.criteria']);
+        $event->loadMissing(['assignments', 'programmes', 'medias', 'juryPanel.criteria', 'inscriptions']);
 
         $suggestions = [];
 
-        if ($event->type === 'concours' && $event->assignments->where('role', 'jury')->isEmpty()) {
-            $suggestions[] = 'Ajouter un jury ?';
+        // General suggestions
+        if (empty($event->description)) {
+            $suggestions[] = 'Complétez la description';
         }
 
-        if ($event->type === 'conference' && $event->assignments->where('role', 'intervenant')->isEmpty()) {
-            $suggestions[] = 'Ajouter un intervenant ?';
+        if (empty($event->lieu)) {
+            $suggestions[] = 'Précisez le lieu';
         }
 
-        if ($event->assignments->where('role', 'participant')->isEmpty()) {
-            $suggestions[] = 'Importer des participants ?';
+        // Type-specific suggestions
+        if ($event->type === 'concours') {
+            $juryCount = $event->assignments->where('role', 'jury')->count();
+            if ($juryCount === 0) {
+                $suggestions[] = 'Ajouter au moins un jury';
+            } elseif ($juryCount < 3) {
+                $suggestions[] = 'Idéalement plus de 3 jurés';
+            }
+
+            $criteriaCount = $event->juryPanel?->criteria?->where('actif', true)->count() ?? 0;
+            if ($criteriaCount < 2) {
+                $suggestions[] = 'Ajouter plusieurs critères';
+            }
         }
 
-        if ($event->medias()->count() === 0) {
-            $suggestions[] = 'Ajouter une image de couverture ?';
+        if ($event->type === 'conference') {
+            $sessionCount = $event->programmes->filter(fn ($p) => filled($p->titre))->count();
+            if ($sessionCount === 0) {
+                $suggestions[] = 'Ajouter au moins une session';
+            }
+
+            if ($event->assignments->where('role', 'intervenant')->isEmpty()) {
+                $suggestions[] = 'Ajouter un intervenant';
+            }
         }
 
-        return $suggestions;
+        // Actor suggestions
+        $participantCount = $event->inscriptions()->count();
+        if ($participantCount === 0 && $event->statut === 'publie') {
+            $suggestions[] = 'Promouvoir l\'événement';
+        }
+
+        // Media suggestions
+        if ($event->medias()->where('is_cover', true)->doesntExist()) {
+            $suggestions[] = 'Ajouter une image de couverture';
+        }
+
+        // Certification suggestions
+        if ($event->evenement_certifie && empty($event->certificate_template_version)) {
+            $suggestions[] = 'Configurer le template certificat';
+        }
+
+        // Interaction suggestions
+        if (!$event->comments_enabled) {
+            $suggestions[] = 'Activer les commentaires';
+        }
+
+        return array_slice($suggestions, 0, 3); // Limiter à 3 suggestions
     }
 
     private function updateGeneral(Evenement $event, array $data): Evenement

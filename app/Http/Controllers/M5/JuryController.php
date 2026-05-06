@@ -14,7 +14,13 @@ class JuryController extends Controller
 {
     public function panel(Evenement $evenement)
     {
-        $evenement->load(['juryPanel.criteria', 'inscriptions.utilisateur']);
+        $evenement->load([
+            'juryPanel.criteria',
+            'juryPanel.deliberations',
+            'juryPanel.scores',
+            'inscriptions.utilisateur',
+            'roles.user',
+        ]);
         
         $candidatures = $evenement->inscriptions->map(fn($ins) => [
             'id' => $ins->id,
@@ -23,7 +29,25 @@ class JuryController extends Controller
             'statut_evaluation' => 'en_attente',
         ]);
 
-        return Inertia::render('m5/jury/Panel', [
+        $evenement->setRelation('participants', $evenement->inscriptions->map(fn($ins) => (object) [
+            'id' => $ins->id,
+            'backend_statut' => $ins->statut,
+            'utilisateur' => [
+                'id' => $ins->utilisateur->id,
+                'name' => $ins->utilisateur->name,
+                'email' => $ins->utilisateur->email,
+            ],
+        ]));
+
+        $juryMembers = $evenement->roles->where('role', 'jury')->map(fn($role) => [
+            'id' => $role->user?->id,
+            'name' => $role->user?->name,
+            'email' => $role->user?->email,
+        ])->filter();
+
+        $evenement->setRelation('team', (object) ['jury' => $juryMembers]);
+
+        return Inertia::render('module5/jury/Panel', [
             'concours' => $evenement,
             'candidatures' => $candidatures,
             'criteres' => $evenement->juryPanel?->criteria ?? [],

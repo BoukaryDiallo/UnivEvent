@@ -40,7 +40,12 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? array_merge($request->user()->toArray(), [
+                    'event_roles' => $request->user()->assignments()->pluck('role')->unique()->toArray(),
+                    'has_managed_events' => $request->user()->isAdmin() || 
+                                           \App\Models\Evenement::where('cree_par', $request->user()->id)->exists() ||
+                                           $request->user()->assignments()->whereIn('role', ['organisateur', 'jury', 'intervenant'])->exists(),
+                ]) : null,
             ],
             'notifications' => fn () => $request->user()
                 ? [

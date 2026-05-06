@@ -33,6 +33,10 @@ class Evenement extends Model
         'rejection_reason',
         'cree_par',
         'inscription_requise',
+        'allow_organizer',
+        'allow_intervenant',
+        'allow_jury',
+        'allow_participant',
         'capacite_max',
         'checkin_active',
         'comments_enabled',
@@ -57,6 +61,10 @@ class Evenement extends Model
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
         'inscription_requise' => 'boolean',
+        'allow_organizer' => 'boolean',
+        'allow_intervenant' => 'boolean',
+        'allow_jury' => 'boolean',
+        'allow_participant' => 'boolean',
         'checkin_active' => 'boolean',
         'comments_enabled' => 'boolean',
         'comment_replies_enabled' => 'boolean',
@@ -75,6 +83,11 @@ class Evenement extends Model
     }
 
     // Inscriptions
+    public function reactions()
+    {
+        return $this->hasMany(EvenementReaction::class);
+    }
+
     public function inscriptions()
     {
         return $this->hasMany(InscriptionEvenement::class);

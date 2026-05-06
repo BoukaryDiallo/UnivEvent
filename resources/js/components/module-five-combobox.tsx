@@ -15,6 +15,7 @@ import {
     Ticket,
     Trophy,
     Users,
+    LayoutDashboard,
 } from 'lucide-react';
 
 import {
@@ -39,14 +40,18 @@ import {
 import { useLiveNotifications } from '@/contexts/live-notifications-context';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 
-import { gestion as evenementsGestion } from '@/routes/evenements';
-import { index as evenementsIndex } from '@/routes/evenements';
 import { mine as myRegistrations } from '@/routes/inscriptions';
 
 export function ModuleFiveCombobox() {
     const { isCurrentUrl } = useCurrentUrl();
     const { auth, notifications } = usePage().props as {
-        auth?: { user?: { role?: string | null } | null };
+        auth?: { 
+            user?: { 
+                role?: string | null;
+                event_roles?: string[];
+                has_managed_events?: boolean;
+            } | null 
+        };
         notifications?: { unread_count?: number } | null;
     };
     const { notifications: liveNotifications } = useLiveNotifications();
@@ -55,17 +60,19 @@ export function ModuleFiveCombobox() {
 
     const user = auth?.user ?? null;
     const role = user?.role;
+    const eventRoles = user?.event_roles ?? [];
+    const hasManagedEvents = user?.has_managed_events ?? false;
 
     const isAdmin = role === 'admin';
-    const canManageEvents = ['admin', 'organisateur', 'enseignant'].includes(role ?? '');
-    const hubHref = canManageEvents ? evenementsGestion.url() : evenementsIndex.url({ query: { statut: 'publie' } });
+    const canManageEvents = isAdmin || role === 'organisateur' || eventRoles.includes('organisateur');
+    const hubHref = '/module5/events';
 
     const actions = {
         common: [
             {
                 title: 'Explorer événements',
                 hint: 'Découvrir les événements publics',
-                href: evenementsIndex.url({ query: { statut: 'publie' } }),
+                href: '/module5/events',
                 icon: FileSearch,
             },
             {
@@ -81,34 +88,40 @@ export function ModuleFiveCombobox() {
             {
                 title: 'Mes inscriptions',
                 hint: 'Suivi de participation',
-                href: myRegistrations().url,
+                href: '/mes-inscriptions',
                 icon: Ticket,
             },
             {
                 title: 'Mes certificats',
                 hint: 'Télécharger attestations',
-                href: '/certificats',
+                href: '/module5/certificats',
                 icon: Trophy,
             },
         ],
 
         organisateur: [
             {
-                title: 'Centre de gestion',
-                hint: 'Piloter vos événements',
-                href: evenementsGestion.url(),
+                title: 'Console Gestion',
+                hint: 'Piloter vos participants',
+                href: '/module5/dashboard',
+                icon: LayoutDashboard,
+            },
+            {
+                title: 'Mes événements',
+                hint: 'Liste de vos créations',
+                href: '/module5/events?filter=mine',
                 icon: FolderKanban,
             },
             {
-                title: 'Créer conférence',
+                title: 'Créer événement',
                 hint: 'Démarrer un nouvel événement',
-                href: '/evenements/create/conference',
+                href: '/module5/events/create',
                 icon: CirclePlus,
             },
             {
-                title: 'Créer concours',
+                title: 'Gérer les concours',
                 hint: 'Initialiser un concours',
-                href: '/evenements/create/concours',
+                href: '/module5/events/create',
                 icon: ClipboardList,
             },
         ],
@@ -117,13 +130,13 @@ export function ModuleFiveCombobox() {
             {
                 title: 'Mes espaces jury',
                 hint: 'Accéder aux concours assignés',
-                href: evenementsGestion.url({ query: { role: 'organisateur', type: 'concours' } }),
+                href: '/module5/dashboard', // Redirects to jury dashboard
                 icon: ClipboardList,
             },
             {
                 title: 'Messages événement',
                 hint: 'Suivi des échanges liés au jury',
-                href: '/evenements/messages',
+                href: '/module5/dashboard',
                 icon: MessageSquare,
             },
         ],
@@ -132,7 +145,7 @@ export function ModuleFiveCombobox() {
             {
                 title: 'Mes événements assignés',
                 hint: 'Retrouver vos sessions et prises de parole',
-                href: evenementsGestion.url(),
+                href: '/module5/events',
                 icon: Mic,
             },
         ],
@@ -153,7 +166,7 @@ export function ModuleFiveCombobox() {
             {
                 title: 'Tous les événements',
                 hint: 'Vue globale et brouillons en cours',
-                href: evenementsGestion.url(),
+                href: '/module5/events',
                 icon: Users,
             },
             {
@@ -168,25 +181,29 @@ export function ModuleFiveCombobox() {
     const buildActions = () => {
         const list = [...actions.common];
 
-        if (role === 'participant') {
-list.push(...actions.participant);
-}
+        // Participant actions: either by global role or if has any registration
+        if (role === 'participant' || role === 'etudiant' || role === 'enseignant' || eventRoles.includes('participant')) {
+            list.push(...actions.participant);
+        }
 
-        if (role === 'organisateur') {
-list.push(...actions.organisateur);
-}
+        // Organizer actions: either by global role or if assigned as organizer
+        if (role === 'organisateur' || eventRoles.includes('organisateur')) {
+            list.push(...actions.organisateur);
+        }
 
-        if (role === 'jury') {
-list.push(...actions.jury);
-}
+        // Jury actions: if assigned as jury in any event
+        if (eventRoles.includes('jury')) {
+            list.push(...actions.jury);
+        }
 
-        if (role === 'intervenant') {
-list.push(...actions.intervenant);
-}
+        // Speaker actions
+        if (eventRoles.includes('intervenant')) {
+            list.push(...actions.intervenant);
+        }
 
         if (isAdmin) {
-list.push(...actions.admin);
-}
+            list.push(...actions.admin);
+        }
 
         return list;
     };
@@ -202,25 +219,47 @@ list.push(...actions.admin);
             <SidebarMenu>
                 <SidebarMenuItem>
                     {/* MAIN */}
-                    <SidebarMenuButton
-                        asChild
-                        isActive={isModuleActive}
-                        tooltip={{ children: 'Menu événementiel' }}
-                        className="h-auto min-h-14 items-start rounded-2xl border border-sidebar-border/60 bg-sidebar-accent/30 px-3 py-3"
-                    >
-                        <Link href={hubHref} prefetch>
-                            <div className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-400 text-white">
-                                <CalendarDays className="size-5" />
-                            </div>
+                    {hasManagedEvents ? (
+                        <SidebarMenuButton
+                            asChild
+                            isActive={isModuleActive}
+                            tooltip={{ children: 'Menu événementiel' }}
+                            className="h-auto min-h-14 items-start rounded-2xl border border-sidebar-border/60 bg-sidebar-accent/30 px-3 py-3"
+                        >
+                            <Link href={hubHref} prefetch>
+                                <div className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-400 text-white">
+                                    <CalendarDays className="size-5" />
+                                </div>
 
-                            <div className="grid min-w-0 flex-1 gap-0.5">
-                                <span className="text-sm font-semibold">Menu Événementiel</span>
-                                <span className="text-xs text-sidebar-foreground/70">
-                                    Accès dynamique selon vos rôles
-                                </span>
-                            </div>
-                        </Link>
-                    </SidebarMenuButton>
+                                <div className="grid min-w-0 flex-1 gap-0.5">
+                                    <span className="text-sm font-semibold">Menu Événementiel</span>
+                                    <span className="text-xs text-sidebar-foreground/70">
+                                        Interface adaptée à votre activité
+                                    </span>
+                                </div>
+                            </Link>
+                        </SidebarMenuButton>
+                    ) : (
+                         <SidebarMenuButton
+                            asChild
+                            isActive={isModuleActive}
+                            tooltip={{ children: 'Explorer les événements' }}
+                            className="h-auto min-h-14 items-start rounded-2xl border border-sidebar-border/60 bg-sidebar-accent/30 px-3 py-3"
+                        >
+                            <Link href={actions.common[0].href} prefetch>
+                                <div className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-400 text-white">
+                                    <FileSearch className="size-5" />
+                                </div>
+
+                                <div className="grid min-w-0 flex-1 gap-0.5">
+                                    <span className="text-sm font-semibold">UnivEvent Explorer</span>
+                                    <span className="text-xs text-sidebar-foreground/70">
+                                        Découvrez les événements à venir
+                                    </span>
+                                </div>
+                            </Link>
+                        </SidebarMenuButton>
+                    )}
 
                     {/* DROPDOWN */}
                     <DropdownMenu>
@@ -234,7 +273,7 @@ list.push(...actions.admin);
                             <DropdownMenuLabel>
                                 Actions intelligentes
                                 <div className="text-xs text-slate-500 mt-1">
-                                    Interface adaptée automatiquement à votre rôle
+                                    Raccourcis contextuels selon vos rôles
                                 </div>
                             </DropdownMenuLabel>
 

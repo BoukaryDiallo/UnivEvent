@@ -44,6 +44,17 @@ class InscriptionEvenementController extends Controller
         $user = $request->user();
         abort_unless($user, 403);
 
+        // T05: Check for duplicate registration
+        $existing = InscriptionEvenement::where('evenement_id', $validated['evenement_id'])
+            ->where('utilisateur_id', $user->id)
+            ->first();
+
+        if ($existing) {
+            return back()->withErrors([
+                'evenement_id' => 'Vous êtes déjà inscrit à cet événement.'
+            ]);
+        }
+
         $evenement = Evenement::with(['roles', 'inscriptions'])->findOrFail($validated['evenement_id']);
 
         if (! $this->canJoin($evenement, $user)) {
@@ -115,8 +126,9 @@ class InscriptionEvenementController extends Controller
         return back();
     }
 
-    public function destroy(Request $request, InscriptionEvenement $inscription)
+    public function destroy(Request $request, $inscriptionId)
     {
+        $inscription = InscriptionEvenement::findOrFail($inscriptionId);
         $user = $request->user();
         abort_unless($user, 403);
 
@@ -156,50 +168,57 @@ class InscriptionEvenementController extends Controller
         $user = $request->user();
         abort_unless($user, 403);
 
-        $inscriptions = InscriptionEvenement::query()
-            ->with(['evenement.createur:id,name,email,role', 'evenement.roles', 'evenement.medias'])
+        $mes_inscriptions = InscriptionEvenement::query()
+            ->with([
+                'evenement.createur:id,name,email,role', 
+                'evenement.roles', 
+                'evenement.medias',
+                'evenement.programmes',
+                'evenement.messages' => fn($q) => $q->where('status', 'active')
+            ])
             ->where('utilisateur_id', $user->id)
             ->latest()
-            ->paginate(9)
-            ->through(function (InscriptionEvenement $inscription) use ($user) {
+            ->get()
+            ->map(function (InscriptionEvenement $inscription) {
                 $evenement = $inscription->evenement;
-                $cover = $evenement->preferredCoverMedia();
-
-                return [
-                    'id' => $evenement->id,
-                    'titre' => $evenement->titre,
-                    'description' => $evenement->description,
-                    'type' => $evenement->type,
-                    'date_debut' => optional($evenement->date_debut)->toIso8601String(),
-                    'date_fin' => optional($evenement->date_fin)->toIso8601String(),
-                    'lieu' => $evenement->lieu,
-                    'statut' => $evenement->statut,
-                    'visibilite' => $evenement->visibilite,
-                    'public_cible' => $evenement->public_cible,
-                    'capacite_max' => $evenement->capacite_max,
-                    'participants_count' => $evenement->inscriptions()->count(),
-                    'comments_count' => $evenement->comments()->count(),
-                    'activity_count' => $evenement->activities()->count(),
-                    'cover_url' => $cover ? Storage::url($cover->chemin_fichier) : null,
-                    'roles' => $evenement->roles->pluck('role')->values(),
-                    'createur' => [
-                        'id' => $evenement->createur?->id,
-                        'name' => $evenement->createur?->name,
-                        'role' => $evenement->createur?->role,
-                    ],
-                    'participation' => [
+                if ($evenement) {
+                    $evenement->setRelation('current_inscription', (object) [
                         'id' => $inscription->id,
                         'statut' => $this->mapParticipationStatus($inscription->statut),
                         'backend_statut' => $inscription->statut,
                         'is_waitlist' => (bool) $inscription->is_waitlist,
                         'waitlist_position' => $inscription->waitlist_position,
-                    ],
-                    'can_join' => false,
-                ];
+                    ]);
+                }
+                return $inscription;
             });
 
-        return Inertia::render('evenements/Inscriptions', [
-            'inscriptions' => $inscriptions,
+        $mes_certificats = \App\Models\Certificat::where('utilisateur_id', $user->id)
+            ->with('evenement')
+            ->get();
+
+        $evenements_suggeres = Evenement::where('statut', 'publie')
+            ->where('date_debut', '>', now())
+            ->where('visibilite', 'public')
+            ->limit(6)
+            ->get();
+
+        $actualites = \App\Models\EvenementActivity::whereIn('evenement_id', $mes_inscriptions->pluck('evenement_id'))
+            ->with(['user:id,name', 'evenement:id,titre'])
+            ->latest()
+            ->take(15)
+            ->get();
+
+        return Inertia::render('module5/participants/Index', [
+            'mes_inscriptions' => $mes_inscriptions,
+            'mes_certificats' => $mes_certificats,
+            'evenements_suggeres' => $evenements_suggeres,
+            'actualites' => $actualites,
+            'stats' => [
+                'total_inscriptions' => $mes_inscriptions->count(),
+                'total_certificats' => $mes_certificats->count(),
+                'prochains_evenements' => $mes_inscriptions->filter(fn($i) => $i->evenement && $i->evenement->date_debut > now())->count(),
+            ],
         ]);
     }
 
@@ -289,8 +308,12 @@ class InscriptionEvenementController extends Controller
 
     private function canJoin(Evenement $evenement, $user): bool
     {
-        if ($this->authorization->canManageParticipants($evenement, $user) || in_array($evenement->statut, ['cloture', 'archive'], true)) {
+        if (in_array($evenement->statut, ['cloture', 'archive'], true)) {
             return false;
+        }
+
+        if ($user->role === 'admin') {
+            return true;
         }
 
         $roles = $evenement->roles->pluck('role');
@@ -331,7 +354,7 @@ class InscriptionEvenementController extends Controller
         return collect([$evenement->createur])
             ->merge(
                 $evenement->assignments
-                    ->whereIn('role', ['organisateur', 'intervenant', 'jury'])
+                    ->whereIn('role', ['organisateur'])
                     ->pluck('user')
             )
             ->filter(fn ($user) => $user && $user->id !== $actorUserId)

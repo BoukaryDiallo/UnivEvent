@@ -9,7 +9,10 @@ use App\Models\InscriptionEvenement;
 use App\Models\EvenementRole;
 use App\Models\Programme;
 use App\Models\JuryPanel;
+use App\Models\User;
 use App\Models\EventType;
+use App\Services\EventCompletionService;
+use App\Services\EventService;
 use App\Services\MediaService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,14 +23,27 @@ use Illuminate\Support\Str;
 class EventController extends Controller
 {
     public function __construct(
-        private MediaService $mediaService
+        private MediaService $mediaService,
+        private EventCompletionService $completionService,
+        private EventService $eventService,
     ) {}
 
     public function index(Request $request)
     {
+        $user = Auth::user();
         $query = Evenement::query()
-            ->with(['createur', 'roles', 'medias'])
+            ->with(['createur', 'roles', 'medias', 'assignments', 'programmes', 'juryPanel.criteria'])
             ->withCount(['inscriptions', 'comments', 'activities']);
+
+        // Visibility Scoping:
+        // 1. Published events are visible to everyone
+        // 2. Drafts/Rejected are only visible to the creator OR admin
+        // 3. Pending are visible to creator OR admin
+        $query->where(function ($q) use ($user) {
+            $q->where('statut', 'publie')
+              ->orWhere('cree_par', $user->id)
+              ->when($user && $user->role === 'admin', fn($adminQuery) => $adminQuery->orWhereIn('statut', ['en_attente', 'annule', 'brouillon']));
+        });
 
         // Filtres
         if ($request->filled('search')) {
@@ -40,19 +56,24 @@ class EventController extends Controller
             $query->where('statut', $request->statut);
         }
 
+        if ($request->query('filter') === 'mine') {
+            $query->where('cree_par', $user->id);
+        }
+
         $events = $query->latest()->paginate(12)->withQueryString();
 
-        return Inertia::render('m5/events/Index', [
-            'events' => EvenementResource::collection($events),
+        // Ajouter les données de complétion
+        $eventsWithCompletion = $events->getCollection()->map(function (Evenement $event) {
+            $data = (new EvenementResource($event))->resolve();
+            $data['completion'] = $this->completionService->summarize($event);
+            return $data;
+        });
+
+        $events->setCollection($eventsWithCompletion);
+
+        return Inertia::render('module5/events/Index', [
+            'events' => $events,
             'filters' => $request->all(['search', 'type', 'statut', 'date_from', 'date_to', 'public_cible']),
-            'auth' => [
-                'user' => $request->user() ? [
-                    'id' => $request->user()->id,
-                    'nom' => $request->user()->name,
-                    'prenom' => '', 
-                    'role_rbac' => $request->user()->role,
-                ] : null,
-            ],
         ]);
     }
 
@@ -67,24 +88,83 @@ class EventController extends Controller
                 ->first()
             : null;
 
-        return Inertia::render('m5/events/Show', [
-            'event' => new EvenementResource($evenement),
+        return Inertia::render('module5/events/Show', [
+            'event' => (new EvenementResource($evenement))->resolve(),
             'participation' => $participation,
-            'auth' => [
-                'user' => $user,
-            ],
         ]);
     }
 
-    public function create()
+    public function toggleReaction(Request $request, Evenement $evenement)
     {
-        return Inertia::render('m5/events/Create', [
+        $user = Auth::user();
+        abort_unless($user, 401);
+
+        $reaction = \App\Models\EvenementReaction::where([
+            'evenement_id' => $evenement->id,
+            'user_id' => $user->id,
+        ])->first();
+
+        if ($reaction) {
+            $reaction->delete();
+        } else {
+            \App\Models\EvenementReaction::create([
+                'evenement_id' => $evenement->id,
+                'user_id' => $user->id,
+                'type' => 'like',
+            ]);
+
+            $evenement->activities()->create([
+                'user_id' => $user->id,
+                'type' => 'evenement_aime',
+                'label' => 'Événement aimé',
+                'description' => "Un utilisateur a aimé l'événement.",
+                'meta' => ['type' => 'like'],
+            ]);
+        }
+
+        return back();
+    }
+
+    public function create(Request $request)
+    {
+        return Inertia::render('module5/events/Create', [
             'event_types' => EventType::where('is_active', true)->get(),
-            'auth' => [
-                'user' => Auth::user(),
-            ],
         ]);
     }
+
+    public function manage(Evenement $evenement)
+{
+    $user = Auth::user();
+    $evenement->load([
+        'createur',
+        'roles',
+        'medias',
+        'programmes',
+        'assignments.user',
+        'juryPanel.criteria',
+    ]);
+
+    return Inertia::render('module5/events/Manage', [
+        'event' => (new EvenementResource($evenement))->resolve(),
+        'assignable_users' => User::select(['id', 'name', 'email', 'role'])->orderBy('name')->get()->map(fn ($user) => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+        ]),
+        'completion' => $this->completionService->summarize($evenement),
+        'suggestions' => $this->eventService->suggestions($evenement),
+        'submission_errors' => $this->eventService->submissionErrors($evenement),
+    ]);
+}
+
+public function edit(Evenement $evenement)
+{
+    return Inertia::render('module5/events/Edit', [
+        'event' => (new EvenementResource($evenement))->resolve(),
+        'event_types' => EventType::where('is_active', true)->get(),
+    ]);
+}
 
     public function store(Request $request)
     {
@@ -101,7 +181,11 @@ class EventController extends Controller
             'statut' => 'nullable|string',
             'theme' => 'nullable|string',
             'reglement' => 'nullable|string',
-            'affiche' => 'nullable|image|max:5120', // Max 5MB
+            'affiche' => 'nullable|image|max:5120',
+            'allow_organizer' => 'boolean',
+            'allow_intervenant' => 'boolean',
+            'allow_jury' => 'boolean',
+            'allow_participant' => 'boolean',
         ]);
 
         return DB::transaction(function () use ($request, $validated) {
@@ -112,6 +196,10 @@ class EventController extends Controller
                 'statut' => $request->statut ?? 'brouillon',
                 'validation_status' => 'pending',
                 'submitted_at' => $request->statut === 'en_attente' ? now() : null,
+                'allow_organizer' => $request->boolean('allow_organizer', true),
+                'allow_intervenant' => $request->boolean('allow_intervenant', true),
+                'allow_jury' => $request->boolean('allow_jury', false),
+                'allow_participant' => $request->boolean('allow_participant', true),
             ]);
 
             // Handle Poster (Affiche)
@@ -143,7 +231,7 @@ class EventController extends Controller
                 }
             }
 
-            return redirect()->route('m5.events.index')
+            return redirect()->route('module5.events.index')
                 ->with('success', 'Événement créé avec succès.');
         });
     }
@@ -161,9 +249,36 @@ class EventController extends Controller
             'visibilite' => 'required|in:public,restreint,prive',
             'statut' => 'nullable|string',
             'affiche' => 'nullable|image|max:5120',
+            'allow_organizer' => 'boolean',
+            'allow_intervenant' => 'boolean',
+            'allow_jury' => 'boolean',
+            'allow_participant' => 'boolean',
+            'comment_policy' => 'nullable|string|in:all,registered,accepted_participants,readonly',
+            'comments_enabled' => 'boolean',
+            'messages_enabled' => 'boolean',
+            'evenement_certifie' => 'boolean',
+            'certificate_template_schema' => 'nullable|array',
         ]);
 
-        $evenement->update($validated);
+        $evenement->update([
+            'titre' => $validated['titre'],
+            'description' => $validated['description'],
+            'type' => $validated['type'],
+            'date_debut' => $validated['date_debut'],
+            'date_fin' => $validated['date_fin'] ?? null,
+            'lieu' => $validated['lieu'] ?? null,
+            'capacite_max' => $validated['capacite_max'] ?? null,
+            'visibilite' => $validated['visibilite'],
+            'allow_organizer' => $request->boolean('allow_organizer', $evenement->allow_organizer),
+            'allow_intervenant' => $request->boolean('allow_intervenant', $evenement->allow_intervenant),
+            'allow_jury' => $request->boolean('allow_jury', $evenement->allow_jury),
+            'allow_participant' => $request->boolean('allow_participant', $evenement->allow_participant),
+            'comment_policy' => $validated['comment_policy'] ?? $evenement->comment_policy,
+            'comments_enabled' => $request->boolean('comments_enabled', $evenement->comments_enabled),
+            'messages_enabled' => $request->boolean('messages_enabled', $evenement->messages_enabled),
+            'evenement_certifie' => $request->boolean('evenement_certifie', $evenement->evenement_certifie),
+            'certificate_template_schema' => $validated['certificate_template_schema'] ?? $evenement->certificate_template_schema,
+        ]);
 
         if ($request->hasFile('affiche')) {
             $this->mediaService->uploadMedia($evenement, $request->file('affiche'), [

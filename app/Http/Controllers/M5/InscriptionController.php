@@ -14,7 +14,7 @@ class InscriptionController extends Controller
         $inscription = InscriptionEvenement::with('evenement')->findOrFail($id);
         
         // Authorization: Check if user is creator or admin
-        if (!Auth::user()->isAdmin() && $inscription->evenement->cree_par !== Auth::id()) {
+        if (Auth::user()->role !== 'admin' && $inscription->evenement->cree_par !== Auth::id()) {
             abort(403);
         }
 
@@ -33,7 +33,7 @@ class InscriptionController extends Controller
     {
         $inscription = InscriptionEvenement::with('evenement')->findOrFail($id);
         
-        if (!Auth::user()->isAdmin() && $inscription->evenement->cree_par !== Auth::id()) {
+        if (Auth::user()->role !== 'admin' && $inscription->evenement->cree_par !== Auth::id()) {
             abort(403);
         }
 

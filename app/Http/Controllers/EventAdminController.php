@@ -41,9 +41,9 @@ class EventAdminController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return Inertia::render('admin/events/PendingEvents', [
+        return Inertia::render('module5/events/PendingEvents', [
             'events' => $events,
-            'filters' => $request->all(['search', 'type']),
+            'filters' => $request->only(['search', 'type']),
         ]);
     }
 

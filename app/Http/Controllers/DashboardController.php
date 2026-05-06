@@ -21,6 +21,16 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        abort_unless($user, 403);
+
+        return Inertia::render('Dashboard', [
+            'isAdmin' => $user->isAdmin(),
+        ]);
+    }
+
+    public function eventDashboard(Request $request)
+    {
+        $user = $request->user();
 
         abort_unless($user, 403);
         $this->reminders->dispatchForUser($user);
@@ -189,7 +199,7 @@ class DashboardController extends Controller
             ->get()
             ->map(fn (Evenement $evenement) => $this->serializeEvenement($evenement, $user));
 
-        return Inertia::render('dashboard', [
+        return Inertia::render('module5/EventDashboard', [
             'eventStats' => [
                 'events_count' => $eventsCount,
                 'inscriptions_count' => $inscriptionsCount,

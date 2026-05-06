@@ -46,6 +46,7 @@ class StoreEvenementRequest extends FormRequest
             'statut' => ['nullable', 'in:brouillon,publie,en_cours,cloture,archive'],
             'capacite_max' => ['nullable', 'integer', 'min:1'],
             'media' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,webp,pdf'],
+            'notify_participants' => ['nullable', 'boolean'],
         ];
     }
 }

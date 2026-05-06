@@ -98,30 +98,54 @@ class EventCompletionService
     private function actorsSection(Evenement $event): array
     {
         $organizers = $event->assignments->where('role', 'organisateur')->count();
-        $speakers = $event->assignments->whereIn('role', ['jury', 'intervenant'])->count();
+        $jury = $event->assignments->where('role', 'jury')->count();
+        $speakers = $event->assignments->where('role', 'intervenant')->count();
+        $participants = $event->assignments->where('role', 'participant')->count();
+
+        if ($event->type === 'concours') {
+            $checks = [
+                $organizers > 0,
+                $jury > 0,
+                $jury > 1,
+            ];
+            $missing = [];
+            if ($organizers === 0) $missing[] = 'Ajoutez au moins un organisateur';
+            if ($jury === 0) $missing[] = 'Ajoutez au moins un jury';
+            if ($jury < 2) $missing[] = 'Idéalement 3 à 5 jurés';
+        } else {
+            $checks = [
+                $organizers > 0,
+                $speakers > 0,
+            ];
+            $missing = [];
+            if ($organizers === 0) $missing[] = 'Ajoutez au least un organisateur';
+            if ($speakers === 0) $missing[] = 'Ajoutez au moins un intervenant';
+        }
 
         return $this->buildSection(
             'actors',
             'Acteurs',
             self::SECTION_WEIGHTS['actors'],
-            [$organizers > 0, $speakers > 0],
-            [
-                'Ajoutez au moins un organisateur',
-                $event->type === 'concours' ? 'Ajoutez un jury' : 'Ajoutez un intervenant',
-            ],
+            $checks,
+            $missing,
         );
     }
 
     private function mediaSection(Evenement $event): array
     {
         $count = $event->medias->count();
+        $hasCover = $event->medias->where('is_cover', true)->isNotEmpty();
+        $publicMedias = $event->medias->where('is_public', true)->count();
 
         return $this->buildSection(
             'media',
             'Medias',
             self::SECTION_WEIGHTS['media'],
-            [$count > 0],
-            ['Ajoutez une image ou un document'],
+            [$count > 0, $hasCover],
+            [
+                $count === 0 ? 'Ajoutez au moins une image ou document' : 'Définissez une image de couverture',
+                $publicMedias === 0 ? 'Rendez au moins un média public' : '',
+            ],
         );
     }
 

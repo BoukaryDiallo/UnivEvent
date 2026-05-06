@@ -11,8 +11,13 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class MediaService
 {
-    private const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
-    private const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    private const ALLOWED_TYPES = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf',
+        'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'
+    ];
+    private const MAX_SIZE = 50 * 1024 * 1024; // 50MB
+
     private const CONFIDENTIALITY_LEVELS = [
         'public',
         'inscrits',
@@ -118,7 +123,7 @@ class MediaService
 
         $event = $media->relationLoaded('evenement') ? $media->evenement : $media->evenement()->first();
 
-        if ($event && ($user->isAdmin() || $event->cree_par === $user->id)) {
+        if ($event && ($user->role === 'admin' || $event->cree_par === $user->id)) {
             return true;
         }
 
@@ -177,17 +182,20 @@ class MediaService
     private function validateFile(UploadedFile $file): void
     {
         if (!in_array($file->getMimeType(), self::ALLOWED_TYPES)) {
-            throw new \InvalidArgumentException('Type de fichier non autorisé. Seules les images et PDFs sont acceptés.');
+            throw new \InvalidArgumentException('Type de fichier non autorisé. Seules les images, PDFs et vidéos (MP4, WebM) sont acceptés.');
         }
 
         if ($file->getSize() > self::MAX_SIZE) {
-            throw new \InvalidArgumentException('Le fichier est trop volumineux. Taille maximale : 10MB.');
+            throw new \InvalidArgumentException('Le fichier est trop volumineux. Taille maximale : 50MB.');
         }
     }
 
     private function getMediaType(UploadedFile $file): string
     {
-        return str_contains($file->getMimeType(), 'pdf') ? 'pdf' : 'image';
+        $mime = $file->getMimeType();
+        if (str_contains($mime, 'pdf')) return 'pdf';
+        if (str_contains($mime, 'video')) return 'video';
+        return 'image';
     }
 
     private function normalizeConfidentiality(?string $confidentialite, bool $isPublic): string
