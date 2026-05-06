@@ -27,7 +27,6 @@ const noms: Record<number, string> = {
 
 const couleurs: Record<string, string> = {
     prefere: 'bg-emerald-500/70',
-    acceptable: 'bg-amber-400/80',
     non_definie: 'bg-slate-200',
     reserve: 'bg-blue-500/80',
 };
@@ -52,6 +51,10 @@ function formatPeriode(date: string, dateFin?: string | null) {
 
 function nomEnseignant(enseignant: UserDispo) {
     return enseignant.nom_complet ?? enseignant.name;
+}
+
+function formatNiveau(niveau: string) {
+    return niveau === 'prefere' ? 'Prefere' : niveau;
 }
 
 function normaliserTexte(valeur: string) {
@@ -311,7 +314,6 @@ export default function ConsultationPage({
                                         </div>
                                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                                             <span className="inline-flex items-center gap-2"><span className="size-3 rounded-sm bg-emerald-500/70" />Prefere</span>
-                                            <span className="inline-flex items-center gap-2"><span className="size-3 rounded-sm bg-amber-400/80" />Acceptable</span>
                                             <span className="inline-flex items-center gap-2"><span className="size-3 rounded-sm bg-slate-300" />Non definie</span>
                                             <span className="inline-flex items-center gap-2"><span className="size-3 rounded-sm bg-blue-500/80" />Reserve</span>
                                         </div>
@@ -331,7 +333,7 @@ export default function ConsultationPage({
                                                 <TableRow key={item.id}>
                                                     <TableCell>{noms[item.jour]}</TableCell>
                                                     <TableCell>{item.debut} - {item.fin}</TableCell>
-                                                    <TableCell>{item.niveau}</TableCell>
+                                                    <TableCell>{formatNiveau(item.niveau)}</TableCell>
                                                     <TableCell>{item.motif ?? '-'}</TableCell>
                                                 </TableRow>
                                             ))}
@@ -445,7 +447,7 @@ export default function ConsultationPage({
                                                     <TableCell>{item.date}</TableCell>
                                                     <TableCell>{item.debut} - {item.fin}</TableCell>
                                                     <TableCell>{item.source}</TableCell>
-                                                    <TableCell>{item.niveau}</TableCell>
+                                                    <TableCell>{formatNiveau(item.niveau)}</TableCell>
                                                     <TableCell>{item.libere_at ? 'Liberee' : 'Active'}</TableCell>
                                                 </TableRow>
                                             ))}

@@ -16,6 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('mes-notifications', [DispoController::class, 'notifications'])->name('notifications.index');
 
         Route::post('dispos', [DispoController::class, 'store'])->name('dispos.store');
+        Route::post('dispos/import', [DispoController::class, 'importer'])->name('dispos.import');
         Route::put('dispos/{dispo}', [DispoController::class, 'update'])->name('dispos.update');
         Route::delete('dispos/{dispo}', [DispoController::class, 'detruire'])->name('dispos.detruire');
         Route::post('dispos/{dispo}/restaurer', [DispoController::class, 'restaurer'])->name('dispos.restaurer');

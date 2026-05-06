@@ -34,7 +34,7 @@ class DispoRequest extends FormRequest
                 'creneaux.*.jour' => ['required', 'integer', 'between:1,7'],
                 'creneaux.*.debut' => ['required', 'date_format:H:i'],
                 'creneaux.*.fin' => ['required', 'date_format:H:i'],
-                'creneaux.*.niveau' => ['required', 'in:prefere,acceptable'],
+                'creneaux.*.niveau' => ['required', 'in:prefere'],
                 'creneaux.*.motif' => ['nullable', 'string', 'max:255'],
             ];
         }
@@ -43,7 +43,7 @@ class DispoRequest extends FormRequest
             'jour' => ['required', 'integer', 'between:1,7'],
             'debut' => ['required', 'date_format:H:i'],
             'fin' => ['required', 'date_format:H:i'],
-            'niveau' => ['required', 'in:prefere,acceptable'],
+            'niveau' => ['required', 'in:prefere'],
             'motif' => ['nullable', 'string', 'max:255'],
         ];
     }

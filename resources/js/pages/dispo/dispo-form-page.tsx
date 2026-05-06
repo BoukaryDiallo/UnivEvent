@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { BreadcrumbItem } from '@/types';
 import type { LigneDispo, NiveauOption, ResumeDispo, UserDispo } from '@/types/dispo';
+import { FileSpreadsheet, Upload } from 'lucide-react';
+import { useRef } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -46,6 +48,7 @@ export default function DispoFormPage({
     mode: 'creation' | 'edition';
     dispo: LigneDispo | null;
 }) {
+    const importInputRef = useRef<HTMLInputElement | null>(null);
     const form = useForm({
         jour: dispo?.jour ?? 1,
         debut: dispo?.debut ?? '',
@@ -54,6 +57,12 @@ export default function DispoFormPage({
         motif: dispo?.motif ?? '',
         creneaux: [creerCreneau(Number(jours[0]?.id ?? 1))],
     });
+    const importForm = useForm<{
+        fichier: File | null;
+    }>({
+        fichier: null,
+    });
+    const formErrors = form.errors as Record<string, string | undefined>;
 
     const setCreneau = (index: number, champ: keyof CreneauForm, valeur: string | number) => {
         const prochains = [...form.data.creneaux];
@@ -118,10 +127,78 @@ export default function DispoFormPage({
                             form.put(`/dispos/${dispo?.id}`, options);
                         }}
                     >
-                        <InputError message={form.errors.dispo} className="rounded-md border border-red-200 bg-red-50 px-3 py-2" />
+                        <InputError message={formErrors.dispo} className="rounded-md border border-red-200 bg-red-50 px-3 py-2" />
 
                         {mode === 'creation' ? (
                             <div className="space-y-4">
+                                <div className="rounded-xl border border-dashed bg-muted/20 p-4">
+                                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <FileSpreadsheet className="h-4 w-4" />
+                                                <p className="text-sm font-medium">Importer un fichier Excel</p>
+                                            </div>
+                                            <p className="text-sm text-muted-foreground">
+                                                Colonnes attendues: <span className="font-medium text-foreground">jour</span>, <span className="font-medium text-foreground">debut</span>, <span className="font-medium text-foreground">fin</span>. La colonne <span className="font-medium text-foreground">motif</span> est facultative.
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                                Le niveau n&apos;est pas demande dans le fichier: chaque ligne importee sera en <span className="font-medium text-foreground">prefere</span>.
+                                            </p>
+                                            <a
+                                                href="/modeles/disponibilites-import.csv"
+                                                download
+                                                className="inline-flex text-sm font-medium text-primary underline underline-offset-4"
+                                            >
+                                                Telecharger un modele CSV compatible Excel
+                                            </a>
+                                        </div>
+
+                                        <div className="flex flex-col items-stretch gap-2 md:min-w-72">
+                                            <input
+                                                ref={importInputRef}
+                                                type="file"
+                                                accept=".xlsx,.csv"
+                                                className="hidden"
+                                                onChange={(event) => {
+                                                    const file = event.target.files?.[0] ?? null;
+                                                    importForm.setData('fichier', file);
+                                                    importForm.clearErrors('fichier');
+                                                }}
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => importInputRef.current?.click()}
+                                            >
+                                                <Upload className="mr-2 h-4 w-4" />
+                                                Choisir un fichier
+                                            </Button>
+                                            <p className="truncate text-xs text-muted-foreground">
+                                                {importForm.data.fichier?.name ?? 'Aucun fichier selectionne'}
+                                            </p>
+                                            <Button
+                                                type="button"
+                                                disabled={importForm.processing || !importForm.data.fichier}
+                                                onClick={() => {
+                                                    importForm.post('/dispos/import', {
+                                                        forceFormData: true,
+                                                        preserveScroll: true,
+                                                        onSuccess: () => {
+                                                            importForm.reset();
+                                                            if (importInputRef.current) {
+                                                                importInputRef.current.value = '';
+                                                            }
+                                                        },
+                                                    });
+                                                }}
+                                            >
+                                                Importer le fichier
+                                            </Button>
+                                            <InputError message={importForm.errors.fichier} className="mt-1" />
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/20 px-4 py-3">
                                     <div className="space-y-1">
                                         <p className="text-sm font-medium">Saisie multiple</p>
