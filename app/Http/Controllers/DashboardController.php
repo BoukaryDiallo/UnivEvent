@@ -26,8 +26,7 @@ class DashboardController extends Controller
         abort_unless($user !== null, 401);
 
         if ($user->role === 'enseignant') {
-            return inertia('dashboard', [
-                'role' => 'enseignant',
+            return inertia('mon-planning', [
                 'resume' => [
                     'dispos' => Dispo::query()->where('user_id', $user->id)->count(),
                     'ecarts' => Ecart::query()->where('user_id', $user->id)->count(),
