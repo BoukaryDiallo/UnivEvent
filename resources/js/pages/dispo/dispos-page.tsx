@@ -357,12 +357,10 @@ export default function DisposPage({
                                                 className={`inline-flex rounded px-2 py-0.5 text-xs font-medium ${
                                                     item.niveau === 'prefere'
                                                         ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30'
-                                                        : item.niveau === 'acceptable'
-                                                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30'
-                                                          : 'bg-slate-100 text-slate-700 dark:bg-slate-800'
+                                                        : 'bg-slate-100 text-slate-700 dark:bg-slate-800'
                                                 }`}
                                             >
-                                                {item.niveau === 'prefere' ? 'Prefere' : item.niveau === 'acceptable' ? 'Acceptable' : 'Non defini'}
+                                                {item.niveau === 'prefere' ? 'Prefere' : 'Non defini'}
                                             </span>
                                         </TableCell>
                                         <TableCell>{item.motif ?? '-'}</TableCell>

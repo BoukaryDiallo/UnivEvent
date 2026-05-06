@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -28,6 +29,14 @@ class Dispo extends Model
             'avant' => 'array',
             'maj_le' => 'datetime',
         ];
+    }
+
+    protected function niveau(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => $value === 'acceptable' ? 'prefere' : $value,
+            set: fn (?string $value) => $value === 'acceptable' ? 'prefere' : $value,
+        );
     }
 
     public function user(): BelongsTo

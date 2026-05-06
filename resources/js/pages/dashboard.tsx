@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
+import type { BreadcrumbItem } from '@/types';
 import { dashboard } from '@/routes';
 import { create as createRequest, index as diplomasIndex, show as showRequest } from '@/routes/diplomas';
-import type { BreadcrumbItem } from '@/types';
 
 type ActiveRequest = {
     id: number;
@@ -80,9 +80,9 @@ export default function Dashboard({
 
             <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
                 <div>
-                    <h1 className="text-2xl font-semibold">Bonjour ðŸ‘‹</h1>
+                    <h1 className="text-2xl font-semibold">Bonjour</h1>
                     <p className="text-sm text-muted-foreground">
-                        Suivi de vos retraits de diplÃ´me.
+                        Suivi de vos retraits de diplôme.
                     </p>
                 </div>
 
@@ -92,7 +92,7 @@ export default function Dashboard({
                             <CardTitle>Ma demande en cours</CardTitle>
                             <CardDescription>
                                 {active_request
-                                    ? 'Statut courant et accÃ¨s rapide Ã  la fiche.'
+                                    ? 'Statut courant et accès rapide à la fiche.'
                                     : 'Aucune demande active.'}
                             </CardDescription>
                         </CardHeader>
@@ -101,9 +101,8 @@ export default function Dashboard({
                                 <>
                                     <div className="flex items-center gap-3">
                                         <span className="text-lg font-semibold">
-                                            {DIPLOMA_TYPE_LABEL[active_request.diploma_type] ??
-                                                active_request.diploma_type}
-                                            {' Â· '}
+                                            {DIPLOMA_TYPE_LABEL[active_request.diploma_type] ?? active_request.diploma_type}
+                                            {' · '}
                                             {active_request.academic_year}
                                         </span>
                                         <DiplomaStatusBadge
@@ -136,7 +135,7 @@ export default function Dashboard({
                             ) : (
                                 <div className="flex flex-col items-start gap-3">
                                     <p className="text-sm text-muted-foreground">
-                                        DÃ©marrez une demande pour suivre la procÃ©dure jusqu'au retrait.
+                                        Démarrez une demande pour suivre la procédure jusqu'au retrait.
                                     </p>
                                     <Button asChild>
                                         <Link href={createRequest().url}>Nouvelle demande</Link>
@@ -145,7 +144,7 @@ export default function Dashboard({
                             )}
                             {archived_count > 0 && (
                                 <div className="border-t pt-3 text-xs text-muted-foreground">
-                                    {archived_count} dossier(s) archivÃ©(s) â€”{' '}
+                                    {archived_count} dossier(s) archivé(s) —{' '}
                                     <Link
                                         href={diplomasIndex().url}
                                         className="text-primary underline-offset-4 hover:underline"
@@ -162,8 +161,8 @@ export default function Dashboard({
                             <CardTitle>Prochain rendez-vous</CardTitle>
                             <CardDescription>
                                 {upcoming_appointment
-                                    ? 'Rappel du crÃ©neau confirmÃ©.'
-                                    : 'Aucun rendez-vous programmÃ©.'}
+                                    ? 'Rappel du créneau confirmé.'
+                                    : 'Aucun rendez-vous programmé.'}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="flex flex-col gap-2 text-sm">
@@ -178,7 +177,7 @@ export default function Dashboard({
                                 </>
                             ) : (
                                 <p className="text-sm text-muted-foreground">
-                                    Lorsque votre dossier sera prÃªt, vous pourrez rÃ©server un crÃ©neau.
+                                    Lorsque votre dossier sera prêt, vous pourrez réserver un créneau.
                                 </p>
                             )}
                         </CardContent>
@@ -187,19 +186,16 @@ export default function Dashboard({
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>ActivitÃ© rÃ©cente</CardTitle>
-                        <CardDescription>5 derniers Ã©vÃ¨nements de vos demandes.</CardDescription>
+                        <CardTitle>Activité récente</CardTitle>
+                        <CardDescription>5 derniers évènements de vos demandes.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {recent_events.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">Aucune activitÃ©.</p>
+                            <p className="text-sm text-muted-foreground">Aucune activité.</p>
                         ) : (
                             <ol className="flex flex-col gap-3">
                                 {recent_events.map((e) => (
-                                    <li
-                                        key={e.id}
-                                        className="border-l-2 border-muted pl-3 text-sm"
-                                    >
+                                    <li key={e.id} className="border-l-2 border-muted pl-3 text-sm">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <span className="font-medium">{e.to}</span>
                                             <span className="font-mono text-xs text-muted-foreground">

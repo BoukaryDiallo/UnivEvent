@@ -40,7 +40,7 @@ export function AppSidebar() {
 
     const mainNavItems: NavItem[] = [
         {
-            title: 'Dashboard',
+            title: role === 'enseignant' ? 'Mon planning' : 'Dashboard',
             href: dashboard(),
             icon: LayoutGrid,
         },
