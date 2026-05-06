@@ -5,9 +5,23 @@ import { usePage } from '@inertiajs/react';
 export function useAuth() {
     const { auth } = usePage().props as any;
 
-    const roles = auth.roles || [];
+    // Débogage : afficher la structure de auth
+    console.log('Auth object:', auth);
+    console.log('Auth user:', auth?.user);
+    console.log('Auth user role:', auth?.user?.role);
+
+    // Essayer différentes façons d'obtenir les rôles
+    const roles = auth?.roles || auth?.user?.roles || [];
     
-    const permissions = auth.permissions || [];
+    // Si l'utilisateur a un rôle direct, l'ajouter aux rôles
+    if (auth?.user?.role && !roles.includes(auth.user.role)) {
+        roles.push(auth.user.role);
+    }
+    
+    const permissions = auth?.permissions || auth?.user?.permissions || [];
+
+    console.log('Final roles:', roles);
+    console.log('Final permissions:', permissions);
 
     return {
         roles,

@@ -39,10 +39,10 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                             <ChevronDown className="ml-auto" />
                                         </SidebarMenuButton>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent side="right" align="start">
+                                    <DropdownMenuContent side="right" align="start" className="w-48 z-50">
                                         {item.items.map((subItem) => (
                                             <DropdownMenuItem key={subItem.title} asChild>
-                                                <Link href={subItem.href || '#'}>
+                                                <Link href={subItem.href || '#'} className="flex items-center">
                                                     {subItem.icon && <subItem.icon className="mr-2 h-4 w-4" />}
                                                     <span>{subItem.title}</span>
                                                 </Link>

@@ -41,8 +41,15 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { hasRole, can } = useAuth();
+    const { hasRole, can, roles, permissions } = useAuth();
     const canManageDiplomas = can('diplomas.manage');
+
+    // Débogage
+    console.log('Sidebar - Roles:', roles);
+    console.log('Sidebar - Permissions:', permissions);
+    console.log('Sidebar - hasRole etudiant:', hasRole('etudiant'));
+    console.log('Sidebar - hasRole admin:', hasRole('admin'));
+    console.log('Sidebar - hasRole enseignant:', hasRole('enseignant'));
 
     const mainNavItems: NavItem[] = [
         {
@@ -69,7 +76,7 @@ export function AppSidebar() {
 
     if (hasRole('admin') || can('manage elections')) {
         mainNavItems.push({
-            title: 'Gestion Électorale',
+            title: 'Gestion des elections',
             icon: Vote,
             items: [
                 {
@@ -233,14 +240,10 @@ export function AppSidebar() {
 
     if (hasRole('etudiant')) {
         mainNavItems.push({
-            title: 'Gestion Électorale',
+            title: 'Gestion des elections',
             icon: Vote,
             items: [
-                {
-                    title: 'Votes',
-                    href: '/votes',
-                    icon: Trophy,
-                },
+                
                 {
                     title: 'Espace Élection',
                     href: '/espace-election',
