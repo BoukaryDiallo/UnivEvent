@@ -41,8 +41,6 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { auth } = usePage().props as any;
-    const role = auth?.user?.role;
     const { hasRole, can } = useAuth();
     const canManageDiplomas = can('diplomas.manage');
 
@@ -94,6 +92,11 @@ export function AppSidebar() {
                     href: '/resultats',
                     icon: List,
                 },
+                {
+                    title: 'Espace Élection',
+                    href: '/espace-election',
+                    icon: Trophy,
+                },
             ],
         });
     }
@@ -129,11 +132,6 @@ export function AppSidebar() {
 
     if (hasRole('admin')) {
         mainNavItems.push(
-            {
-                title: 'Espace Élection',
-                href: '/espace-election',
-                icon: Trophy,
-            },
             {
                 title: 'Consultation',
                 href: '/consultation',
@@ -171,32 +169,6 @@ export function AppSidebar() {
             },
         );
     }
-
-    if (hasRole('etudiant')) {
-        mainNavItems.push({
-            title: 'Votes',
-            href: '/votes',
-            icon: Vote,
-        });
-        mainNavItems.push({
-            title: 'Espace Élection',
-            href: '/espace-election',
-            icon: Trophy,
-        });
-    }
-
-    const footerNavItems = [
-        {
-            title: 'Repository',
-            href: 'https://github.com/laravel/react-starter-kit',
-            icon: FolderGit2,
-        },
-        {
-            title: 'Documentation',
-            href: 'https://laravel.com/docs/starter-kits#react',
-            icon: BookOpen,
-        },
-    ];
 
     if (hasRole('enseignant')) {
         mainNavItems.push(
@@ -260,18 +232,27 @@ export function AppSidebar() {
     }
 
     if (hasRole('etudiant')) {
-        mainNavItems.push(
-            {
-                title: 'Votes',
-                href: '/votes',
-                icon: Vote,
-            },
-            {
-                title: 'Emploi du Temps',
-                href: '/emploie-du-temps/edt-etudiant',
-                icon: Calendar1,
-            }
-        );
+        mainNavItems.push({
+            title: 'Gestion Électorale',
+            icon: Vote,
+            items: [
+                {
+                    title: 'Votes',
+                    href: '/votes',
+                    icon: Trophy,
+                },
+                {
+                    title: 'Espace Élection',
+                    href: '/espace-election',
+                    icon: Trophy,
+                },
+            ],
+        });
+        mainNavItems.push({
+            title: 'Emploi du Temps',
+            href: '/emploie-du-temps/edt-etudiant',
+            icon: Calendar1,
+        });
     }
 
     return (
