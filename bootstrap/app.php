@@ -4,18 +4,15 @@ use App\Http\Middleware\EnsureScolarite;
 use App\Http\Middleware\EnsureStudent;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
-<<<<<<< HEAD
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\PreventCaching;
 use App\Http\Middleware\VerifySession;
-=======
->>>>>>> upstream/main
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Spatie\Permission\Middleware\PermissionMiddleware;
-use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware as SpatieRoleMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(

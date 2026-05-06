@@ -1,35 +1,16 @@
-<<<<<<< HEAD
 import { Head, router, useForm } from '@inertiajs/react';
-import { Shield, Plus, RefreshCw, Lock } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import AppLayout from '@/layouts/app-layout';
-import { dashboard } from '@/routes';
-import type { BreadcrumbItem } from '@/types';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: dashboard() },
-    { title: 'Permissions', href: '#' },
-];
-=======
-import { router, useForm } from '@inertiajs/react';
-import { useState } from 'react';
 
 // shadcn
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AppLayout from '@/layouts/app-layout';
->>>>>>> upstream/main
+import { Badge, Lock, Plus, RefreshCcw, Shield } from 'lucide-react';
+import { Separator } from '@radix-ui/react-separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function Permissions({ permissions, roles }: any) {
     const { data, setData, post, processing, reset } = useForm({ name: '' });
@@ -221,7 +202,7 @@ export default function Permissions({ permissions, roles }: any) {
                                         disabled={loadingSave[role.name]}
                                         className="gap-2 mt-auto"
                                     >
-                                        <RefreshCw className={`h-3 w-3 ${loadingSave[role.name] ? 'animate-spin' : ''}`} />
+                                        <RefreshCcw className={`h-3 w-3 ${loadingSave[role.name] ? 'animate-spin' : ''}`} />
                                         {loadingSave[role.name] ? "Sauvegarde..." : "Sauvegarder"}
                                     </Button>
                                 </CardContent>

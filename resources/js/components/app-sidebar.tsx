@@ -130,6 +130,11 @@ export function AppSidebar() {
     if (hasRole('admin')) {
         mainNavItems.push(
             {
+                title: 'Espace Élection',
+                href: '/espace-election',
+                icon: Trophy,
+            },
+            {
                 title: 'Consultation',
                 href: '/consultation',
                 icon: Eye,
@@ -172,6 +177,11 @@ export function AppSidebar() {
             title: 'Votes',
             href: '/votes',
             icon: Vote,
+        });
+        mainNavItems.push({
+            title: 'Espace Élection',
+            href: '/espace-election',
+            icon: Trophy,
         });
     }
 
