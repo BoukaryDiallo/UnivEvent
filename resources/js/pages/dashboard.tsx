@@ -1,12 +1,26 @@
-import { Head, Link } from '@inertiajs/react';
-import { Calendar, LayoutDashboard, Settings, Users, GraduationCap, ClipboardCheck } from 'lucide-react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import {
+    Activity,
+    ArrowRight,
+    Building2,
+    Calendar,
+    Calendar as CalendarIcon,
+    ClipboardCheck,
+    GraduationCap,
+    LayoutDashboard,
+    Settings,
+    Star,
+    TrendingUp,
+    Users,
+    Zap,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { DiplomaStatusBadge } from '@/pages/diplomas/status-badge';
-import type { BreadcrumbItem } from '@/types';
 import { dashboard } from '@/routes';
 import { create as createRequest, index as diplomasIndex, show as showRequest } from '@/routes/diplomas';
+import type { BreadcrumbItem } from '@/types';
 
 type ActiveRequest = {
     id: number;
@@ -46,12 +60,27 @@ type RecentEvent = {
     occurred_at: string;
 };
 
-type DashboardProps = {
-    isAdmin: boolean;
-    active_request: ActiveRequest | null;
-    upcoming_appointment: Appointment | null;
-    archived_count: number;
-    recent_events: RecentEvent[];
+type DashboardStats = {
+    clubsCount: number;
+    electionsCount: number;
+    votesCount: number;
+    usersCount: number;
+    pendingRequests: number;
+    recentActivities: Array<{
+        id: number;
+        type: string;
+        description: string;
+        createdAt: string;
+    }>;
+};
+
+type Props = {
+    isAdmin?: boolean;
+    active_request?: ActiveRequest | null;
+    upcoming_appointment?: Appointment | null;
+    archived_count?: number;
+    recent_events?: RecentEvent[];
+    stats?: DashboardStats;
 };
 
 const DIPLOMA_TYPE_LABEL: Record<string, string> = {
@@ -63,19 +92,26 @@ const DIPLOMA_TYPE_LABEL: Record<string, string> = {
 const formatDateTime = (iso: string) =>
     new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
 
+const formatLongDate = (iso: string) =>
+    new Date(iso).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' });
+
 export default function Dashboard({
-    isAdmin,
-    active_request,
-    upcoming_appointment,
-    archived_count,
-    recent_events,
-}: DashboardProps) {
+    isAdmin = false,
+    active_request = null,
+    upcoming_appointment = null,
+    archived_count = 0,
+    recent_events = [],
+    stats,
+}: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Tableau de bord',
             href: dashboard(),
         },
     ];
+
+    const hasDiplomaData = !!active_request || !!upcoming_appointment;
+    const hasUnivEventData = !!stats;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -84,9 +120,55 @@ export default function Dashboard({
                 <div className="flex flex-col gap-2">
                     <h1 className="text-3xl font-bold tracking-tight">Bienvenue sur votre portail</h1>
                     <p className="text-muted-foreground">
-                        Accédez aux différents modules de la plateforme UnivEvent.
+                        {hasDiplomaData ? 'Suivi de vos retraits de diplôme.' : 'Accédez aux différents modules de la plateforme UnivEvent.'}
                     </p>
                 </div>
+
+                {/* Dashboard Stats if available */}
+                {hasUnivEventData && stats && (
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Clubs</CardTitle>
+                                <Building2 className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{stats.clubsCount}</div>
+                                <p className="text-xs text-muted-foreground">Actifs</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Élections</CardTitle>
+                                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{stats.electionsCount}</div>
+                                <p className="text-xs text-muted-foreground">En cours</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Votes</CardTitle>
+                                <Users className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{stats.votesCount}</div>
+                                <p className="text-xs text-muted-foreground">Total</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
+                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{stats.usersCount}</div>
+                                <p className="text-xs text-muted-foreground">Inscrits</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {/* Module 5: Événements */}
@@ -179,7 +261,7 @@ export default function Dashboard({
                                         </div>
                                         {upcoming_appointment && (
                                             <div className="mt-2 text-sm font-medium text-indigo-700 dark:text-indigo-300">
-                                                Rendez-vous : {new Date(upcoming_appointment.slot.starts_at).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' })}
+                                                Rendez-vous : {formatLongDate(upcoming_appointment.slot.starts_at)}
                                             </div>
                                         )}
                                     </div>
@@ -192,6 +274,38 @@ export default function Dashboard({
                             </CardContent>
                         </Card>
                     </div>
+                )}
+
+                {/* Recent Activity for Diplomas */}
+                {recent_events.length > 0 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Activité récente</CardTitle>
+                            <CardDescription>Derniers évènements de vos demandes de diplômes.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ol className="flex flex-col gap-3">
+                                {recent_events.map((e) => (
+                                    <li key={e.id} className="border-l-2 border-muted pl-3 text-sm">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="font-medium">{e.to}</span>
+                                            <span className="font-mono text-xs text-muted-foreground">
+                                                {e.tracking_code}
+                                            </span>
+                                        </div>
+                                        {e.note && (
+                                            <div className="text-xs text-muted-foreground">
+                                                {e.note}
+                                            </div>
+                                        )}
+                                        <div className="text-xs text-muted-foreground">
+                                            {formatDateTime(e.occurred_at)}
+                                        </div>
+                                    </li>
+                                ))}
+                            </ol>
+                        </CardContent>
+                    </Card>
                 )}
             </div>
         </AppLayout>

@@ -8,6 +8,7 @@ use App\Models\Charge;
 use App\Models\Dispo;
 use App\Models\Ecart;
 use App\Models\HistoriqueDisponibilite;
+use App\Models\Etudiant;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -106,6 +107,11 @@ class User extends Authenticatable
     public function historiqueDisponibilites(): HasMany
     {
         return $this->hasMany(HistoriqueDisponibilite::class, 'enseignant_id');
+    }
+
+    public function etudiant(): HasOne
+    {
+        return $this->hasOne(Etudiant::class);
     }
 
     /*

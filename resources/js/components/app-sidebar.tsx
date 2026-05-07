@@ -1,20 +1,24 @@
 import { Link } from '@inertiajs/react';
 import {
+    Activity,
     Bell,
     BookOpen,
-    ClipboardCheck,
-    GraduationCap,
-    PieChart,
+    Building2,
+    Calendar,
     Calendar1,
     CalendarClock,
     CalendarRange,
+    ClipboardCheck,
     Eye,
     FolderGit2,
+    GraduationCap,
     History,
     LayoutGrid,
     NotebookPen,
+    PieChart,
     ShieldEllipsis,
     User,
+    Users,
 } from 'lucide-react';
 
 import AppLogo from '@/components/app-logo';
@@ -70,11 +74,32 @@ export function AppSidebar() {
             icon: LayoutGrid,
         },
         {
+            title: 'Événements',
+            href: '/module5/dashboard',
+            icon: Calendar,
+        },
+        {
             title: 'Retraits de diplômes',
             href: diplomasIndex(),
             icon: GraduationCap,
         },
     ];
+
+    // Elections & Clubs
+    if (hasRole('admin') || hasRole('etudiant')) {
+        mainNavItems.push(
+            {
+                title: 'Clubs',
+                href: '/clubs',
+                icon: Building2,
+            },
+            {
+                title: 'Élections',
+                href: '/elections',
+                icon: Users,
+            }
+        );
+    }
 
     if (canManageDiplomas) {
         mainNavItems.push(
@@ -163,7 +188,7 @@ export function AppSidebar() {
 
     if (hasRole('etudiant')) {
         mainNavItems.push({
-            title: 'Emploi du Temps',
+            title: 'Mon emploi du temps',
             href: '/emploie-du-temps/edt-etudiant',
             icon: Calendar1,
         });

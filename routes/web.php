@@ -6,6 +6,7 @@ use App\Http\Controllers\NotificationCenterController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\GestionController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -68,6 +69,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Admin only
     Route::middleware('role:admin')->group(function () {
+        Route::get('gestion', [GestionController::class, 'index'])
+            ->name('gestion');
         Route::get('roles', [UserController::class, 'index'])
             ->name('roles');
     });
@@ -85,3 +88,6 @@ require __DIR__.'/dispo.php';
 require __DIR__.'/module2.php';
 require __DIR__.'/module5.php';
 require __DIR__.'/settings.php';
+require __DIR__.'/clubs.php';
+require __DIR__.'/elections.php';
+require __DIR__.'/academic.php';
