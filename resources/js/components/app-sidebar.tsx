@@ -1,9 +1,28 @@
 import { Link } from '@inertiajs/react';
-import { Bell, BookOpen,ClipboardCheck, GraduationCap, PieChart, Calendar1, CalendarClock, CalendarRange, Eye, FolderGit2, History, LayoutGrid, NotebookPen, ShieldEllipsis, User } from 'lucide-react';
+import {
+    Bell,
+    BookOpen,
+    ClipboardCheck,
+    GraduationCap,
+    PieChart,
+    Calendar1,
+    CalendarClock,
+    CalendarRange,
+    Eye,
+    FolderGit2,
+    History,
+    LayoutGrid,
+    NotebookPen,
+    ShieldEllipsis,
+    User,
+} from 'lucide-react';
+
 import AppLogo from '@/components/app-logo';
+import { ModuleFiveCombobox } from '@/components/module-five-combobox';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+
 import {
     Sidebar,
     SidebarContent,
@@ -13,13 +32,16 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+
 import { useAuth } from '@/hooks/module1/useAuth';
-import { dashboard } from '@/routes';
+
 import { dashboard as adminDashboard } from '@/routes/admin';
 import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
 import { index as adminPickupSlotsIndex } from '@/routes/admin/pickup-slots';
-import { index as diplomasIndex } from '@/routes/diplomas';
+
 import type { NavItem } from '@/types';
+import { dashboard } from '@/routes';
+import { index as diplomasIndex } from '@/routes/diplomas';
 
 const footerNavItems: NavItem[] = [
     {
@@ -35,7 +57,10 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { hasRole, can } = useAuth();
+    const { hasRole, can, user } = useAuth();
+
+    const role = user?.role ?? null;
+
     const canManageDiplomas = can('diplomas.manage');
 
     const mainNavItems: NavItem[] = [
@@ -67,29 +92,26 @@ export function AppSidebar() {
                 title: 'Créneaux de retrait',
                 href: adminPickupSlotsIndex(),
                 icon: CalendarRange,
-            },
+            }
         );
     }
 
+    if (hasRole('admin')) {
+        mainNavItems.push(
+            {
+                title: 'Consultation',
+                href: '/consultation',
+                icon: Eye,
+            },
+            {
+                title: 'Emploi du Temps',
+                href: '/emploie-du-temps',
+                icon: Calendar1,
+            }
+        );
+    }
 
-        if(hasRole('admin')){
-            mainNavItems.push(
-                {
-                    title: 'Consultation',
-                    href: '/consultation',
-                    icon: Eye,
-                },
-                {
-                    title: 'Emploi du Temps',
-                    href: '/emploie-du-temps',
-                    icon: Calendar1,
-                },
-            )
-        }
-
-
-
-        if (hasRole('admin') || can('manage users')) {
+    if (hasRole('admin') || can('manage users')) {
         mainNavItems.push(
             {
                 title: 'Gestion des rôles',
@@ -100,63 +122,57 @@ export function AppSidebar() {
                 title: 'Permissions',
                 href: '/admin/permissions',
                 icon: ShieldEllipsis,
-            },
+            }
         );
-        }
+    }
 
-
-        if (hasRole('enseignant')) {
-            mainNavItems.push(
-                {
-                    title: 'Mes disponibilites',
-                    href: '/dispos',
-                    icon: CalendarClock,
-                },
-                {
-                    title: 'Exceptions',
-                    href: '/ecarts',
-                    icon: CalendarRange,
-                },
-                {
-                    title: 'Reservations',
-                    href: '/mes-reservations',
-                    icon: NotebookPen,
-                },
-                {
-                    title: 'Historique',
-                    href: '/historique-disponibilites',
-                    icon: History,
-                },
-                {
-                    title: 'Notifications',
-                    href: '/mes-notifications',
-                    icon: Bell,
-                },
-                {
-                    title: 'Mon emploi du Temps',
-                    href: '/emploie-du-temps/edt-enseignant',
-                    icon: Calendar1,
-                },
-            
-            );
-        }
-
-
-        if (hasRole('etudiant')) {
-            mainNavItems.push(
+    if (hasRole('enseignant')) {
+        mainNavItems.push(
             {
-                    title: 'Emploi du Temps',
-                    href: '/emploie-du-temps/edt-etudiant',
-                    icon: Calendar1,
-                }
-            
-            );
-        }
+                title: 'Mes disponibilités',
+                href: '/dispos',
+                icon: CalendarClock,
+            },
+            {
+                title: 'Exceptions',
+                href: '/ecarts',
+                icon: CalendarRange,
+            },
+            {
+                title: 'Réservations',
+                href: '/mes-reservations',
+                icon: NotebookPen,
+            },
+            {
+                title: 'Historique',
+                href: '/historique-disponibilites',
+                icon: History,
+            },
+            {
+                title: 'Notifications',
+                href: '/mes-notifications',
+                icon: Bell,
+            },
+            {
+                title: 'Mon emploi du temps',
+                href: '/emploie-du-temps/edt-enseignant',
+                icon: Calendar1,
+            }
+        );
+    }
 
-    
+    if (hasRole('etudiant')) {
+        mainNavItems.push({
+            title: 'Emploi du Temps',
+            href: '/emploie-du-temps/edt-etudiant',
+            icon: Calendar1,
+        });
+    }
 
     return (
         <Sidebar collapsible="icon" variant="inset">
+
+            {/* HEADER */}
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -169,14 +185,18 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
+            {/* CONTENT */}
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                <ModuleFiveCombobox />
             </SidebarContent>
 
+            {/* FOOTER */}
             <SidebarFooter>
                 <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
+
         </Sidebar>
     );
 }

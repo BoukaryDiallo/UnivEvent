@@ -21,7 +21,7 @@ Route::middleware(['auth', 'verified'])->prefix('emploie-du-temps')->name('emplo
         Route::put('{id}/modifier-seance', [EmploiDuTempsController::class, 'modifierSeance'])->name('modifier-seance');
         Route::delete('{id}/supprimer-seance', [EmploiDuTempsController::class, 'supprimerSeance'])->name('supprmier-seance');
         Route::post('{id}/publier', [EmploiDuTempsController::class, 'publierEdt'])->name('publier');
-        Route::get('/{id}/vue-admin', [EmploiDuTempsController::class, 'adminSeanceEdt'])->name('vue');
+        Route::get('/{id}/vue-admin', [EmploiDuTempsController::class, 'adminSeanceEdt'])->name('vue-admin');
         Route::post('{id}/envoyer-email', [EmploiDuTempsController::class, 'envoyerEdtParEmail'])->name('admin.envoyer-email');
         Route::post('/{id}/liberer-enseignant', [EmploiDuTempsController::class, 'libererEnseignant'])->name('seances.liberer-enseignant');
         Route::post('/config-annee', [EmploiDuTempsController::class, 'configurerAnne'])->name('config-annee');
@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->prefix('emploie-du-temps')->name('emplo
 
     Route::middleware('role:enseignant')->group(function () {
         Route::get('/edt-enseignant', [EmploiDuTempsController::class, 'enseignantSeance'])->name('enseignant.edt-enseignant');
-        Route::get('{id}/pdf-enseignant', [EmploiDuTempsController::class, 'edtEnseignantPdf'])->name('pdf');
+        Route::get('{id}/pdf-enseignant', [EmploiDuTempsController::class, 'edtEnseignantPdf'])->name('pdf-enseignant');
     });
 
     Route::middleware('role:etudiant')->group(function () {

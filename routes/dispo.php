@@ -13,7 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('ecarts/ajout', [DispoController::class, 'ajoutEcart'])->name('ecarts.ajout');
         Route::get('mes-reservations', [DispoController::class, 'reservations'])->name('reservations.index');
         Route::get('historique-disponibilites', [DispoController::class, 'historique'])->name('dispos.historique');
-        Route::get('mes-notifications', [DispoController::class, 'notifications'])->name('notifications.index');
+        Route::get('mes-notifications', [DispoController::class, 'notifications'])->name('dispos.notifications');
 
         Route::post('dispos', [DispoController::class, 'store'])->name('dispos.store');
         Route::post('dispos/import', [DispoController::class, 'importer'])->name('dispos.import');

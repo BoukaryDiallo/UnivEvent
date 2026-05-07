@@ -9,15 +9,15 @@ use Laravel\Fortify\Features;
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::middleware('role:admin')->prefix('admin')->group(function () {
+    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
 
-        Route::get('/users', [AdminUserController::class, 'index']);
-        Route::post('/users', [AdminUserController::class, 'store']);
-        Route::post('/users/{id}/promote-user', [AdminUserController::class, 'promouvoirUser']);
-        Route::post('/users/{id}/roles', [AdminUserController::class, 'updateRoles']);
-        Route::get('/permissions', [PermissionController::class, 'index']);
-        Route::post('/permissions', [PermissionController::class, 'store']);
-        Route::post('/permissions/assign', [PermissionController::class, 'assignerPermisson']);
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+        Route::post('/users/{id}/promote-user', [AdminUserController::class, 'promouvoirUser'])->name('users.promote-user');
+        Route::post('/users/{id}/roles', [AdminUserController::class, 'updateRoles'])->name('users.roles');
+        Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+        Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
+        Route::post('/permissions/assign', [PermissionController::class, 'assignerPermisson'])->name('permissions.assign');
 
     });
 

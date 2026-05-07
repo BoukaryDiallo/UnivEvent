@@ -19,7 +19,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'est_actif'])]
+#[Fillable(['name', 'email', 'password', 'role', 'est_actif'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -37,17 +37,51 @@ class User extends Authenticatable
     }
 
 
-    public function isAdmin(){
+    public function isAdmin(): bool
+    {
         return $this->role === 'admin';
     }
 
-    public function isEtudiant(){
+    public function isEtudiant(): bool
+    {
         return $this->role === 'etudiant';
     }
 
-    public function isEnseignant(){
+    public function isEnseignant(): bool
+    {
         return $this->role === 'enseignant';
     }
+
+    public function isOrganisateur(): bool
+    {
+        return $this->role === 'organisateur';
+    }
+
+    public function isParticipant(): bool
+    {
+        return $this->role === 'participant';
+    }
+
+    public function isJury(): bool
+    {
+        return $this->role === 'jury';
+    }
+
+    public function isIntervenant(): bool
+    {
+        return $this->role === 'intervenant';
+    }
+
+    public function isScolarite(): bool
+    {
+        return $this->can('diplomas.manage');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONS (Module 1 & 2)
+    |--------------------------------------------------------------------------
+    */
 
     public function enseignant(): HasOne
     {
@@ -73,8 +107,75 @@ class User extends Authenticatable
     {
         return $this->hasMany(HistoriqueDisponibilite::class, 'enseignant_id');
     }
-    public function isScolarite(): bool
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONS (Module 5)
+    |--------------------------------------------------------------------------
+    */
+
+    public function evenementsCrees()
     {
-        return $this->can('diplomas.manage');
+        return $this->hasMany(Evenement::class, 'cree_par');
+    }
+
+    public function inscriptions()
+    {
+        return $this->hasMany(InscriptionEvenement::class, 'utilisateur_id');
+    }
+
+    public function resultats()
+    {
+        return $this->hasMany(ResultatEvaluation::class, 'utilisateur_id');
+    }
+
+    public function certificats()
+    {
+        return $this->hasMany(Certificat::class, 'utilisateur_id');
+    }
+
+    public function evenementComments()
+    {
+        return $this->hasMany(EvenementComment::class);
+    }
+
+    public function eventNotifications()
+    {
+        return $this->hasMany(EventNotification::class);
+    }
+
+    public function eventMessages()
+    {
+        return $this->hasMany(EventMessage::class);
+    }
+
+    public function evenementAssignments()
+    {
+        return $this->hasMany(EvenementRole::class);
+    }
+
+    public function assignments()
+    {
+        return $this->evenementAssignments();
+    }
+
+    public function moderationRestrictions()
+    {
+        return $this->hasMany(EvenementModerationRestriction::class);
+    }
+
+    public function juryPanelsAsPresident()
+    {
+        return $this->hasMany(JuryPanel::class, 'president_user_id');
+    }
+
+    public function juryScores()
+    {
+        return $this->hasMany(JuryScore::class, 'jury_user_id');
+    }
+
+    public function participantScores()
+    {
+        return $this->hasMany(JuryScore::class, 'participant_id');
     }
 }

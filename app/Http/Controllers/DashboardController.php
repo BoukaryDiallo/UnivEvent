@@ -52,7 +52,10 @@ class DashboardController extends Controller
             ]);
         }
 
-        return Inertia::render('dashboard', $service->snapshot($user));
+        return Inertia::render('dashboard', array_merge(
+            $service->snapshot($user),
+            ['isAdmin' => $user->hasRole('admin')]
+        ));
     }
 
     protected function grille(int $userId): array
