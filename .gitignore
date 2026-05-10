@@ -10,6 +10,7 @@
 /resources/js/routes
 /resources/js/wayfinder
 /vendor
+/resources/js/pages/EmploiDuTemps/docs/*.zip
 .DS_Store
 .env
 .env.backup
@@ -26,3 +27,4 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+*.xml

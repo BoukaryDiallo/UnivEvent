@@ -1,0 +1,25 @@
+
+h2 {
+    font-weight: 600;
+}
+/*////////////////////////AJOUT DES ETUDIANT TEMPLATE//////////////////////*/
+form {
+    border-left: 5px solid #198754;
+}
+select {
+    border: 2px solid #198754;
+}
+
+/*////////////////////////LISTE DES ETUDIANT TEMPLATE//////////////////////*/
+
+#searchInput {
+    border: 2px solid #198754;
+}
+#sortSelect {
+    border: 2px solid #198754;
+}
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+

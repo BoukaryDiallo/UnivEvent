@@ -90,11 +90,10 @@ export default function Login({
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
-                                className='bg-blue-600 hover:bg-blue-700 text-white'
+                                className="mt-4 w-full bg-blue-600 text-white hover:bg-blue-700"
                             >
                                 {processing && <Spinner />}
                                 Se connecter
