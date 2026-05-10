@@ -20,12 +20,16 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'role', 'est_actif'])]
+#[Fillable(['name', 'email', 'password', 'est_actif'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
+<<<<<<< HEAD
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
+=======
     use HasFactory, Notifiable, SoftDeletes, TwoFactorAuthenticatable, HasRoles;
+>>>>>>> main
 
     protected function casts(): array
     {
@@ -37,6 +41,8 @@ class User extends Authenticatable
         ];
     }
 
+<<<<<<< HEAD
+=======
 
     public function isAdmin(): bool
     {
@@ -184,4 +190,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(JuryScore::class, 'participant_id');
     }
+>>>>>>> main
 }

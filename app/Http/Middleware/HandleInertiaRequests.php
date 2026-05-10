@@ -43,6 +43,11 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
+<<<<<<< HEAD
+                'user' => $request->user(),
+                'roles' => $request->user() ? $request->user()->getRoleNames() : [],
+                'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
+=======
                 'user' => $request->user()
                     ? array_merge(
                         $request->user()->toArray(),
@@ -60,6 +65,7 @@ class HandleInertiaRequests extends Middleware
                         ]
                     )
                     : null,
+>>>>>>> main
             ],
             'notifications' => fn () => $request->user()
                 ? [

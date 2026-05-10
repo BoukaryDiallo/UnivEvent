@@ -9,6 +9,7 @@ import {
     CalendarClock,
     CalendarRange,
     ClipboardCheck,
+    DoorOpen,
     Eye,
     FolderGit2,
     GraduationCap,
@@ -44,13 +45,15 @@ import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
 import { index as adminPickupSlotsIndex } from '@/routes/admin/pickup-slots';
 
 import type { NavItem } from '@/types';
+
+
 import { dashboard } from '@/routes';
 import { index as diplomasIndex } from '@/routes/diplomas';
 
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
+        href: 'https://github.com/BoukaryDiallo/UnivEvent',
         icon: FolderGit2,
     },
     {
@@ -174,6 +177,16 @@ export function AppSidebar() {
                 icon: History,
             },
             {
+                title: 'Soutenances',
+                href: '/soutenances',
+                icon: GraduationCap,
+            },
+            {
+                title: 'Salles',
+                href: '/salles',
+                icon: DoorOpen,
+            },
+            {
                 title: 'Notifications',
                 href: '/mes-notifications',
                 icon: Bell,
@@ -191,7 +204,29 @@ export function AppSidebar() {
             title: 'Mon emploi du temps',
             href: '/emploie-du-temps/edt-etudiant',
             icon: Calendar1,
-        });
+        },
+        {
+        title: 'Soutenances',
+        href: '/soutenances',
+        icon: GraduationCap,
+    },
+    {
+        title: 'Jurys',
+        href: '/jurys',
+        icon: Users,
+    },
+    {
+        title: 'Salles',
+        href: '/salles',
+        icon: DoorOpen,
+    },
+    {
+        title: 'Notifications',
+        href: '/notifications-soutenance',
+        icon: Bell,
+    },
+    
+    );
     }
 
     return (
