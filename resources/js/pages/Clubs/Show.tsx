@@ -40,7 +40,7 @@ export default function ClubShow({ club }: Props) {
   })
   const { auth } = usePage().props as any;
   const user = auth?.user;
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || (auth?.roles && auth.roles.includes('admin'));
   const [activeTab, setActiveTab] = useState('overview');
 
   if (!club) {
@@ -172,7 +172,10 @@ export default function ClubShow({ club }: Props) {
                         Forum
                       </button>
                     </SheetTrigger>
-                    <SheetContent className="p-0 sm:max-w-md border-l-0">
+                    <SheetContent className="p-0 sm:max-w-md border-l-0" onOpenAutoFocus={(e) => {
+                      e.preventDefault();
+                      setTimeout(() => document.getElementById('forum-message-input')?.focus(), 100);
+                    }}>
                       <div className="flex flex-col h-full bg-white">
                         <SheetHeader className="p-6 border-b border-slate-100">
                           <div className="flex items-center gap-3">
@@ -222,17 +225,18 @@ export default function ClubShow({ club }: Props) {
                         <div className="p-4 bg-white border-t border-slate-100">
                           <form onSubmit={handlePostMessage} className="relative">
                             <textarea
+                              id="forum-message-input"
                               value={forumForm.data.contenu}
                               onChange={e => forumForm.setData('contenu', e.target.value)}
                               placeholder="Votre message..."
-                              className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 outline-none transition-all resize-none h-12 min-h-[48px] max-h-32 text-sm"
+                              className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 outline-none transition-all resize-none min-h-[48px] max-h-32 text-sm text-slate-900 placeholder:text-slate-400 relative z-10 pointer-events-auto"
                               rows={1}
                               required
                             />
                             <button
                               type="submit"
                               disabled={forumForm.processing || !forumForm.data.contenu.trim()}
-                              className="absolute right-2 top-2 p-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all shadow-sm disabled:opacity-50"
+                              className="absolute right-2 top-2 p-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all shadow-sm disabled:opacity-50 z-20"
                             >
                               <Send className="w-4 h-4" />
                             </button>
@@ -243,7 +247,7 @@ export default function ClubShow({ club }: Props) {
                   </Sheet>
                 )}
 
-                {club.statut === 'actif' && !adhesionStatut && (
+                {club.statut === 'actif' && !adhesionStatut && !isAdmin && (
                   <button
                     onClick={handleJoin}
                     disabled={processing}
@@ -451,20 +455,27 @@ export default function ClubShow({ club }: Props) {
             <div className="space-y-8">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Local Requests */}
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-black text-slate-900">Demandes de locaux</h3>
-                    <Link href={`/clubs/${club.id}/demandes-local/create`} className="text-xs font-bold text-indigo-600 hover:underline uppercase tracking-wider">
-                      Nouvelle demande
-                    </Link>
+                <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center border border-indigo-100 shadow-sm">
+                        <Building2 className="w-5 h-5 text-indigo-600" />
+                      </div>
+                      <h3 className="text-xl font-black px-4 py-1.5 bg-indigo-100 text-indigo-900 rounded-xl shadow-sm border border-indigo-200">Demandes de locaux</h3>
+                    </div>
+                    {!isAdmin && (
+                      <Link href={`/clubs/${club.id}/demandes-local/create`} className="text-xs font-bold text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">
+                        Nouvelle
+                      </Link>
+                    )}
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-4 flex-1">
                     {club.demandes_local && club.demandes_local.map((demande: any) => (
-                      <div key={demande.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                      <div key={demande.id} className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 hover:border-indigo-200 hover:shadow-md transition-all">
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-bold text-slate-900">{demande.salle_souhaitee}</h4>
-                            <p className="text-xs text-slate-400 mt-1">{new Date(demande.date).toLocaleString()}</p>
+                            <p className="text-xs text-slate-500 mt-1">{new Date(demande.date).toLocaleString()}</p>
                             <span className={`inline-flex items-center mt-3 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${
                               demande.statut === 'approuvée' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                               demande.statut === 'en_attente' ? 'bg-amber-50 text-amber-700 border-amber-100' :
@@ -476,24 +487,37 @@ export default function ClubShow({ club }: Props) {
                         </div>
                       </div>
                     ))}
+                    {(!club.demandes_local || club.demandes_local.length === 0) && (
+                      <div className="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                        <Building2 className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                        <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Aucune demande</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Budget Requests */}
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-black text-slate-900">Demandes de budget</h3>
-                    <Link href={`/clubs/${club.id}/demandes-budget/create`} className="text-xs font-bold text-purple-600 hover:underline uppercase tracking-wider">
-                      Nouvelle demande
-                    </Link>
+                <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center border border-purple-100 shadow-sm">
+                        <DollarSign className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <h3 className="text-xl font-black px-4 py-1.5 bg-purple-100 text-purple-900 rounded-xl shadow-sm border border-purple-200">Demandes de budget</h3>
+                    </div>
+                    {!isAdmin && (
+                      <Link href={`/clubs/${club.id}/demandes-budget/create`} className="text-xs font-bold text-purple-600 hover:bg-purple-50 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">
+                        Nouvelle
+                      </Link>
+                    )}
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-4 flex-1">
                     {club.demandes_budget && club.demandes_budget.map((demande: any) => (
-                      <div key={demande.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                      <div key={demande.id} className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 hover:border-purple-200 hover:shadow-md transition-all">
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-black text-slate-900 text-lg">{demande.montant_demande} FCFA</h4>
-                            <p className="text-xs text-slate-400 mt-1">{demande.justificatif}</p>
+                            <p className="text-xs text-slate-500 mt-1">{demande.justificatif}</p>
                             <span className={`inline-flex items-center mt-3 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${
                               demande.statut === 'approuvée' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                               demande.statut === 'en_attente' ? 'bg-amber-50 text-amber-700 border-amber-100' :
@@ -505,37 +529,51 @@ export default function ClubShow({ club }: Props) {
                         </div>
                       </div>
                     ))}
+                    {(!club.demandes_budget || club.demandes_budget.length === 0) && (
+                      <div className="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                        <DollarSign className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                        <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Aucune demande</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Pending Approvals */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-black text-slate-900">Demandes d'adhésion en attente</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center border border-emerald-100 shadow-sm">
+                    <Users className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <h3 className="text-xl font-black px-4 py-1.5 bg-emerald-100 text-emerald-900 rounded-xl shadow-sm border border-emerald-200">Demandes d'adhésion en attente</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {club.adhesions && club.adhesions.filter((a: any) => a.statut === 'en_attente').map((adhesion: any) => (
-                    <div key={adhesion.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div key={adhesion.id} className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 hover:border-emerald-200 hover:shadow-md transition-all flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 font-bold">
+                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-slate-600 font-black text-xl shadow-sm border border-slate-200">
                           {adhesion.user?.name?.charAt(0)}
                         </div>
                         <div>
                           <p className="font-black text-slate-900">{adhesion.user?.name}</p>
-                          <p className="text-xs text-slate-400">{adhesion.user?.email}</p>
+                          <p className="text-xs text-slate-500">{adhesion.user?.email}</p>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => handleApprove(adhesion.id)} className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors">
-                          <Check className="w-5 h-5" />
-                        </button>
-                        <button onClick={() => handleReject(adhesion.id)} className="p-2 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors">
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
+                      {isResponsable && (
+                        <div className="flex gap-2">
+                          <button onClick={() => handleApprove(adhesion.id)} className="p-2 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors shadow-sm">
+                            <Check className="w-5 h-5" />
+                          </button>
+                          <button onClick={() => handleReject(adhesion.id)} className="p-2 bg-rose-100 text-rose-700 rounded-xl hover:bg-rose-200 transition-colors shadow-sm">
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                   {(!club.adhesions || club.adhesions.filter((a: any) => a.statut === 'en_attente').length === 0) && (
-                    <div className="md:col-span-2 text-center py-10 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                    <div className="md:col-span-2 lg:col-span-3 text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                      <Users className="w-8 h-8 text-slate-300 mx-auto mb-3" />
                       <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Aucune demande en attente</p>
                     </div>
                   )}

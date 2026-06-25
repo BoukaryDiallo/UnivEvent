@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Activite;
 use App\Models\Club;
 use App\Models\Adhesion;
+use App\Services\DiplomaStudentDashboardService;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request, DiplomaStudentDashboardService $service): Response
     {
         $activites = Activite::whereHas('club', function($query) {
             if (!Auth::user()->isAdmin()) {
@@ -30,9 +33,11 @@ class DashboardController extends Controller
             'membersCount' => Adhesion::where('statut', 'approuvee')->distinct('user_id')->count()
         ];
 
-        return Inertia::render('dashboard', [
+        $diplomaData = $service->snapshot($request->user());
+
+        return Inertia::render('dashboard', array_merge([
             'activites' => $activites,
             'stats' => $stats
-        ]);
+        ], $diplomaData));
     }
 }

@@ -13,7 +13,7 @@ class ForumController extends Controller
     {
         // Check if user is member or admin
         $isMember = $club->adhesions()->where('user_id', Auth::id())->where('statut', 'approuvee')->exists();
-        $isAdmin = Auth::user()->role === 'admin';
+        $isAdmin = Auth::user()->isAdmin();
 
         if (!$isMember && !$isAdmin) {
             return back()->with('error', 'Vous devez être membre du club pour participer au forum.');
@@ -35,7 +35,7 @@ class ForumController extends Controller
     public function destroy(ForumMessage $message)
     {
         // Check if user is author or admin
-        if ($message->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+        if ($message->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
             return back()->with('error', 'Action non autorisée.');
         }
 

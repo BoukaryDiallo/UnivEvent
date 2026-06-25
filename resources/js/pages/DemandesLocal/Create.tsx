@@ -40,60 +40,60 @@ export default function DemandeLocalCreate({ club }: Props) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Demander un local" />
-      <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Demander un local pour {club.nom}</h1>
-          <p className="text-gray-600 mt-2">
-            Remplissez le formulaire ci-dessous pour demander une réservation de salle.
-          </p>
-        </div>
+      <div className="flex h-full flex-1 flex-col gap-6 p-8 bg-slate-50/50">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden max-w-3xl mx-auto w-full">
+          <div className="p-8 sm:p-10">
+            <h1 className="text-3xl font-black text-slate-900">Demander un local pour {club.nom}</h1>
+            <p className="text-slate-500 mt-3 text-lg">
+              Remplissez le formulaire ci-dessous pour demander une réservation de salle.
+            </p>
 
-        <div className="max-w-2xl">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Salle souhaitée
-              </label>
-              <input
-                type="text"
-                value={data.salle_souhaitee}
-                onChange={(e) => setData('salle_souhaitee', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                required
-              />
-              {errors.salle_souhaitee && <p className="mt-1 text-sm text-red-600">{errors.salle_souhaitee}</p>}
-            </div>
+            <form onSubmit={handleSubmit} className="mt-10 space-y-8">
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider">
+                  Salle souhaitée
+                </label>
+                <input
+                  type="text"
+                  value={data.salle_souhaitee}
+                  onChange={(e) => setData('salle_souhaitee', e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+                  required
+                />
+                {errors.salle_souhaitee && <p className="mt-2 text-sm text-rose-600 font-medium">{errors.salle_souhaitee}</p>}
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date et heure souhaitée
-              </label>
-              <input
-                type="datetime-local"
-                value={data.date}
-                onChange={(e) => setData('date', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                required
-              />
-              {errors.date && <p className="mt-1 text-sm text-red-600">{errors.date}</p>}
-            </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider">
+                  Date et heure souhaitée
+                </label>
+                <input
+                  type="datetime-local"
+                  value={data.date}
+                  onChange={(e) => setData('date', e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+                  required
+                />
+                {errors.date && <p className="mt-2 text-sm text-rose-600 font-medium">{errors.date}</p>}
+              </div>
 
-            <div className="flex items-center justify-end gap-4">
-              <Link
-                href={`/clubs/${club.id}`}
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Annuler
-              </Link>
-              <button
-                type="submit"
-                disabled={processing}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {processing ? 'Envoi...' : 'Envoyer la demande'}
-              </button>
-            </div>
-          </form>
+              <div className="flex items-center justify-end gap-4 pt-8 mt-8 border-t border-slate-100">
+                <Link
+                  href={`/clubs/${club.id}`}
+                  className="px-6 py-3 text-slate-600 font-bold hover:text-slate-900 transition-colors"
+                >
+                  Annuler
+                </Link>
+                <button
+                  type="submit"
+                  disabled={processing}
+                  className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-sm disabled:opacity-50"
+                >
+                  {processing ? 'Envoi...' : 'Envoyer la demande'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </AppLayout>

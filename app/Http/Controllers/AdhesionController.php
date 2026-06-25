@@ -83,6 +83,11 @@ class AdhesionController extends Controller
     public function valider(string $id)
     {
         $adhesion = Adhesion::with('club')->findOrFail($id);
+
+        if ($adhesion->club->responsable_id !== Auth::id()) {
+            abort(403, 'Seul le responsable du club peut valider cette adhésion.');
+        }
+
         $adhesion->update(['statut' => 'approuvee', 'date_adhesion' => now()]);
         
         // Notifier l'étudiant
@@ -100,6 +105,11 @@ class AdhesionController extends Controller
     public function reject(string $id, Request $request)
     {
         $adhesion = Adhesion::with('club')->findOrFail($id);
+
+        if ($adhesion->club->responsable_id !== Auth::id()) {
+            abort(403, 'Seul le responsable du club peut rejeter cette adhésion.');
+        }
+
         $adhesion->update(['statut' => 'rejetee']);
         
         // Notifier l'étudiant

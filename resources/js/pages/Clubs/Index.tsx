@@ -195,42 +195,44 @@ export default function ClubsIndex({ clubs }: Props) {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <Link
                           href={`/clubs/${club.id}`}
-                          className="inline-flex items-center gap-2 px-3 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-semibold text-sm"
+                          className="p-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 hover:text-slate-900 transition-colors shadow-sm"
                           title="Voir détails"
                         >
                           <Eye className="w-4 h-4" />
-                          Détails
                         </Link>
                         {isAdmin && (
-                          <>
-                            <button
-                              onClick={() => handleSuspendre(club.id)}
-                              className="inline-flex items-center gap-2 px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-semibold text-sm"
-                              title="Suspendre"
-                            >
-                              <Ban className="w-4 h-4" />
-                              Suspendre
-                            </button>
-                            <button
-                              onClick={() => handleReactiver(club.id)}
-                              className="inline-flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold text-sm"
-                              title="Réactiver"
-                            >
-                              <CheckCircle className="w-4 h-4" />
-                              Réactiver
-                            </button>
-                            <button
-                              onClick={() => handleDissoudre(club.id)}
-                              className="inline-flex items-center gap-2 px-3 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors font-semibold text-sm"
-                              title="Dissoudre"
-                            >
-                              <XCircle className="w-4 h-4" />
-                              Dissoudre
-                            </button>
-                          </>
+                          <div className="flex items-center gap-1 border-l border-slate-200 pl-2 ml-1">
+                            {club.statut === 'actif' && (
+                              <button
+                                onClick={() => handleSuspendre(club.id)}
+                                className="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 hover:text-amber-700 transition-colors"
+                                title="Suspendre"
+                              >
+                                <Ban className="w-4 h-4" />
+                              </button>
+                            )}
+                            {(club.statut === 'suspendu' || club.statut === 'dissous') && (
+                              <button
+                                onClick={() => handleReactiver(club.id)}
+                                className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 hover:text-emerald-700 transition-colors"
+                                title="Réactiver"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </button>
+                            )}
+                            {club.statut !== 'dissous' && (
+                              <button
+                                onClick={() => handleDissoudre(club.id)}
+                                className="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 hover:text-rose-700 transition-colors"
+                                title="Dissoudre"
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     </td>

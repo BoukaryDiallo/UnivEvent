@@ -27,14 +27,14 @@ Route::middleware(['auth'])->group(function () {
     Route::put('activites/{activite}/annuler', [ActiviteController::class, 'cancel'])->name('activites.annuler');
 
     // Demandes de local
-    Route::resource('demandes-local', DemandeLocalController::class);
+    Route::resource('demandes-local', DemandeLocalController::class)->except(['create', 'store']);
     Route::get('clubs/{club}/demandes-local/create', [DemandeLocalController::class, 'create'])->name('clubs.demandes-local.create');
     Route::post('clubs/{club}/demandes/local', [DemandeLocalController::class, 'store'])->name('clubs.demandes.local');
     Route::put('demandes-local/{demande}/valider', [DemandeLocalController::class, 'valider'])->name('demandes-local.valider');
     Route::put('demandes-local/{demande}/rejeter', [DemandeLocalController::class, 'reject'])->name('demandes-local.rejeter');
 
     // Demandes de budget
-    Route::resource('demandes-budget', DemandeBudgetController::class);
+    Route::resource('demandes-budget', DemandeBudgetController::class)->except(['create', 'store']);
     Route::get('clubs/{club}/demandes-budget/create', [DemandeBudgetController::class, 'create'])->name('clubs.demandes-budget.create');
     Route::post('clubs/{club}/demandes/budget', [DemandeBudgetController::class, 'store'])->name('clubs.demandes.budget');
     Route::put('demandes-budget/{demande}/valider', [DemandeBudgetController::class, 'valider'])->name('demandes-budget.valider');

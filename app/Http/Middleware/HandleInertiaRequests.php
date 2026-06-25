@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -35,13 +36,13 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
         $unreadCount = 0;
-        if ($request->user()) {
-            $user = $request->user();
-            if ($user->isAdmin()) {
+        if ($user) {
+            if (method_exists($user, 'isAdmin') && $user->isAdmin()) {
                 $unreadCount = \App\Models\NotificationClub::where('lu', false)->count();
             } else {
-                $unreadCount = \App\Models\NotificationClub::where('club_id', $user->club_id)
+                $unreadCount = \App\Models\NotificationClub::where('club_id', $user->club_id ?? null)
                     ->where('lu', false)
                     ->count();
             }
@@ -51,16 +52,47 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user() ? [
-                    'id' => $request->user()->id,
-                    'name' => $request->user()->name,
-                    'email' => $request->user()->email,
-                    'role' => $request->user()->role,
-                    'is_responsable' => $request->user()->isResponsable(),
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role ?? null,
+                    'is_responsable' => method_exists($user, 'isResponsable') ? $user->isResponsable() : false,
                 ] : null,
+                'isScolarite' => (bool) $user?->isScolarite(),
+                'roles' => $user ? $user->getRoleNames() : [],
+                'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
             ],
             'unreadNotifications' => $unreadCount,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'notifications' => $user
+                ? $this->buildNotificationsShare($user)
+                : ['unread_count' => 0, 'recent' => []],
+        ];
+    }
+
+    /**
+     * @return array{unread_count: int, recent: array<int, array<string, mixed>>}
+     */
+    private function buildNotificationsShare($user): array
+    {
+        $unread = $user->unreadNotifications()->latest()->limit(10)->get();
+
+        $count = $unread->count() < 10
+            ? $unread->count()
+            : $user->unreadNotifications()->count();
+
+        return [
+            'unread_count' => $count,
+            'recent' => $unread
+                ->map(fn (DatabaseNotification $n) => [
+                    'id' => $n->id,
+                    'title' => $n->data['title'] ?? 'Notification',
+                    'tracking_code' => $n->data['tracking_code'] ?? null,
+                    'status_label' => $n->data['status_label'] ?? null,
+                    'created_at' => $n->created_at->toIso8601String(),
+                ])
+                ->all(),
         ];
     }
 }

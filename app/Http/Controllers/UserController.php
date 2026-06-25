@@ -7,63 +7,37 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
         $users = User::all();
         return inertia('roles', [
             'users' => $users,
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function toggleStatus(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->est_actif = !$user->est_actif;
+        $user->save();
+        return back()->with('success', 'Statut mis à jour');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function updateRole(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'role' => 'required|in:admin,etudiant'
+        ]);
+        $user = User::findOrFail($id);
+        $user->role = $request->role;
+        $user->save();
+        return back()->with('success', 'Rôle mis à jour');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->delete();
+        return back()->with('success', 'Utilisateur supprimé');
     }
 }

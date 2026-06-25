@@ -230,6 +230,70 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
         }
     };
 
+    const handleToggleUserStatus = (id: number) => {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/users/${id}/toggle-status`;
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'PUT';
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '_token';
+        tokenInput.value = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+        form.appendChild(methodInput);
+        form.appendChild(tokenInput);
+        document.body.appendChild(form);
+        form.submit();
+    };
+
+    const handleUpdateUserRole = (id: number, currentRole: string) => {
+        const newRole = currentRole === 'admin' ? 'etudiant' : 'admin';
+        if (confirm(`Voulez-vous changer le rôle de cet utilisateur en ${newRole} ?`)) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/users/${id}/role`;
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'PUT';
+            const roleInput = document.createElement('input');
+            roleInput.type = 'hidden';
+            roleInput.name = 'role';
+            roleInput.value = newRole;
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '_token';
+            tokenInput.value = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+            form.appendChild(methodInput);
+            form.appendChild(roleInput);
+            form.appendChild(tokenInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    };
+
+    const handleDeleteUser = (id: number) => {
+        if (confirm('Voulez-vous vraiment supprimer cet utilisateur ? Cette action est irréversible.')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/users/${id}`;
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '_token';
+            tokenInput.value = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+            form.appendChild(methodInput);
+            form.appendChild(tokenInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Gestion des clubs" />
@@ -684,6 +748,7 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
                                             <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Email</th>
                                             <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Rôle</th>
                                             <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Statut</th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-slate-200">
@@ -699,11 +764,40 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
                                                         {user.est_actif ? 'Actif' : 'Inactif'}
                                                     </span>
                                                 </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => handleToggleUserStatus(user.id)}
+                                                            className={`inline-flex items-center justify-center w-9 h-9 text-white rounded-lg transition-colors ${
+                                                                user.est_actif ? 'bg-amber-500 hover:bg-amber-600' : 'bg-emerald-600 hover:bg-emerald-700'
+                                                            }`}
+                                                            title={user.est_actif ? 'Désactiver' : 'Activer'}
+                                                        >
+                                                            {user.est_actif ? <Ban className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleUpdateUserRole(user.id, user.role)}
+                                                            className={`inline-flex items-center justify-center px-3 h-9 text-white font-bold text-xs rounded-lg transition-colors ${
+                                                                user.role === 'admin' ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-blue-500 hover:bg-blue-600'
+                                                            }`}
+                                                            title="Changer le rôle"
+                                                        >
+                                                            {user.role === 'admin' ? 'Rétrograder' : 'Promouvoir'}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteUser(user.id)}
+                                                            className="inline-flex items-center justify-center w-9 h-9 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+                                                            title="Supprimer"
+                                                        >
+                                                            <XCircle className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))}
                                         {!users || users.length === 0 && (
                                             <tr>
-                                                <td colSpan={4} className="px-6 py-16 text-center">
+                                                <td colSpan={5} className="px-6 py-16 text-center">
                                                     <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                                         <UsersIcon className="w-8 h-8 text-slate-400" />
                                                     </div>
