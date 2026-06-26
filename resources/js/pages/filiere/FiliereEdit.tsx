@@ -16,6 +16,7 @@ type Departement = {
 
 type Filiere = {
   id_filiere: number;
+  code: string;
   nom: string;
   id_departement: number;
 };
@@ -29,6 +30,7 @@ export default function FiliereEdit() {
   const { filiere, departements } = usePage<Props>().props;
 
   const { data, setData, put, processing, errors } = useForm({
+    code: filiere.code || '',
     nom: filiere.nom || '',
     id_departement: filiere.id_departement.toString(),
   });
@@ -83,6 +85,28 @@ export default function FiliereEdit() {
             </CardHeader>
             <CardContent className="p-8">
               <form onSubmit={submit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="code" className="text-sm font-medium text-gray-700">
+                    Code de la filière <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="code"
+                    name="code"
+                    value={data.code}
+                    onChange={(e) => setData('code', e.target.value)}
+                    className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.code ? 'border-red-500 ring-2 ring-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Ex: INF"
+                  />
+                  {errors.code && (
+                    <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      {errors.code}
+                    </p>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="nom" className="text-sm font-medium text-gray-700">
                     Nom de la filière <span className="text-red-500">*</span>

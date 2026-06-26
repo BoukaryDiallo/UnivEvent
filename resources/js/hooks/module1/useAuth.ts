@@ -24,6 +24,7 @@ export function useAuth() {
     console.log('Final permissions:', permissions);
 
     return {
+        user: auth?.user,
         roles,
         permissions,
 

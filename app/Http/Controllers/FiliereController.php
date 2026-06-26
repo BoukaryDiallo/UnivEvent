@@ -32,6 +32,7 @@ class FiliereController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'code' => 'required|string|max:50|unique:filieres,code',
             'nom' => 'required|string|max:255',
             'id_departement' => 'required|exists:departements,id_departement',
         ]);
@@ -61,6 +62,7 @@ class FiliereController extends Controller
     public function update(Request $request, Filiere $filiere)
     {
         $data = $request->validate([
+            'code' => 'required|string|max:50|unique:filieres,code,'.$filiere->id_filiere.',id_filiere',
             'nom' => 'required|string|max:255',
             'id_departement' => 'required|exists:departements,id_departement',
         ]);
