@@ -3,7 +3,6 @@ import { CalendarDays, FileText, MessageSquare, Presentation, Users } from 'luci
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { show } from '@/routes/module5';
 import type { EventDetail } from '@/types';
 
 type IntervenantDashboardProps = {
@@ -40,7 +39,7 @@ export function IntervenantDashboard({ event, canManageMessages }: IntervenantDa
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href={show(event.id)}>Voir l'événement</Link>
+                        <Link href={`/module5/events/${event.id}`}>Voir l'événement</Link>
                     </Button>
                 </div>
             </div>
@@ -142,7 +141,7 @@ export function IntervenantDashboard({ event, canManageMessages }: IntervenantDa
                                 <p className="text-sm text-muted-foreground">Participez aux échanges avec les participants</p>
                             </div>
                             <Button asChild size="sm" variant="outline">
-                                <Link href={show(event.id)}>Voir les messages</Link>
+                                <Link href={`/module5/events/${event.id}`}>Voir les messages</Link>
                             </Button>
                         </div>
 
@@ -152,7 +151,7 @@ export function IntervenantDashboard({ event, canManageMessages }: IntervenantDa
                                 <p className="text-sm text-muted-foreground">Téléchargez vos présentations et documents</p>
                             </div>
                             <Button asChild size="sm" variant="outline">
-                                <Link href={show(event.id)}>Gérer les médias</Link>
+                                <Link href={`/module5/events/${event.id}`}>Gérer les médias</Link>
                             </Button>
                         </div>
 
@@ -163,7 +162,7 @@ export function IntervenantDashboard({ event, canManageMessages }: IntervenantDa
                                     <p className="text-sm text-muted-foreground">Répondez aux messages prioritaires liés à votre intervention</p>
                                 </div>
                                 <Button asChild size="sm" variant="outline">
-                                    <Link href={show(event.id)}>Ouvrir</Link>
+                                    <Link href={`/module5/events/${event.id}`}>Ouvrir</Link>
                                 </Button>
                             </div>
                         ) : null}

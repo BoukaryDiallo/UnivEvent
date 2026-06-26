@@ -3,7 +3,6 @@ import { CalendarDays, CheckCircle, Clock, FileText, MessageSquare, Settings, Us
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { edit, show } from '@/routes/module5';
 import type { EventDetail } from '@/types';
 
 type OrganizerDashboardProps = {
@@ -36,11 +35,11 @@ export function OrganizerDashboard({ event, canManage }: OrganizerDashboardProps
                     <div className="flex gap-2">
                         {canManage ? (
                             <Button asChild variant="outline">
-                                <Link href={edit(event.id)}>Modifier l'événement</Link>
+                                <Link href={`/module5/events/${event.id}/edit`}>Modifier l'événement</Link>
                             </Button>
                         ) : null}
                         <Button asChild>
-                            <Link href={show(event.id)}>Voir l'événement</Link>
+                            <Link href={`/module5/events/${event.id}`}>Voir l'événement</Link>
                         </Button>
                     </div>
                 </div>
@@ -108,7 +107,7 @@ export function OrganizerDashboard({ event, canManage }: OrganizerDashboardProps
                                     <p className="text-sm text-muted-foreground">{pendingInscriptions.length} inscription(s) en attente</p>
                                 </div>
                                 <Button asChild size="sm">
-                                    <Link href={show(event.id)}>Gérer</Link>
+                                    <Link href={`/module5/events/${event.id}`}>Gérer</Link>
                                 </Button>
                             </div>
                         ) : null}
@@ -120,7 +119,7 @@ export function OrganizerDashboard({ event, canManage }: OrganizerDashboardProps
                                     <p className="text-sm text-muted-foreground">Rendre visible aux participants</p>
                                 </div>
                                 <Button asChild size="sm">
-                                    <Link href={show(event.id)}>Publier</Link>
+                                    <Link href={`/module5/events/${event.id}`}>Publier</Link>
                                 </Button>
                             </div>
                         ) : null}
@@ -132,7 +131,7 @@ export function OrganizerDashboard({ event, canManage }: OrganizerDashboardProps
                                     <p className="text-sm text-muted-foreground">Configuration et délibérations</p>
                                 </div>
                                 <Button asChild size="sm">
-                                    <Link href={show(event.id)}>Accéder</Link>
+                                    <Link href={`/module5/events/${event.id}`}>Accéder</Link>
                                 </Button>
                             </div>
                         ) : null}

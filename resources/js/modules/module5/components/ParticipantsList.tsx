@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { refuser, valider } from '@/routes/inscriptions';
 import type { BackendParticipationStatus, EventParticipant, ParticipationStatus } from '@/types';
 import { UserAvatar } from './UserAvatar';
 
@@ -43,7 +42,7 @@ export function ParticipantsList({ participants, canManage = false, onToast }: P
     }
 
     const updateStatus = (id: number, action: 'accept' | 'reject') => {
-        router.patch(action === 'accept' ? valider(id) : refuser(id), undefined, {
+        router.patch(action === 'accept' ? `/inscriptions/${id}/valider` : `/inscriptions/${id}/refuser`, undefined, {
             preserveScroll: true,
             onSuccess: () => onToast?.(action === 'accept' ? 'Participant accepte.' : 'Participant refuse.'),
         });

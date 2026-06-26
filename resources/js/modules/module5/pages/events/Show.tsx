@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { store as joinEvent } from '@/routes/inscriptions';
 import type { BreadcrumbItem } from '@/types';
 
 type EventShowProps = {
@@ -215,7 +214,7 @@ export default function EventShow({ event, participation: directParticipation, a
                                             </p>
                                             <Button 
                                                 className="w-full rounded-2xl h-14 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-xs shadow-2xl" 
-                                                onClick={() => router.post(joinEvent(), { evenement_id: event.id, mode: 'participe' })}
+                                                onClick={() => router.post('/inscriptions', { evenement_id: event.id, mode: 'participe' })}
                                             >
                                                 Confirmer ma présence
                                             </Button>

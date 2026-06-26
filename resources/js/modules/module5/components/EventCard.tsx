@@ -3,8 +3,6 @@ import { CalendarDays, Clock3, Heart, MapPin, MessageSquare, Users } from 'lucid
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { store as joinEvent } from '@/routes/inscriptions';
-import { show } from '@/routes/module5';
 import type { EventSummary } from '@/types';
 import { EventBadge } from './EventBadge';
 import { UserAvatar } from './UserAvatar';
@@ -134,7 +132,7 @@ export function EventCard({ evenement, onJoinSuccess, compact = false }: EventCa
                                     type="button"
                                     variant="outline"
                                     onClick={() => {
-                                        router.post(joinEvent(), { evenement_id: evenement.id, mode: 'interesse' }, {
+                                        router.post(`/inscriptions`, { evenement_id: evenement.id, mode: 'interesse' }, {
                                             preserveScroll: true,
                                             onSuccess: () => onJoinSuccess?.('Interet enregistre.'),
                                         });
@@ -145,7 +143,7 @@ export function EventCard({ evenement, onJoinSuccess, compact = false }: EventCa
                                 <Button
                                     type="button"
                                     onClick={() => {
-                                        router.post(joinEvent(), { evenement_id: evenement.id, mode: 'participe' }, {
+                                        router.post(`/inscriptions`, { evenement_id: evenement.id, mode: 'participe' }, {
                                             preserveScroll: true,
                                             onSuccess: () => onJoinSuccess?.('Participation enregistree.'),
                                         });
@@ -156,7 +154,7 @@ export function EventCard({ evenement, onJoinSuccess, compact = false }: EventCa
                             </>
                         ) : null}
                         <Button asChild>
-                            <Link href={show(evenement.id)}>Voir</Link>
+                            <Link href={`/module5/events/${evenement.id}`}>Voir</Link>
                         </Button>
                     </div>
                 </div>

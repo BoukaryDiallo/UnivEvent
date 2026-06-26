@@ -9,9 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('evenements', function (Blueprint $table) {
-            $table->enum('statut', ['brouillon', 'publie', 'en_cours', 'cloture', 'archive'])
-                ->default('brouillon')
-                ->change();
+            $table->string('statut')->default('brouillon')->change();
             $table->boolean('comments_enabled')->default(true)->after('checkin_active');
             $table->boolean('comment_replies_enabled')->default(true)->after('comments_enabled');
             $table->boolean('comment_reactions_enabled')->default(true)->after('comment_replies_enabled');

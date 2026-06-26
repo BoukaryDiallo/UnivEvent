@@ -3,7 +3,6 @@ import { CalendarDays, CheckCircle, FileText, MessageSquare, Trophy, Users, Cloc
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { show } from '@/routes/module5';
 import type { EventDetail, EventResult } from '@/types';
 
 type ParticipantDashboardProps = {
@@ -68,7 +67,7 @@ export function ParticipantDashboard({ event, myResult }: ParticipantDashboardPr
                             {isRegistered ? '✅ Confirmé' : isWaitlisted ? '⏳ En attente' : 'Non inscrit'}
                         </Badge>
                         <Button asChild className="rounded-xl h-10 px-6 font-bold shadow-lg shadow-indigo-100">
-                            <Link href={show(event.id)}>Voir l'événement</Link>
+                            <Link href={`/module5/events/${event.id}`}>Voir l'événement</Link>
                         </Button>
                     </div>
                 </div>
@@ -149,7 +148,7 @@ export function ParticipantDashboard({ event, myResult }: ParticipantDashboardPr
                                     <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">{new Date(event.date_debut).toLocaleDateString()} • {event.lieu || 'Lieu à confirmer'}</p>
                                 </div>
                                 <Button asChild size="sm" className="rounded-xl font-bold h-9">
-                                    <Link href={show(event.id)}>Détails</Link>
+                                    <Link href={`/module5/events/${event.id}`}>Détails</Link>
                                 </Button>
                             </div>
                         )}
@@ -161,7 +160,7 @@ export function ParticipantDashboard({ event, myResult }: ParticipantDashboardPr
                                     <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">{upcomingSessions.length} session(s) à venir</p>
                                 </div>
                                 <Button asChild size="sm" variant="secondary" className="rounded-xl font-bold h-9">
-                                    <Link href={show(event.id)}>Consulter</Link>
+                                    <Link href={`/module5/events/${event.id}`}>Consulter</Link>
                                 </Button>
                             </div>
                         )}
@@ -173,7 +172,7 @@ export function ParticipantDashboard({ event, myResult }: ParticipantDashboardPr
                                     <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">{availableMedias.length} fichiers disponibles</p>
                                 </div>
                                 <Button asChild size="sm" variant="secondary" className="rounded-xl font-bold h-9">
-                                    <Link href={show(event.id)}>Ouvrir</Link>
+                                    <Link href={`/module5/events/${event.id}`}>Ouvrir</Link>
                                 </Button>
                             </div>
                         )}

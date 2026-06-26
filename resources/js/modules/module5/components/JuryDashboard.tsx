@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { show } from '@/routes/module5';
 import type { EventDetail, EventJuryPanel } from '@/types';
 
 type JuryDashboardProps = {
@@ -48,7 +47,7 @@ export function JuryDashboard({ event, juryPanel, canJuryMember, canPresident }:
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href={show(event.id)}>Accéder au jury</Link>
+                        <Link href={`/module5/events/${event.id}`}>Accéder au jury</Link>
                     </Button>
                 </div>
             </div>
@@ -134,7 +133,7 @@ export function JuryDashboard({ event, juryPanel, canJuryMember, canPresident }:
                                     <p className="text-sm text-muted-foreground">Noter selon les critères définis</p>
                                 </div>
                                 <Button asChild size="sm">
-                                    <Link href={show(event.id)}>Évaluer</Link>
+                                    <Link href={`/module5/events/${event.id}`}>Évaluer</Link>
                                 </Button>
                             </div>
                         ) : null}
@@ -147,7 +146,7 @@ export function JuryDashboard({ event, juryPanel, canJuryMember, canPresident }:
                                         <p className="text-sm text-muted-foreground">Ouvrir ou fermer la phase d'évaluation</p>
                                     </div>
                                     <Button asChild size="sm" variant="outline">
-                                        <Link href={show(event.id)}>Gérer</Link>
+                                        <Link href={`/module5/events/${event.id}`}>Gérer</Link>
                                     </Button>
                                 </div>
 
@@ -157,7 +156,7 @@ export function JuryDashboard({ event, juryPanel, canJuryMember, canPresident }:
                                         <p className="text-sm text-muted-foreground">Valider et publier le classement</p>
                                     </div>
                                     <Button asChild size="sm">
-                                        <Link href={show(event.id)}>Finaliser</Link>
+                                        <Link href={`/module5/events/${event.id}`}>Finaliser</Link>
                                     </Button>
                                 </div>
                             </>

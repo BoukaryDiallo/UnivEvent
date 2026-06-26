@@ -40,7 +40,6 @@ import {
 import { useLiveNotifications } from '@/contexts/live-notifications-context';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 
-import { mine as myRegistrations } from '@/routes/inscriptions';
 
 export function ModuleFiveCombobox() {
     const { isCurrentUrl } = useCurrentUrl();

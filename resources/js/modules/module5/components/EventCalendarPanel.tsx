@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import { show } from '@/routes/module5';
 import type { EventSummary } from '@/types';
 
 type EventCalendarPanelProps = {
@@ -18,7 +17,7 @@ export function EventCalendarPanel({ events }: EventCalendarPanelProps) {
                     events.map((event) => (
                         <Link
                             key={event.id}
-                            href={show(event.id)}
+                            href={`/module5/events/${event.id}`}
                             className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 transition hover:border-sky-300 hover:bg-sky-50 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-slate-900"
                         >
                             <div>

@@ -5,7 +5,6 @@ import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { EventBadge } from '@/modules/module5/components/EventBadge';
-import { participantShow, show } from '@/routes/module5';
 import type { EventSummary } from '@/types';
 
 type EventControlPanelDrawerProps = {
@@ -160,10 +159,10 @@ export function EventControlPanelDrawer({ events, userRoles = [] }: EventControl
                                     </div>
                                     <div className="mt-5 grid gap-3 sm:grid-cols-2">
                                         <Button asChild variant="outline" className="w-full">
-                                            <Link href={effectiveRoles.includes('participant') ? participantShow(selectedEvent.id) : show(selectedEvent.id)}>Accéder au tableau de bord</Link>
+                                            <Link href={`/module5/events/${selectedEvent.id}`}>Accéder au tableau de bord</Link>
                                         </Button>
                                         <Button asChild className="w-full">
-                                            <Link href={show(selectedEvent.id)}>Voir l'événement</Link>
+                                            <Link href={`/module5/events/${selectedEvent.id}`}>Voir l'événement</Link>
                                         </Button>
                                     </div>
                                 </div>

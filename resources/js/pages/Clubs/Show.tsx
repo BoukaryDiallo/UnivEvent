@@ -24,6 +24,7 @@ import {
   SheetTitle, 
   SheetTrigger 
 } from '@/components/ui/sheet';
+import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
@@ -135,13 +136,14 @@ return
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={club.nom} />
-      <div className="flex h-full flex-1 flex-col gap-6 p-8 bg-slate-50/50">
+      
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
         {/* Minimalist Hero Section */}
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <div className="p-8">
+        <Card className="rounded-[2.5rem] border-0 shadow-sm overflow-hidden dark:bg-slate-950 dark:border dark:border-slate-800">
+          <CardContent className="p-8 sm:p-12">
             <Link
               href="/clubs"
-              className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-6 text-sm font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white mb-8 text-[10px] font-black uppercase tracking-widest transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Retour aux clubs
@@ -149,21 +151,21 @@ return
 
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="flex items-start gap-6">
-                <div className="w-24 h-24 bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-200 shadow-sm flex-shrink-0">
-                  <Building2 className="w-12 h-12 text-slate-400" />
+                <div className="w-24 h-24 bg-gray-900 rounded-[2rem] flex items-center justify-center shadow-xl dark:bg-white flex-shrink-0">
+                  <Building2 className="w-12 h-12 text-white dark:text-gray-900" />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">{club.nom}</h1>
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                      club.statut === 'actif' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                      club.statut === 'en_attente' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                      'bg-rose-50 text-rose-700 border-rose-200'
+                    <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight uppercase">{club.nom}</h1>
+                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                      club.statut === 'actif' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' :
+                      club.statut === 'en_attente' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' :
+                      'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20'
                     }`}>
                       {club.statut}
                     </span>
                   </div>
-                  <p className="text-slate-500 text-lg max-w-2xl leading-relaxed">{club.description}</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-lg max-w-2xl leading-relaxed">{club.description}</p>
                 </div>
               </div>
 
@@ -270,91 +272,100 @@ return
                 )}
               </div>
             </div>
-          </div>
+          </CardContent>
 
           {/* Tabs Navigation */}
-          <div className="flex items-center px-8 border-t border-slate-100 bg-slate-50/30 overflow-x-auto no-scrollbar">
+          <div className="flex items-center px-8 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/30 overflow-x-auto no-scrollbar">
             {[
               { id: 'overview', label: 'Vue d\'ensemble', icon: Building2 },
               { id: 'activities', label: 'Activités', icon: Calendar },
-              { id: 'community', label: 'Communauté', icon: Users },
-              ...(canManage ? [{ id: 'admin', label: 'Administration', icon: Shield }] : [])
+              { id: 'community', label: 'Communauté', icon: Users, badge: club.adhesions?.length },
+              ...(canManage ? [{ id: 'admin', label: 'Administration', icon: Shield, badge: club.adhesions?.filter((a: any) => a.statut === 'en_attente').length }] : []),
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${
-                  activeTab === tab.id 
-                  ? 'border-slate-900 text-slate-900' 
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-200'
+                className={`flex items-center gap-2 px-6 py-4 text-sm font-black uppercase tracking-widest transition-all whitespace-nowrap border-b-2 ${
+                  activeTab === tab.id
+                    ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300 dark:text-slate-400 dark:hover:text-white dark:hover:border-slate-700'
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
+                {tab.badge !== undefined && tab.badge > 0 && (
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] ${
+                    activeTab === tab.id 
+                    ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400' 
+                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                  }`}>
+                    {tab.badge}
+                  </span>
+                )}
               </button>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Tab Content */}
         <div className="flex-1">
           {activeTab === 'overview' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center border border-indigo-100">
                       <Users className="w-6 h-6 text-indigo-600" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Membres</p>
-                      <p className="text-2xl font-black text-slate-900">
+                      <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Membres</p>
+                      <p className="text-2xl font-black text-slate-900 dark:text-white">
                         {club.adhesions ? club.adhesions.filter((a: any) => a.statut === 'approuvee').length : 0}
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center border border-purple-100">
                       <Calendar className="w-6 h-6 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Activités</p>
-                      <p className="text-2xl font-black text-slate-900">{club.activites?.length || 0}</p>
+                      <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Activités</p>
+                      <p className="text-2xl font-black text-slate-900 dark:text-white">{club.activites?.length || 0}</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center border border-emerald-100">
                       <Shield className="w-6 h-6 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Responsable</p>
-                      <p className="text-lg font-bold text-slate-900 truncate">{club.responsable?.name || 'Non défini'}</p>
+                      <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Responsable</p>
+                      <p className="text-lg font-bold text-slate-900 dark:text-white truncate">{club.responsable?.name || 'Non défini'}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-                <h3 className="text-xl font-bold text-slate-900 mb-4">À propos du club</h3>
+              <div className="bg-white dark:bg-slate-950 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">À propos du club</h3>
                 <div className="prose prose-slate max-w-none">
-                  <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">{club.description}</p>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{club.description}</p>
                 </div>
-                <div className="mt-8 pt-8 border-t border-slate-100 grid grid-cols-2 gap-8">
+                <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-8">
                   <div>
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Détails</h4>
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-sm">
                         <Building2 className="w-4 h-4 text-slate-400" />
-                        <span className="text-slate-500">Type de club:</span>
+                        <span className="text-slate-500 dark:text-slate-400">Type de club:</span>
                         <span className="font-bold text-slate-700">{club.type}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <Calendar className="w-4 h-4 text-slate-400" />
-                        <span className="text-slate-500">Créé le:</span>
+                        <span className="text-slate-500 dark:text-slate-400">Créé le:</span>
                         <span className="font-bold text-slate-700">{new Date(club.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
@@ -367,7 +378,7 @@ return
           {activeTab === 'activities' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-black text-slate-900">Prochaines activités</h2>
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white">Prochaines activités</h2>
                 {canManage && club.statut === 'actif' && (
                   <Link
                     href={`/activites/create?club_id=${club.id}`}
@@ -380,18 +391,18 @@ return
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {club.activites && club.activites.filter((activite: any) => canManage || activite.statut === 'publié').map((activite: any) => (
-                  <div key={activite.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-slate-300 transition-all group">
+                  <div key={activite.id} className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-slate-300 transition-all group">
                     <div className="flex justify-between items-start gap-4">
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">
                           <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${
-                            activite.statut === 'publié' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-100 text-slate-600'
+                            activite.statut === 'publié' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                           }`}>
                             {activite.statut}
                           </span>
                         </div>
-                        <h3 className="font-black text-slate-900 text-xl group-hover:text-indigo-600 transition-colors">{activite.titre}</h3>
-                        <p className="text-slate-500 text-sm line-clamp-2">{activite.description}</p>
+                        <h3 className="font-black text-slate-900 dark:text-white text-xl group-hover:text-indigo-600 transition-colors">{activite.titre}</h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2">{activite.description}</p>
                         <div className="flex items-center gap-4 pt-2">
                           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase">
                             <Calendar className="w-3.5 h-3.5" />
@@ -416,9 +427,9 @@ return
                 ))}
               </div>
               {(!club.activites || club.activites.length === 0) && (
-                <div className="text-center py-20 bg-white rounded-2xl border border-slate-200 border-dashed">
+                <div className="text-center py-20 bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 border-dashed">
                   <Calendar className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                  <p className="text-slate-500 font-bold">Aucune activité programmée</p>
+                  <p className="text-slate-500 dark:text-slate-400 font-bold">Aucune activité programmée</p>
                 </div>
               )}
             </div>
@@ -426,21 +437,21 @@ return
 
           {activeTab === 'community' && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-black text-slate-900">Membres du club</h2>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white">Membres du club</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {club.adhesions && club.adhesions.filter((a: any) => a.statut === 'approuvee').map((adhesion: any) => (
-                  <div key={adhesion.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center group transition-all hover:shadow-md">
-                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 font-black text-2xl border-2 border-white shadow-sm mb-4">
+                  <div key={adhesion.id} className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center group transition-all hover:shadow-md">
+                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 font-black text-2xl border-2 border-white shadow-sm mb-4">
                       {adhesion.user?.name?.charAt(0) || 'U'}
                     </div>
-                    <p className="font-black text-slate-900 text-lg line-clamp-1">{adhesion.user?.name}</p>
+                    <p className="font-black text-slate-900 dark:text-white text-lg line-clamp-1">{adhesion.user?.name}</p>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
                       {adhesion.role_dans_club || 'Membre'}
                     </p>
                     {canManage && adhesion.user?.id !== user?.id && (
                       <button
                         onClick={() => handleTransferResponsabilite(adhesion.user.id)}
-                        className="mt-4 px-4 py-1.5 border border-slate-200 text-xs font-bold text-slate-600 rounded-lg hover:bg-slate-50 transition-all opacity-0 group-hover:opacity-100"
+                        className="mt-4 px-4 py-1.5 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-50 transition-all opacity-0 group-hover:opacity-100"
                       >
                         Désigner Responsable
                       </button>
@@ -457,17 +468,17 @@ return
                 {/* Local Requests */}
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-black text-slate-900">Demandes de locaux</h3>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white">Demandes de locaux</h3>
                     <Link href={`/clubs/${club.id}/demandes-local/create`} className="text-xs font-bold text-indigo-600 hover:underline uppercase tracking-wider">
                       Nouvelle demande
                     </Link>
                   </div>
                   <div className="space-y-4">
                     {club.demandes_local && club.demandes_local.map((demande: any) => (
-                      <div key={demande.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                      <div key={demande.id} className="bg-white dark:bg-slate-950 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="font-bold text-slate-900">{demande.salle_souhaitee}</h4>
+                            <h4 className="font-bold text-slate-900 dark:text-white">{demande.salle_souhaitee}</h4>
                             <p className="text-xs text-slate-400 mt-1">{new Date(demande.date).toLocaleString()}</p>
                             <span className={`inline-flex items-center mt-3 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${
                               demande.statut === 'approuvée' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
@@ -486,17 +497,17 @@ return
                 {/* Budget Requests */}
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-black text-slate-900">Demandes de budget</h3>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white">Demandes de budget</h3>
                     <Link href={`/clubs/${club.id}/demandes-budget/create`} className="text-xs font-bold text-purple-600 hover:underline uppercase tracking-wider">
                       Nouvelle demande
                     </Link>
                   </div>
                   <div className="space-y-4">
                     {club.demandes_budget && club.demandes_budget.map((demande: any) => (
-                      <div key={demande.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                      <div key={demande.id} className="bg-white dark:bg-slate-950 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="font-black text-slate-900 text-lg">{demande.montant_demande} FCFA</h4>
+                            <h4 className="font-black text-slate-900 dark:text-white text-lg">{demande.montant_demande} FCFA</h4>
                             <p className="text-xs text-slate-400 mt-1">{demande.justificatif}</p>
                             <span className={`inline-flex items-center mt-3 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${
                               demande.statut === 'approuvée' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
@@ -515,16 +526,16 @@ return
 
               {/* Pending Approvals */}
               <div className="space-y-6">
-                <h3 className="text-xl font-black text-slate-900">Demandes d'adhésion en attente</h3>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white">Demandes d'adhésion en attente</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {club.adhesions && club.adhesions.filter((a: any) => a.statut === 'en_attente').map((adhesion: any) => (
-                    <div key={adhesion.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div key={adhesion.id} className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 font-bold">
+                        <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 font-bold">
                           {adhesion.user?.name?.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-black text-slate-900">{adhesion.user?.name}</p>
+                          <p className="font-black text-slate-900 dark:text-white">{adhesion.user?.name}</p>
                           <p className="text-xs text-slate-400">{adhesion.user?.email}</p>
                         </div>
                       </div>
@@ -539,7 +550,7 @@ return
                     </div>
                   ))}
                   {(!club.adhesions || club.adhesions.filter((a: any) => a.statut === 'en_attente').length === 0) && (
-                    <div className="md:col-span-2 text-center py-10 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                    <div className="md:col-span-2 text-center py-10 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
                       <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Aucune demande en attente</p>
                     </div>
                   )}
