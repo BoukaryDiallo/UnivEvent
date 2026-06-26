@@ -35,7 +35,7 @@ export function AppSidebar() {
         },
     ];
 
-    if (user?.role === 'admin') {
+    if (hasRole('admin')) {
         mainNavItems.push({
             title: 'Gestion des clubs',
             href: '/gestion',
@@ -43,7 +43,7 @@ export function AppSidebar() {
         });
     }
 
-    if (user?.role === 'student') {
+    if (hasRole('etudiant') || hasRole('student')) {
         mainNavItems.push({
             title: 'Retraits de diplômes',
             href: diplomasIndex(),

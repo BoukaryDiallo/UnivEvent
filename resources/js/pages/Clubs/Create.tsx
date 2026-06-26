@@ -21,7 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function ClubCreate() {
   const { auth, flash } = usePage().props as any;
-  const isAdmin = auth?.user?.role === 'admin';
+  const isAdmin = auth?.roles?.includes('admin');
   
   const { data, setData, post, processing, errors } = useForm({
     nom: '',

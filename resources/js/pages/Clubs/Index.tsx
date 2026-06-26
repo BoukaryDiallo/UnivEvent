@@ -23,7 +23,7 @@ interface Props {
 export default function ClubsIndex({ clubs }: Props) {
   const { auth } = usePage().props as any;
   const user = auth?.user;
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = auth?.roles?.includes('admin');
 
   const getUserRoleInClub = (club: any) => {
     if (club.responsable?.id === user?.id) {

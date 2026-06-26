@@ -756,7 +756,7 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
                                             <tr key={user.id} className="bg-rose-50 transition-colors">
                                                 <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-900 text-base">{user.name}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium">{user.email}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium capitalize">{user.role}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium capitalize">{user.roles?.map((r: any) => r.name).join(', ') || user.role}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${
                                                         user.est_actif ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-rose-100 text-rose-800 border-rose-200'
@@ -776,13 +776,13 @@ export default function Gestion({ clubs, demandesLocal, demandesBudget, users, a
                                                             {user.est_actif ? <Ban className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                                                         </button>
                                                         <button
-                                                            onClick={() => handleUpdateUserRole(user.id, user.role)}
+                                                            onClick={() => handleUpdateUserRole(user.id, user.roles?.some((r: any) => r.name === 'admin') ? 'admin' : 'etudiant')}
                                                             className={`inline-flex items-center justify-center px-3 h-9 text-white font-bold text-xs rounded-lg transition-colors ${
-                                                                user.role === 'admin' ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-blue-500 hover:bg-blue-600'
+                                                                user.roles?.some((r: any) => r.name === 'admin') ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-blue-500 hover:bg-blue-600'
                                                             }`}
                                                             title="Changer le rôle"
                                                         >
-                                                            {user.role === 'admin' ? 'Rétrograder' : 'Promouvoir'}
+                                                            {user.roles?.some((r: any) => r.name === 'admin') ? 'Rétrograder' : 'Promouvoir'}
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteUser(user.id)}

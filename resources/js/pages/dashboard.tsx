@@ -85,8 +85,8 @@ export default function Dashboard({
 }: Props) {
     const { auth } = usePage().props as any;
     const user = auth?.user;
-    const isAdmin = user?.role === 'admin';
-    const isStudent = user?.role === 'student';
+    const isAdmin = auth?.roles?.includes('admin');
+    const isStudent = auth?.roles?.includes('etudiant') || auth?.roles?.includes('student');
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

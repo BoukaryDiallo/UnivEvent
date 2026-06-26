@@ -40,7 +40,7 @@ export default function ClubShow({ club }: Props) {
   })
   const { auth } = usePage().props as any;
   const user = auth?.user;
-  const isAdmin = user?.role === 'admin' || (auth?.roles && auth.roles.includes('admin'));
+  const isAdmin = auth?.roles?.includes('admin');
   const [activeTab, setActiveTab] = useState('overview');
 
   if (!club) {

@@ -29,8 +29,14 @@ class UserController extends Controller
             'role' => 'required|in:admin,etudiant'
         ]);
         $user = User::findOrFail($id);
+        
+        // Mettre à jour via Spatie
+        $user->syncRoles([$request->role]);
+
+        // Pour la rétrocompatibilité temporaire (la colonne est toujours là)
         $user->role = $request->role;
         $user->save();
+        
         return back()->with('success', 'Rôle mis à jour');
     }
 
