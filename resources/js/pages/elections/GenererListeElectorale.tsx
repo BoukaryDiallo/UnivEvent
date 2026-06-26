@@ -119,11 +119,11 @@ export default function GenererListeElectorale() {
                                             <div>
                                                 <Label htmlFor="id_ufr" className="flex items-center gap-2 text-base font-medium text-gray-700 mb-2">
                                                     <Building2 className="h-4 w-4" />
-                                                    UFR
+                                                    UFR (optionnel)
                                                 </Label>
-                                                <Select value={data.id_ufr} onValueChange={(value) => setData('id_ufr', value)} required>
+                                                <Select value={data.id_ufr} onValueChange={(value) => setData('id_ufr', value)}>
                                                     <SelectTrigger className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                                                        <SelectValue placeholder="-- Choisir UFR --" />
+                                                        <SelectValue placeholder="-- Choisir UFR (optionnel) --" />
                                                     </SelectTrigger>
                                                     <SelectContent className="border-gray-200 shadow-lg">
                                                         {ufrs.map((ufr) => (
@@ -138,11 +138,11 @@ export default function GenererListeElectorale() {
                                             <div>
                                                 <Label htmlFor="id_departement" className="flex items-center gap-2 text-base font-medium text-gray-700 mb-2">
                                                     <Building2 className="h-4 w-4" />
-                                                    Département
+                                                    Département (optionnel)
                                                 </Label>
-                                                <Select value={data.id_departement} onValueChange={(value) => setData('id_departement', value)} required>
+                                                <Select value={data.id_departement} onValueChange={(value) => setData('id_departement', value)}>
                                                     <SelectTrigger className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                                                        <SelectValue placeholder="-- Choisir département --" />
+                                                        <SelectValue placeholder="-- Choisir département (optionnel) --" />
                                                     </SelectTrigger>
                                                     <SelectContent className="border-gray-200 shadow-lg">
                                                         {departements.map((dep) => (
@@ -174,11 +174,11 @@ export default function GenererListeElectorale() {
                                             <div>
                                                 <Label htmlFor="id_filiere" className="flex items-center gap-2 text-base font-medium text-gray-700 mb-2">
                                                     <GraduationCap className="h-4 w-4" />
-                                                    Filière
+                                                    Filière (optionnel)
                                                 </Label>
-                                                <Select value={data.id_filiere} onValueChange={(value) => setData('id_filiere', value)} required>
+                                                <Select value={data.id_filiere} onValueChange={(value) => setData('id_filiere', value)}>
                                                     <SelectTrigger className="h-12 border-gray-300 focus:border-purple-500 focus:ring-purple-500">
-                                                        <SelectValue placeholder="-- Choisir filière --" />
+                                                        <SelectValue placeholder="-- Choisir filière (optionnel) --" />
                                                     </SelectTrigger>
                                                     <SelectContent className="border-gray-200 shadow-lg">
                                                         {filieres.map((filiere) => (
@@ -193,11 +193,11 @@ export default function GenererListeElectorale() {
                                             <div>
                                                 <Label htmlFor="niveau" className="flex items-center gap-2 text-base font-medium text-gray-700 mb-2">
                                                     <Users className="h-4 w-4" />
-                                                    Niveau
+                                                    Niveau (optionnel)
                                                 </Label>
-                                                <Select value={data.niveau} onValueChange={(value) => setData('niveau', value)} required>
+                                                <Select value={data.niveau} onValueChange={(value) => setData('niveau', value)}>
                                                     <SelectTrigger className="h-12 border-gray-300 focus:border-purple-500 focus:ring-purple-500">
-                                                        <SelectValue placeholder="-- Choisir niveau --" />
+                                                        <SelectValue placeholder="-- Choisir niveau (optionnel) --" />
                                                     </SelectTrigger>
                                                     <SelectContent className="border-gray-200 shadow-lg">
                                                         {Object.entries(niveaux).map(([key, label]) => (

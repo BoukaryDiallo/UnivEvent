@@ -27,7 +27,6 @@ import {
 } from 'lucide-react';
 
 import AppLogo from '@/components/app-logo';
-import { ModuleFiveCombobox } from '@/components/module-five-combobox';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -331,7 +330,6 @@ export function AppSidebar() {
             {/* CONTENT */}
             <SidebarContent>
                 <NavMain items={mainNavItems} />
-                <ModuleFiveCombobox />
             </SidebarContent>
 
             {/* FOOTER */}
