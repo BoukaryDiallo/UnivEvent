@@ -19,8 +19,7 @@ class CertificatController extends Controller
         private CertificateGenerator $generator,
         private EventAuthorizationService $authorization,
         private EventNotificationService $notifications,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {

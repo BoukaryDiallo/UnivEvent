@@ -2,9 +2,9 @@ import { Link } from '@inertiajs/react';
 import { CalendarDays, ChartBar, ClipboardList, Gavel, Layers, MessageCircle, ShieldCheck, Trophy } from 'lucide-react';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { EventBadge } from '@/modules/module5/components/EventBadge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { EventBadge } from '@/modules/module5/components/EventBadge';
 import { participantShow, show } from '@/routes/module5';
 import type { EventSummary } from '@/types';
 

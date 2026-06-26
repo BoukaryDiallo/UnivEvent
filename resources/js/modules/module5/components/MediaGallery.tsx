@@ -1,7 +1,8 @@
 import { router, useForm, usePage } from '@inertiajs/react';
+import type { CheckedState } from '@radix-ui/react-checkbox';
 import { FileText, Image as ImageIcon, Trash2, UploadCloud, Video, Play, File as FileIcon, X } from 'lucide-react';
 import { useState } from 'react';
-import type { CheckedState } from '@radix-ui/react-checkbox';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -9,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import type { EventMedia } from '@/types';
 import { Modal } from './Modal';
-import { Badge } from '@/components/ui/badge';
 
 type MediaGalleryProps = {
     medias: EventMedia[];

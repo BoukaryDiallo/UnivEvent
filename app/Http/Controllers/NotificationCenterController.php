@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\EventNotification;
 use App\Models\Evenement;
+use App\Models\EventNotification;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;

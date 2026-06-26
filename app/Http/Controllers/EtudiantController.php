@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Etudiant;
-use App\Models\User;
-use App\Models\Ufr;
 use App\Models\Departement;
+use App\Models\Etudiant;
 use App\Models\Filiere;
+use App\Models\Ufr;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -23,7 +23,7 @@ class EtudiantController extends Controller
             ->get();
 
         return Inertia::render('etudiants/EtudiantList', [
-            'etudiants' => $etudiants
+            'etudiants' => $etudiants,
         ]);
     }
 
@@ -52,7 +52,7 @@ class EtudiantController extends Controller
             'id_ufr' => 'required|exists:ufrs,id_ufr',
             'id_departement' => 'required|exists:departements,id_departement',
             'id_filiere' => 'required|exists:filieres,id_filiere',
-            'niveau' => 'required|in:' . implode(',', array_keys(Etudiant::getNiveaux())),
+            'niveau' => 'required|in:'.implode(',', array_keys(Etudiant::getNiveaux())),
             'date_naissance' => 'nullable|date',
             'photo' => 'nullable|image|max:4096',
         ]);
@@ -104,11 +104,11 @@ class EtudiantController extends Controller
 
         $data = $request->validate([
             'id_user' => 'required|exists:users,id',
-            'INE' => 'required|string|unique:etudiants,INE,' . $etudiant->id,
+            'INE' => 'required|string|unique:etudiants,INE,'.$etudiant->id,
             'id_ufr' => 'required|exists:ufrs,id_ufr',
             'id_departement' => 'required|exists:departements,id_departement',
             'id_filiere' => 'required|exists:filieres,id_filiere',
-            'niveau' => 'required|in:' . implode(',', array_keys(Etudiant::getNiveaux())),
+            'niveau' => 'required|in:'.implode(',', array_keys(Etudiant::getNiveaux())),
             'date_naissance' => 'nullable|date',
             'photo' => 'nullable|image|max:4096',
         ]);

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Club;
-use App\Models\DemandeLocal;
-use App\Models\DemandeBudget;
-use App\Models\User;
 use App\Models\Activite;
+use App\Models\Club;
+use App\Models\DemandeBudget;
+use App\Models\DemandeLocal;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -20,7 +20,7 @@ class GestionController extends Controller
 
         // Clubs data
         $data['clubs'] = Club::with(['responsable', 'adhesions'])
-            ->when($user->role !== 'admin', function ($query) use ($user) {
+            ->when($user->role !== 'admin', function ($query) {
                 return $query->where('statut', 'actif');
             })
             ->get();

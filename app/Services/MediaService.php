@@ -14,8 +14,9 @@ class MediaService
     private const ALLOWED_TYPES = [
         'image/jpeg', 'image/png', 'image/gif', 'image/webp',
         'application/pdf',
-        'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'
+        'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime',
     ];
+
     private const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 
     private const CONFIDENTIALITY_LEVELS = [
@@ -87,7 +88,7 @@ class MediaService
 
     public function resolvePublicUrl(EvenementMedia $media): string
     {
-        return asset('storage/' . $media->chemin_fichier);
+        return asset('storage/'.$media->chemin_fichier);
     }
 
     public function download(EvenementMedia $media): BinaryFileResponse
@@ -104,7 +105,7 @@ class MediaService
 
     public function canDownload(EvenementMedia $media, ?User $user, $assignment = null): bool
     {
-        if (!$media->download_allowed) {
+        if (! $media->download_allowed) {
             return false;
         }
 
@@ -117,7 +118,7 @@ class MediaService
             return true;
         }
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -141,7 +142,7 @@ class MediaService
                 ->exists() ?? false;
         }
 
-        if (!$assignment) {
+        if (! $assignment) {
             return false;
         }
 
@@ -181,7 +182,7 @@ class MediaService
 
     private function validateFile(UploadedFile $file): void
     {
-        if (!in_array($file->getMimeType(), self::ALLOWED_TYPES)) {
+        if (! in_array($file->getMimeType(), self::ALLOWED_TYPES)) {
             throw new \InvalidArgumentException('Type de fichier non autorisé. Seules les images, PDFs et vidéos (MP4, WebM) sont acceptés.');
         }
 
@@ -193,8 +194,13 @@ class MediaService
     private function getMediaType(UploadedFile $file): string
     {
         $mime = $file->getMimeType();
-        if (str_contains($mime, 'pdf')) return 'pdf';
-        if (str_contains($mime, 'video')) return 'video';
+        if (str_contains($mime, 'pdf')) {
+            return 'pdf';
+        }
+        if (str_contains($mime, 'video')) {
+            return 'video';
+        }
+
         return 'image';
     }
 

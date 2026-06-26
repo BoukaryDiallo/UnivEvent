@@ -18,42 +18,42 @@ class ActivityController extends Controller
         $query = EvenementActivity::with(['user:id,name', 'evenement:id,titre,cree_par'])
             ->latest();
 
-        if (!$user || $user->role !== 'admin') {
+        if (! $user || $user->role !== 'admin') {
             $query->where(function ($q) use ($user) {
                 // 1. I see my own activities (what I did)
                 $q->where('user_id', $user->id)
-                
+
                   // 2. OR I am the creator/organizer of the event (I see everything for it)
-                  ->orWhereHas('evenement', function($eq) use ($user) {
-                      $eq->where('cree_par', $user->id)
-                         ->orWhereHas('assignments', fn($aq) => $aq->where('user_id', $user->id)->where('role', 'organisateur'));
-                  })
-                  
+                    ->orWhereHas('evenement', function ($eq) use ($user) {
+                        $eq->where('cree_par', $user->id)
+                            ->orWhereHas('assignments', fn ($aq) => $aq->where('user_id', $user->id)->where('role', 'organisateur'));
+                    })
+
                   // 3. OR I am a participant/stakeholder and it's a PUBLIC activity
-                  ->orWhere(function($sq) use ($user) {
-                      $sq->whereIn('type', [
-                          'commentaire_ajoute', 
-                          'message_envoye', 
-                          'programme_ajoute', 
-                          'resultat_publie', 
-                          'publication', 
-                          'evenement_aime', 
-                          'cloture'
-                      ])->where(function($evQ) use ($user) {
-                          $evQ->whereHas('evenement.inscriptions', fn($iq) => $iq->where('utilisateur_id', $user->id))
-                              ->orWhereHas('evenement.assignments', fn($aq) => $aq->where('user_id', $user->id));
-                      });
-                  });
+                    ->orWhere(function ($sq) use ($user) {
+                        $sq->whereIn('type', [
+                            'commentaire_ajoute',
+                            'message_envoye',
+                            'programme_ajoute',
+                            'resultat_publie',
+                            'publication',
+                            'evenement_aime',
+                            'cloture',
+                        ])->where(function ($evQ) use ($user) {
+                            $evQ->whereHas('evenement.inscriptions', fn ($iq) => $iq->where('utilisateur_id', $user->id))
+                                ->orWhereHas('evenement.assignments', fn ($aq) => $aq->where('user_id', $user->id));
+                        });
+                    });
             });
         }
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('label', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhereHas('user', fn($uq) => $uq->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('evenement', fn($eq) => $eq->where('titre', 'like', "%{$search}%"));
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('evenement', fn ($eq) => $eq->where('titre', 'like', "%{$search}%"));
             });
         }
 
@@ -77,8 +77,8 @@ class ActivityController extends Controller
         $user = Auth::user();
         $query = EvenementActivity::whereNull('read_at');
 
-        if (!$user || $user->role !== 'admin') {
-            $query->whereHas('evenement', fn($q) => $q->where('cree_par', $user->id));
+        if (! $user || $user->role !== 'admin') {
+            $query->whereHas('evenement', fn ($q) => $q->where('cree_par', $user->id));
         }
 
         $query->update(['read_at' => now()]);
@@ -102,8 +102,8 @@ class ActivityController extends Controller
         $user = Auth::user();
         $query = EvenementActivity::query();
 
-        if (!$user || $user->role !== 'admin') {
-            $query->whereHas('evenement', fn($q) => $q->where('cree_par', $user->id));
+        if (! $user || $user->role !== 'admin') {
+            $query->whereHas('evenement', fn ($q) => $q->where('cree_par', $user->id));
         }
 
         $query->delete();

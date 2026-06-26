@@ -17,8 +17,7 @@ class DashboardController extends Controller
     public function __construct(
         protected AlerteMetier $alertes,
         protected DispoMetier $metier,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request, DiplomaStudentDashboardService $service): Response
     {

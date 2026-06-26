@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Database\Factories\Module2\EmploiDuTempsFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class EmploiDuTemps extends Model
 {
@@ -12,14 +13,14 @@ class EmploiDuTemps extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\Module2\EmploiDuTempsFactory::new();
+        return EmploiDuTempsFactory::new();
     }
 
     protected $table = 'emploi_du_temps';
 
     protected $fillable = [
         'titre', 'semestre', 'groupe', 'statut', 'date_debut', 'date_fin',
-        'annee_academique_id', 'filiere_id', 'niveau_id', 'user_id'
+        'annee_academique_id', 'filiere_id', 'niveau_id', 'user_id',
     ];
 
     protected $casts = [
@@ -52,7 +53,6 @@ class EmploiDuTemps extends Model
         return $this->hasMany(Seance::class);
     }
 
-
     protected static function booted()
     {
         static::saving(function ($edt) {
@@ -63,7 +63,7 @@ class EmploiDuTemps extends Model
 
         static::updated(function ($edt) {
             if ($edt->wasChanged('statut') && $edt->statut === 'Archivé') {
-                
+
                 $seances = $edt->seances()
                     ->whereNotNull('prise_id')
                     ->with('prise')
@@ -72,7 +72,7 @@ class EmploiDuTemps extends Model
                 foreach ($seances as $seance) {
                     if ($seance->prise && is_null($seance->prise->libere_at)) {
                         $seance->prise->update([
-                            'libere_at' => now()
+                            'libere_at' => now(),
                         ]);
                     }
 

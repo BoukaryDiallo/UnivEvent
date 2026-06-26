@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
 import { CheckIcon, CircleIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type TimelineStep = {
     label: string;

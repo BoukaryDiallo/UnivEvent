@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Evenement;
-use App\Models\EvenementRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -27,12 +26,12 @@ class ControlPanelService
             $query->where('user_id', $user->id)
                 ->where('category', 'assignment');
         })
-        ->with(['assignments' => function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        }, 'createur'])
-        ->latest()
-        ->get()
-        ->map(fn ($event) => $this->enrichEventWithRole($event, $user));
+            ->with(['assignments' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }, 'createur'])
+            ->latest()
+            ->get()
+            ->map(fn ($event) => $this->enrichEventWithRole($event, $user));
     }
 
     /**
@@ -157,12 +156,12 @@ class ControlPanelService
      */
     private function isEventActive(object $event): bool
     {
-        if (!$event->date_debut) {
+        if (! $event->date_debut) {
             return false;
         }
 
         $start = new \DateTime($event->date_debut);
-        $now = new \DateTime();
+        $now = new \DateTime;
         $end = $event->date_fin ? new \DateTime($event->date_fin) : $start->modify('+1 day');
 
         return $now >= $start->modify('-7 days') && $now <= $end->modify('+1 day');
@@ -190,7 +189,7 @@ class ControlPanelService
             'manage_users' => false,
         ];
 
-        if (!$assignment) {
+        if (! $assignment) {
             return $actions;
         }
 

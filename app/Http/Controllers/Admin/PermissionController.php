@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
- use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class PermissionController extends Controller
 {
     //
-   
 
     public function index()
     {
@@ -23,7 +22,7 @@ class PermissionController extends Controller
     public function store(Request $request)
     {
         Permission::create([
-            'name' => $request->name
+            'name' => $request->name,
         ]);
 
         return back();

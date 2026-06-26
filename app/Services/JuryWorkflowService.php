@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Evenement;
-use App\Models\JuryCriterion;
 use App\Models\JuryDeliberation;
 use App\Models\JuryPanel;
 use App\Models\JuryScore;
@@ -52,6 +51,7 @@ class JuryWorkflowService
             if ($model) {
                 $model->update($payload);
                 $idsToKeep[] = $model->id;
+
                 continue;
             }
 

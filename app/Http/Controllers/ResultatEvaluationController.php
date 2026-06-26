@@ -18,8 +18,7 @@ class ResultatEvaluationController extends Controller
         private EventNotificationService $notifications,
         private EventAuthorizationService $authorization,
         private JuryWorkflowService $workflow,
-    ) {
-    }
+    ) {}
 
     public function store(Request $request)
     {

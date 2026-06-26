@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Contrats\DispoContrat;
 use App\Metiers\DispoMetier;
+use App\Models\Election;
+use App\Observers\ElectionObserver;
 use App\Policies\NotificationPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Notifications\DatabaseNotification;
@@ -12,8 +14,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use App\Models\Election;
-use App\Observers\ElectionObserver;
 
 class AppServiceProvider extends ServiceProvider
 {

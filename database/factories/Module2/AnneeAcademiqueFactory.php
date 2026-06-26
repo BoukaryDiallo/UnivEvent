@@ -14,9 +14,9 @@ class AnneeAcademiqueFactory extends Factory
         $debut = $this->faker->unique()->numberBetween(2000, 2050);
 
         return [
-            'libelle'      => "{$debut}-" . ($debut + 1),
-            'date_debut'   => (string) $debut,
-            'date_fin'     => (string) ($debut + 1),
+            'libelle' => "{$debut}-".($debut + 1),
+            'date_debut' => (string) $debut,
+            'date_fin' => (string) ($debut + 1),
             'est_courante' => false,
         ];
     }

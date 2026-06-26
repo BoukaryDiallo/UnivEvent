@@ -14,15 +14,15 @@ class FiliereFactory extends Factory
     {
         // 1. Crée une UFR
         $ufrId = DB::table('ufrs')->insertGetId([
-            'nom'        => 'UFR ' . $this->faker->unique()->word(),
+            'nom' => 'UFR '.$this->faker->unique()->word(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         // 2. Crée un département lié à l'UFR
         $departementId = DB::table('departements')->insertGetId([
-            'id_ufr'     => $ufrId,
-            'nom'        => 'Dept ' . $this->faker->unique()->word(),
+            'id_ufr' => $ufrId,
+            'nom' => 'Dept '.$this->faker->unique()->word(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -30,8 +30,8 @@ class FiliereFactory extends Factory
         // 3. Retourne la filière liée au département
         return [
             'id_departement' => $departementId,
-            'nom'            => $this->faker->unique()->word() . ' Informatique',
-            'code'           => strtoupper($this->faker->unique()->lexify('??')),
+            'nom' => $this->faker->unique()->word().' Informatique',
+            'code' => strtoupper($this->faker->unique()->lexify('??')),
         ];
     }
 }

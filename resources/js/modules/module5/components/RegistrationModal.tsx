@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
 import dayjs from 'dayjs';
 import { CalendarIcon, Loader2, MapPinIcon, InfoIcon, CheckCircle2Icon, AlertTriangleIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,8 +10,8 @@ import {
     DialogHeader, 
     DialogTitle 
 } from '@/components/ui/dialog';
-import { EventBadge } from './EventBadge';
 import type { EventSummary } from '@/modules/module5/types/event';
+import { EventBadge } from './EventBadge';
 
 type RegistrationModalProps = {
     isOpen: boolean;
@@ -22,11 +22,13 @@ type RegistrationModalProps = {
 };
 
 export default function RegistrationModal({ isOpen, onClose, event, isRegistered, isFull }: RegistrationModalProps) {
-    if (!event) return null;
-
     const { post, processing, recentlySuccessful } = useForm({
-        evenement_id: event.id,
+        evenement_id: event?.id ?? 0,
     });
+
+    if (!event) {
+        return null;
+    }
 
     const handleConfirm = () => {
         post('/module5/inscriptions', {
@@ -43,9 +45,6 @@ export default function RegistrationModal({ isOpen, onClose, event, isRegistered
             onSuccess: () => onClose(),
         });
     };
-
-    // Need router for the cancel action if not using useForm for it
-    const { router } = require('@inertiajs/react');
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -160,4 +159,3 @@ export default function RegistrationModal({ isOpen, onClose, event, isRegistered
         </Dialog>
     );
 }
-

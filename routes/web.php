@@ -1,16 +1,16 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnseignantAuthController;
 use App\Http\Controllers\EventDashboardController;
-use App\Http\Controllers\NotificationCenterController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\SoutenanceController;
-use App\Http\Controllers\SalleController;
-use App\Http\Controllers\JuryController;
-use App\Http\Controllers\NotificationSoutenanceController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\GestionController;
+use App\Http\Controllers\JuryController;
+use App\Http\Controllers\NotificationCenterController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\NotificationSoutenanceController;
+use App\Http\Controllers\SalleController;
+use App\Http\Controllers\SoutenanceController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -50,7 +50,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('roles', [UserController::class, 'index'])->name('roles');
     });
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -123,4 +122,3 @@ require __DIR__.'/settings.php';
 require __DIR__.'/clubs.php';
 require __DIR__.'/elections.php';
 require __DIR__.'/academic.php';
-

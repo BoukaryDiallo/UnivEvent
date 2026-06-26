@@ -18,7 +18,7 @@ class EvenementRoleController extends Controller
     {
         $request->validate([
             'evenement_id' => 'required|exists:evenements,id',
-            'role' => 'required|string'
+            'role' => 'required|string',
         ]);
 
         $evenement = Evenement::findOrFail($request->evenement_id);
@@ -28,12 +28,12 @@ class EvenementRoleController extends Controller
         $role = EvenementRole::create([
             'evenement_id' => $evenement->id,
             'category' => 'audience',
-            'role' => $request->role
+            'role' => $request->role,
         ]);
 
         return response()->json([
             'message' => 'Rôle ajouté avec succès',
-            'data' => $role
+            'data' => $role,
         ]);
     }
 
@@ -51,7 +51,7 @@ class EvenementRoleController extends Controller
         $evenementRole->delete();
 
         return response()->json([
-            'message' => 'Rôle supprimé avec succès'
+            'message' => 'Rôle supprimé avec succès',
         ]);
     }
 
@@ -64,7 +64,7 @@ class EvenementRoleController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             abort(403);
         }
 

@@ -19,8 +19,7 @@ class EventStatusUpdated implements ShouldBroadcastNow
         public Evenement $evenement,
         public ?User $actor = null,
         public ?string $message = null,
-    ) {
-    }
+    ) {}
 
     public function broadcastOn(): array
     {

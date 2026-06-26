@@ -16,6 +16,5 @@ class EventValidated
         public Evenement $evenement,
         public User $actor,
         public string $status,
-    ) {
-    }
+    ) {}
 }

@@ -4,11 +4,8 @@ namespace App\Http\Controllers\M5;
 
 use App\Http\Controllers\Controller;
 use App\Models\Evenement;
-use App\Models\JuryPanel;
-use App\Models\ResultatEvaluation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
 
 class JuryController extends Controller
 {
@@ -21,15 +18,15 @@ class JuryController extends Controller
             'inscriptions.utilisateur',
             'roles.user',
         ]);
-        
-        $candidatures = $evenement->inscriptions->map(fn($ins) => [
+
+        $candidatures = $evenement->inscriptions->map(fn ($ins) => [
             'id' => $ins->id,
             'nom' => $ins->utilisateur->name,
             'fichier_url' => '#',
             'statut_evaluation' => 'en_attente',
         ]);
 
-        $evenement->setRelation('participants', $evenement->inscriptions->map(fn($ins) => (object) [
+        $evenement->setRelation('participants', $evenement->inscriptions->map(fn ($ins) => (object) [
             'id' => $ins->id,
             'backend_statut' => $ins->statut,
             'utilisateur' => [
@@ -39,7 +36,7 @@ class JuryController extends Controller
             ],
         ]));
 
-        $juryMembers = $evenement->roles->where('role', 'jury')->map(fn($role) => [
+        $juryMembers = $evenement->roles->where('role', 'jury')->map(fn ($role) => [
             'id' => $role->user?->id,
             'name' => $role->user?->name,
             'email' => $role->user?->email,

@@ -6,12 +6,13 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RbacSeeder extends Seeder
 {
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Permissions pour le système de vote et gestion
         $permissions = [
@@ -22,7 +23,7 @@ class RbacSeeder extends Seeder
             'delete',
             // Module 8 — Retraits de diplômes
             'diplomas.manage',     // toutes les actions scolarité (file, dossiers, agenda, validation, rejet, remise, archivage, créneaux)
-            
+
             // Permissions pour les élections
             'manage elections',
             'create elections',
@@ -33,30 +34,30 @@ class RbacSeeder extends Seeder
             'manage candidates',
             'validate candidates',
             'publish results',
-            
+
             // Permissions pour les votes
             'vote',
             'view voting results',
             'manage voting process',
-            
+
             // Permissions pour la structure académique
             'manage ufr',
             'manage departments',
             'manage filieres',
             'manage students',
-            
+
             // Permissions pour les clubs et activités
             'manage clubs',
             'manage activities',
             'manage budgets',
             'manage locals',
-            
+
             // Permissions administratives
             'manage users',
             'manage roles',
             'manage permissions',
             'view dashboard',
-            'access admin panel'
+            'access admin panel',
         ];
 
         foreach ($permissions as $perm) {
@@ -66,6 +67,10 @@ class RbacSeeder extends Seeder
         $admin = Role::firstOrCreate(['name' => 'admin']);
         $enseignant = Role::firstOrCreate(['name' => 'enseignant']);
         $etudiant = Role::firstOrCreate(['name' => 'etudiant']);
+        Role::firstOrCreate(['name' => 'organisateur']);
+        Role::firstOrCreate(['name' => 'intervenant']);
+        Role::firstOrCreate(['name' => 'jury']);
+        Role::firstOrCreate(['name' => 'participant']);
 
         $admin->syncPermissions(Permission::all());
 
@@ -84,7 +89,7 @@ class RbacSeeder extends Seeder
             'manage filieres',
             'manage students',
             'manage clubs',
-            'manage activities'
+            'manage activities',
         ]);
 
         // Étudiant : permissions pour voter et participer
@@ -94,16 +99,19 @@ class RbacSeeder extends Seeder
             'vote',
             'view voting results',
             'manage clubs',
-            'manage activities'
+            'manage activities',
         ]);
 
-        $admin = User::firstOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@gmail.com'],
             [
                 'name' => 'Admin',
                 'password' => bcrypt('password'),
+                'role' => 'admin',
+                'est_actif' => true,
+                'email_verified_at' => now(),
             ],
         );
-        $admin->assignRole('admin');
+        $admin->syncRoles(['admin']);
     }
 }

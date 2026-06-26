@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Matiere;
+use illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class MatiereController extends Controller
@@ -13,10 +14,11 @@ class MatiereController extends Controller
     public function vueMatiere()
     {
         //
-        $matieres = Matiere::orderBy('ordre')->latest()->paginate(10);;
-         return inertia('EmploiDuTemps/Admin/matiere',[
-            "matieres" => $matieres
-         ]);
+        $matieres = Matiere::orderBy('ordre')->latest()->paginate(10);
+
+        return inertia('EmploiDuTemps/Admin/matiere', [
+            'matieres' => $matieres,
+        ]);
     }
 
     /**
@@ -33,7 +35,6 @@ class MatiereController extends Controller
     public function ajouterMatiere(Request $request)
     {
         //
-        
 
         $data = $request->validate([
             'code' => 'required|string|max:150|unique:matieres,code',
@@ -72,7 +73,7 @@ class MatiereController extends Controller
     public function modifierMatiere(Request $request, string $id)
     {
         //
-        
+
         $data = $request->validate([
             'code' => 'required|string|max:150|unique:matieres,code'.$id,
             'intitule' => 'required|string|max:150',
@@ -82,14 +83,13 @@ class MatiereController extends Controller
         ]);
 
         $matieres = Matiere::findOrFail($id);
-        try{
+        try {
             $matieres->update($data);
-        } catch(\illuminate\Database\QueryException $e){
+        } catch (QueryException $e) {
             return back()->withErrors([
-                'code' => 'Cet module existe déjà'
+                'code' => 'Cet module existe déjà',
             ]);
         }
-        
 
         return back()->with('success', 'Matiere modifiée avec succès');
     }
@@ -104,6 +104,6 @@ class MatiereController extends Controller
         $matieres = Matiere::findOrFail($id);
         $matieres->delete();
 
-        return back()-> with('success', 'Matiere supprimée avec succès');
+        return back()->with('success', 'Matiere supprimée avec succès');
     }
 }

@@ -27,8 +27,8 @@ class Club extends Model
     public function membres()
     {
         return $this->belongsToMany(User::class, 'adhesions')
-                    ->wherePivot('statut', 'approuvee')
-                    ->withPivot('role_dans_club', 'statut');
+            ->wherePivot('statut', 'approuvee')
+            ->withPivot('role_dans_club', 'statut');
     }
 
     public function activites()

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext, useMemo, useState } from 'react';
-import { EventToast } from '@/modules/module5/components/EventToast';
 import { useUserLiveChannel } from '@/hooks/use-user-live-channel';
+import { EventToast } from '@/modules/module5/components/EventToast';
 import type { SharedNotification, SharedNotifications } from '@/types';
 
 type NotificationCreatedPayload = {

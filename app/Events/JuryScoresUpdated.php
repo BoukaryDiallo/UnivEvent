@@ -20,8 +20,7 @@ class JuryScoresUpdated implements ShouldBroadcastNow
         public User $juryUser,
         public int $participantId,
         public bool $submitted,
-    ) {
-    }
+    ) {}
 
     public function broadcastOn(): array
     {

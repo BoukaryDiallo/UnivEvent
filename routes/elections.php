@@ -1,20 +1,19 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ElectionController;
 use App\Http\Controllers\CandidatureController;
-use App\Http\Controllers\VoteController;
-use App\Http\Controllers\ResultatController;
 use App\Http\Controllers\DepouillementController;
+use App\Http\Controllers\ElectionController;
+use App\Http\Controllers\ResultatController;
+use App\Http\Controllers\VoteController;
+use Illuminate\Support\Facades\Route;
 
 // Routes du module élections
 
 Route::middleware(['auth'])->group(function () {
 
-        
-    Route::resource('elections', 
-    ElectionController::class)
-    ->middleware('role:admin');
+    Route::resource('elections',
+        ElectionController::class)
+        ->middleware('role:admin');
 
     Route::get('/elections/{election}/prepare',
         [ElectionController::class, 'prepare'])
@@ -50,7 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/elections/{election}/second-tour-form', [ElectionController::class, 'secondTourForm'])
         ->name('elections.secondTour.form')
         ->middleware('role:admin');
-        
+
     Route::post('/elections/{election}/second-tour', [ElectionController::class, 'secondTourStore'])
         ->name('elections.secondTour.store')
         ->middleware('role:admin');
@@ -63,7 +62,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('elections.admin')
         ->middleware('role:admin');
 
-    /////////////////////////////////////GESTION DES CANDIDATURES///////////////////////////////////
+    // ///////////////////////////////////GESTION DES CANDIDATURES///////////////////////////////////
     Route::resource('candidatures', CandidatureController::class);
 
     Route::post('/candidatures/{candidature}/valider', [CandidatureController::class, 'valider'])
@@ -77,20 +76,19 @@ Route::middleware(['auth'])->group(function () {
     // Route pour candidater depuis une élection spécifique
     Route::get('/candidatures/create/{election}', [CandidatureController::class, 'createForElection'])
         ->name('candidatures.create.election');
-        
+
     // Route create classique pour admin uniquement
     Route::get('/candidatures/create', [CandidatureController::class, 'create'])
         ->name('candidatures.create')
         ->middleware('role:admin');
 
-    /////////////////////////////////////GESTION DES VOTES///////////////////////////////////
+    // ///////////////////////////////////GESTION DES VOTES///////////////////////////////////
 
     Route::get('/votes/participer', [VoteController::class, 'electionsOuvertes'])
         ->name('votes.elections');
 
-      // Espace Élections
+    // Espace Élections
     Route::get('espace-election', [ResultatController::class, 'espaceElections'])->name('espace.elections');
-
 
     Route::get('/votes/candidats/{election}', [VoteController::class, 'candidats'])
         ->name('votes.candidats');
@@ -101,7 +99,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/votes/enregistrer', [VoteController::class, 'store'])
         ->name('votes.store');
 
-    // Routes de consultation des votes 
+    // Routes de consultation des votes
     Route::get('/votes', [VoteController::class, 'index'])
         ->name('votes.index')
         ->middleware('auth')
@@ -111,7 +109,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('votes.show')
         ->middleware('auth');
 
-
     Route::get('/votes/live', [VoteController::class, 'liveIndex'])
         ->name('votes.live.index')
         ->middleware('role:admin');
@@ -120,8 +117,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('votes.live.show')
         ->middleware('role:admin');
 
-    /////////////////////////////////////GESTION DES RÉSULTATS///////////////////////////////////
-    
+    // ///////////////////////////////////GESTION DES RÉSULTATS///////////////////////////////////
+
     // Routes de consultation des résultats (frontend)
     Route::get('/resultats', [ResultatController::class, 'index'])
         ->name('resultats.index')
@@ -139,8 +136,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('resultats.publier')
         ->middleware('role:admin');
 
-    /////////////////////////////////////GESTION DU DÉPOUILLEMENT///////////////////////////////////
-    
+    // ///////////////////////////////////GESTION DU DÉPOUILLEMENT///////////////////////////////////
+
     // Routes de calcul du dépouillement (admin)
     Route::post('/depouillement/{election}/calculer', [DepouillementController::class, 'calculer'])
         ->name('depouillement.calculer')
@@ -154,4 +151,4 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/depouillement/{election}/etat', [DepouillementController::class, 'etat'])
         ->name('depouillement.etat')
         ->middleware('role:admin');
-    });
+});

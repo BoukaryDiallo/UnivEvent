@@ -40,15 +40,15 @@ import {
 
 import { useAuth } from '@/hooks/module1/useAuth';
 
+import { dashboard } from '@/routes';
 import { dashboard as adminDashboard } from '@/routes/admin';
 import { index as adminDiplomasIndex } from '@/routes/admin/diplomas';
 import { index as adminPickupSlotsIndex } from '@/routes/admin/pickup-slots';
 
+import { index as diplomasIndex } from '@/routes/diplomas';
 import type { NavItem } from '@/types';
 
 
-import { dashboard } from '@/routes';
-import { index as diplomasIndex } from '@/routes/diplomas';
 
 const footerNavItems: NavItem[] = [
     {
@@ -81,12 +81,15 @@ export function AppSidebar() {
             href: '/module5/dashboard',
             icon: Calendar,
         },
-        {
+    ];
+
+    if (!hasRole('admin')) {
+        mainNavItems.push({
             title: 'Retraits de diplômes',
             href: diplomasIndex(),
             icon: GraduationCap,
-        },
-    ];
+        });
+    }
 
     // Elections & Clubs
     if (hasRole('admin') || hasRole('etudiant')) {

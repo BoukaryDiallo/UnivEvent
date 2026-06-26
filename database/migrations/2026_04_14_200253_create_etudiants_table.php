@@ -22,8 +22,8 @@ return new class extends Migration
             $table->unsignedBigInteger('id_departement');
             $table->unsignedBigInteger('id_filiere');
 
-            $table->enum('niveau', ['Licence1', 'Licence2', 'Licence3','Master1', 'Master2', 'Doctorat1','Doctorat2', 'Doctorat3'])
-                  ->default('Licence1');;
+            $table->enum('niveau', ['Licence1', 'Licence2', 'Licence3', 'Master1', 'Master2', 'Doctorat1', 'Doctorat2', 'Doctorat3'])
+                ->default('Licence1');
 
             $table->date('date_naissance')->nullable();
 
@@ -35,7 +35,6 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-          
             $table->foreign('id_ufr')
                 ->references('id_ufr')
                 ->on('ufrs');

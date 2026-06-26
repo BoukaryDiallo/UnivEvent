@@ -11,8 +11,10 @@ export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
     if (typeof url === 'string') {
         return url;
     }
+
     if (url && typeof url === 'object' && 'url' in url) {
         return url.url;
     }
+
     return '';
 }

@@ -1,5 +1,7 @@
 <?php
+
 /* c:\Users\PADSEM\clother-integrateur\UnivEvent\app\Http\Controllers\ForumController.php */
+
 namespace App\Http\Controllers;
 
 use App\Models\Club;
@@ -15,7 +17,7 @@ class ForumController extends Controller
         $isMember = $club->adhesions()->where('user_id', Auth::id())->where('statut', 'approuvee')->exists();
         $isAdmin = Auth::user()->role === 'admin';
 
-        if (!$isMember && !$isAdmin) {
+        if (! $isMember && ! $isAdmin) {
             return back()->with('error', 'Vous devez être membre du club pour participer au forum.');
         }
 

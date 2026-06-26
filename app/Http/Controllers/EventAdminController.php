@@ -11,8 +11,7 @@ class EventAdminController extends Controller
 {
     public function __construct(
         private EventValidationService $validationService,
-    ) {
-    }
+    ) {}
 
     public function pendingEvents(Request $request)
     {

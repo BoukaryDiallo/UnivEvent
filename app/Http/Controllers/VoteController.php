@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Vote;
-use App\Models\Election;
 use App\Models\Candidature;
+use App\Models\Election;
 use App\Models\ListeElectorale;
+use App\Models\Vote;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -20,17 +20,18 @@ class VoteController extends Controller
         $user = auth()->user();
         $etudiant = $user->etudiant ?? null;
 
-        if (!$etudiant) {
+        if (! $etudiant) {
             return back()->with('error', 'Vous n\'êtes pas enregistré comme étudiant.');
         }
 
         $elections = Election::whereHas('listesElectorales', function ($q) use ($etudiant) {
-                $q->where('id_etudiant', $etudiant->id);
-            })
+            $q->where('id_etudiant', $etudiant->id);
+        })
             ->with(['ufr', 'filiere'])
             ->get()
             ->filter(function ($election) {
                 $election->synchronizeStatus();
+
                 return in_array($election->statut, ['ouverte', 'second_tour']);
             });
 
@@ -48,11 +49,11 @@ class VoteController extends Controller
         $user = auth()->user();
         $etudiant = $user->etudiant ?? null;
 
-        if (!$etudiant) {
+        if (! $etudiant) {
             return back()->with('error', 'Vous n\'êtes pas enregistré comme étudiant.');
         }
 
-        if (!in_array($election->statut, ['ouverte', 'second_tour'])) {
+        if (! in_array($election->statut, ['ouverte', 'second_tour'])) {
             return back()->with('error', 'Cette élection n\'est pas ouverte pour le vote.');
         }
 
@@ -61,7 +62,7 @@ class VoteController extends Controller
             ->where('id_etudiant', $etudiant->id)
             ->exists();
 
-        if (!$autorise) {
+        if (! $autorise) {
             return back()->with('error', 'Non autorisé pour cette élection.');
         }
 
@@ -95,7 +96,7 @@ class VoteController extends Controller
         $user = auth()->user();
         $etudiant = $user->etudiant ?? null;
 
-        if (!$etudiant) {
+        if (! $etudiant) {
             return back()->with('error', 'Non étudiant.');
         }
 
@@ -103,7 +104,7 @@ class VoteController extends Controller
             ->where('id_etudiant', $etudiant->id)
             ->exists();
 
-        if (!$autorise) {
+        if (! $autorise) {
             return back()->with('error', 'Non autorisé.');
         }
 
@@ -123,20 +124,20 @@ class VoteController extends Controller
         $user = auth()->user();
         $etudiant = $user->etudiant ?? null;
 
-        if (!$etudiant) {
+        if (! $etudiant) {
             return back()->with('error', 'Vous n\'êtes pas enregistré comme étudiant.');
         }
 
-$election = Election::findOrFail($request->id_election);
+        $election = Election::findOrFail($request->id_election);
 
         $election->synchronizeStatus();
 
         if (now()->lt($election->date_debut) || now()->gt($election->date_fin)) {
             return back()->with('error', 'Vote non autorisé hors période.');
         }
-        
+
         // Vérifier statut élection - 'ouverte' OU 'second_tour'
-        if (!in_array($election->statut, ['ouverte', 'second_tour'])) {
+        if (! in_array($election->statut, ['ouverte', 'second_tour'])) {
             return back()->with('error', 'Vote fermé ou non ouvert.');
         }
 
@@ -145,7 +146,7 @@ $election = Election::findOrFail($request->id_election);
             ->where('id_etudiant', $etudiant->id)
             ->exists();
 
-        if (!$autorise) {
+        if (! $autorise) {
             return back()->with('error', 'Non autorisé pour cette élection.');
         }
 
@@ -174,7 +175,7 @@ $election = Election::findOrFail($request->id_election);
                 ->first();
         }
 
-        if (!$candidature) {
+        if (! $candidature) {
             return back()->with('error', 'Candidat invalide.');
         }
 
@@ -201,6 +202,7 @@ $election = Election::findOrFail($request->id_election);
             ->get()
             ->filter(function ($election) {
                 $election->synchronizeStatus();
+
                 // N'afficher que les élections ouvertes, exclure clôturées/terminées
                 return in_array($election->statut, ['ouverte', 'planifiee', 'liste_generee']);
             });
@@ -218,7 +220,7 @@ $election = Election::findOrFail($request->id_election);
             ->get();
 
         return Inertia::render('votes/VoteList', [
-            'votes' => $votes
+            'votes' => $votes,
         ]);
     }
 
@@ -230,11 +232,9 @@ $election = Election::findOrFail($request->id_election);
         $vote->load(['user', 'election', 'candidature.user']);
 
         return Inertia::render('votes/VoteShow', [
-            'vote' => $vote
+            'vote' => $vote,
         ]);
     }
-
-
 
     /**
      * 🟢 LIVE SHOW (VERSION MODERNE SANS DB::raw)
@@ -264,11 +264,11 @@ $election = Election::findOrFail($request->id_election);
 
                 $votes = $votesGrouped[$cand->id_candidature] ?? 0;
 
-                return (object)[
-                    'name'    => $cand->user->name ?? 'Candidat',
-                    'photo'   => $cand->user->photo ?? null,
-                    'slogan'  => $cand->slogan ?? '',
-                    'votes'   => $votes,
+                return (object) [
+                    'name' => $cand->user->name ?? 'Candidat',
+                    'photo' => $cand->user->photo ?? null,
+                    'slogan' => $cand->slogan ?? '',
+                    'votes' => $votes,
                     'percent' => $totalVotes > 0
                         ? round(($votes * 100) / $totalVotes, 2)
                         : 0,
@@ -276,20 +276,20 @@ $election = Election::findOrFail($request->id_election);
             });
 
         // Résumé élection
-        $electionData = (object)[
-            'id_election'  => $election->id_election,
-            'title'        => $election->titre,
-            'status'       => $election->statut,
-            'votes_count'  => $totalVotes,
+        $electionData = (object) [
+            'id_election' => $election->id_election,
+            'title' => $election->titre,
+            'status' => $election->statut,
+            'votes_count' => $totalVotes,
             'total_voters' => $totalVoters,
-            'progress'     => $totalVoters > 0
+            'progress' => $totalVoters > 0
                 ? round(($totalVotes * 100) / $totalVoters, 2)
                 : 0,
         ];
 
         return Inertia::render('resultats/LiveShow', [
-            'election'   => $electionData,
-            'candidates' => $candidates
+            'election' => $electionData,
+            'candidates' => $candidates,
         ]);
     }
 }
@@ -427,4 +427,4 @@ $election = Election::findOrFail($request->id_election);
 //     }
 // }
 
-//<?php
+// <?php

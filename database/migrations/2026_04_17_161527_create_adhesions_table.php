@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('club_id')->constrained()->onDelete('cascade');
-            $table->enum('statut', ['en_attente','approuvee','rejetee','quittee'])->default('en_attente');
-            $table->enum('role_dans_club', ['membre','vice_president','tresorier','secretaire'])->default('membre');
+            $table->enum('statut', ['en_attente', 'approuvee', 'rejetee', 'quittee'])->default('en_attente');
+            $table->enum('role_dans_club', ['membre', 'vice_president', 'tresorier', 'secretaire'])->default('membre');
             $table->timestamp('date_adhesion')->nullable();
             $table->timestamps();
             $table->unique(['user_id', 'club_id']); // contrainte unicité

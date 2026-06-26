@@ -11,6 +11,7 @@ use Inertia\Inertia;
 class ResultatController extends Controller
 {
     private ElectionService $electionService;
+
     private PublicationService $publicationService;
 
     public function __construct(
@@ -42,7 +43,7 @@ class ResultatController extends Controller
                 ->where('statut_publication', 'brouillon')
                 ->exists();
 
-            $resultatStatut = $hasResultatsOfficiels ? 'officiel' : 
+            $resultatStatut = $hasResultatsOfficiels ? 'officiel' :
                             ($hasResultatsBrouillons ? 'brouillon' : 'aucun');
 
             return [
@@ -60,7 +61,7 @@ class ResultatController extends Controller
         });
 
         return Inertia::render('resultats/ResultatIndex', [
-            'elections' => $electionsWithResultStatus
+            'elections' => $electionsWithResultStatus,
         ]);
     }
 
@@ -88,7 +89,7 @@ class ResultatController extends Controller
                 'ouvertes' => $workflow['ouverte']->count(),
                 'cloturees' => $workflow['cloturee']->count(),
                 'terminees' => $workflow['terminee']->count(),
-            ]
+            ],
         ]);
     }
 
@@ -124,7 +125,7 @@ class ResultatController extends Controller
         if ($resultatsBrouillons->isNotEmpty() && $election->tour === 1) {
             $premier = $resultatsBrouillons->first();
             $deuxieme = $resultatsBrouillons->skip(1)->first();
-            
+
             // Égalité des voix OU pas de majorité absolue
             $secondTourRequis = ($deuxieme && $premier->nb_voix === $deuxieme->nb_voix) || ($premier->pourcentage <= 50);
         }
@@ -141,7 +142,7 @@ class ResultatController extends Controller
             'totalVoters' => $totalVoters,
             'participationRate' => $participationRate,
             'showPublishButton' => $peutPublier,
-            'etatResultats' => null // Plus utilisé car on affiche selon le statut
+            'etatResultats' => null, // Plus utilisé car on affiche selon le statut
         ]);
     }
 
@@ -195,7 +196,7 @@ class ResultatController extends Controller
      */
     public function preview(Election $election)
     {
-        if (!$this->electionService->aResultatsBrouillon($election)) {
+        if (! $this->electionService->aResultatsBrouillon($election)) {
             return back()->with('error', 'Aucun résultat trouvé.');
         }
 
@@ -210,7 +211,7 @@ class ResultatController extends Controller
             'election' => $election,
             'resultats' => $resultats,
             'totalVotes' => $resultats->sum('nb_voix'),
-            'peutPublier' => !$this->publicationService->resultatsImmuables($election)
+            'peutPublier' => ! $this->publicationService->resultatsImmuables($election),
         ]);
     }
 
@@ -225,7 +226,7 @@ class ResultatController extends Controller
                 'secondTourNeeded' => false,
                 'equality' => false,
                 'majority' => false,
-                'type' => 'no_results'
+                'type' => 'no_results',
             ];
         }
 
@@ -235,22 +236,22 @@ class ResultatController extends Controller
 
         // Vérifier s'il y a un élu
         $winner = $resultats->firstWhere('candidature.resultat', 'elu');
-        
+
         // Vérifier l'égalité des voix
         $equality = $deuxieme && $premier->nb_voix === $deuxieme->nb_voix;
-        
+
         // Majorité absolue stricte
         $majority = $premier && $premier->pourcentage > 50;
-        
+
         // Second tour requis
-        $secondTourNeeded = ($election->tour === 1) && (!$majority || $equality);
-        
+        $secondTourNeeded = ($election->tour === 1) && (! $majority || $equality);
+
         return [
             'winner' => $winner,
             'secondTourNeeded' => $secondTourNeeded,
             'equality' => $equality,
             'majority' => $majority,
-            'type' => $winner ? 'elected' : ($secondTourNeeded ? 'second_tour' : 'no_majority')
+            'type' => $winner ? 'elected' : ($secondTourNeeded ? 'second_tour' : 'no_majority'),
         ];
     }
 
@@ -269,7 +270,7 @@ class ResultatController extends Controller
                 'votes' => $resultat->nb_voix,
                 'percentage' => $resultat->pourcentage,
                 'isWinner' => $resultat->candidature->resultat === 'elu',
-                'resultat' => $resultat->candidature->resultat
+                'resultat' => $resultat->candidature->resultat,
             ];
         }
 
@@ -278,13 +279,13 @@ class ResultatController extends Controller
             'date' => now()->format('d/m/Y'),
             'title' => 'Résultats officiels publiés',
             'results' => $results,
-            'total_votes' => $totalVotes
+            'total_votes' => $totalVotes,
         ]];
     }
 
     private function formatElection($election, $totalVotes, $totalVoters)
     {
-        return (object)[
+        return (object) [
             'id_election' => $election->id_election,
             'title' => $election->titre,
             'promotion' => $election->promotion,
@@ -293,7 +294,7 @@ class ResultatController extends Controller
             'total_voters' => $totalVoters,
             'progress' => $totalVoters > 0
                 ? round(($totalVotes * 100) / $totalVoters, 2)
-                : 0
+                : 0,
         ];
     }
 }

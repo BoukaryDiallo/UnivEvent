@@ -2,24 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Jury;
-use App\Models\JuryMembre;
-use App\Models\Soutenance;
-use Inertia\Inertia;
-
-
 use App\Events\EventResultsPublished;
 use App\Events\EventStatusUpdated;
 use App\Events\JuryScoresUpdated;
 use App\Models\Evenement;
+use App\Models\Jury;
 use App\Models\JuryDeliberation;
-use App\Models\JuryPanel;
+use App\Models\JuryMembre;
+use App\Models\Soutenance;
 use App\Models\User;
 use App\Services\EventAuthorizationService;
 use App\Services\EventNotificationService;
 use App\Services\JuryWorkflowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class JuryController extends Controller
 {
@@ -27,8 +24,7 @@ class JuryController extends Controller
         private EventAuthorizationService $authorization,
         private JuryWorkflowService $workflow,
         private EventNotificationService $notifications,
-    ) {
-    }
+    ) {}
 
     public function configure(Request $request, Evenement $evenement)
     {
@@ -140,7 +136,6 @@ class JuryController extends Controller
         }
 
         abort_unless($this->authorization->isPresidentJury($evenement, $request->user()), 403);
-
 
         $validated = $request->validate([
             'reason' => ['required', 'string', 'max:1000'],
@@ -284,10 +279,11 @@ class JuryController extends Controller
         }
     }
 
-    //soutenance
+    // soutenance
     public function index()
     {
         $jurys = Jury::with(['soutenance', 'president', 'membres.user'])->get();
+
         return Inertia::render('soutenances/jurys/index', compact('jurys'));
     }
 
@@ -295,6 +291,7 @@ class JuryController extends Controller
     {
         $soutenances = Soutenance::all();
         $enseignants = User::where('role', 'enseignant')->get();
+
         return Inertia::render('soutenances/jurys/create', compact('soutenances', 'enseignants'));
     }
 
@@ -315,7 +312,7 @@ class JuryController extends Controller
                 JuryMembre::create([
                     'jury_id' => $jury->id,
                     'user_id' => $membreId,
-                    'role' => 'membre'
+                    'role' => 'membre',
                 ]);
             }
         }
@@ -326,6 +323,7 @@ class JuryController extends Controller
     public function show(Jury $jury)
     {
         $jury->load(['soutenance', 'president', 'membres.user']);
+
         return Inertia::render('soutenances/jurys/show', compact('jury'));
     }
 
@@ -333,6 +331,7 @@ class JuryController extends Controller
     {
         $soutenances = Soutenance::all();
         $enseignants = User::where('role', 'enseignant')->get();
+
         return Inertia::render('soutenances/jurys/edit', compact('jury', 'soutenances', 'enseignants'));
     }
 
@@ -344,12 +343,14 @@ class JuryController extends Controller
             'president_id' => 'required|exists:users,id',
         ]);
         $jury->update($request->only('nom', 'soutenance_id', 'president_id'));
+
         return redirect()->route('jurys.index')->with('success', 'Jury modifié.');
     }
 
     public function destroy(Jury $jury)
     {
         $jury->delete();
+
         return redirect()->route('jurys.index')->with('success', 'Jury supprimé.');
     }
 }

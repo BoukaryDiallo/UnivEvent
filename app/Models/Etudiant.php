@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Etudiant extends Model
 {
@@ -67,7 +66,7 @@ class Etudiant extends Model
     }
 
     public function listesElectorales()
-{
-    return $this->hasMany(ListeElectorale::class, 'id_etudiant');
-}
+    {
+        return $this->hasMany(ListeElectorale::class, 'id_etudiant');
+    }
 }

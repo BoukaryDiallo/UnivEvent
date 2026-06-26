@@ -214,6 +214,7 @@ export default function AdminScanner({ scanTarget = '' }: AdminScannerProps) {
                                         if (!token) {
                                             return;
                                         }
+
                                         const url = `/acces/${token}${scanTarget ? `?target=${scanTarget}` : ''}`;
                                         window.location.href = url;
                                     }}

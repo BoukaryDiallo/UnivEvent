@@ -9,7 +9,7 @@ class Seance extends Model
     protected $fillable = [
         'jour_semaine', 'type_seance', 'description',
         'emploi_du_temps_id', 'creneau_id', 'salle_id',
-        'matiere_id', 'enseignant_id', 'prise_id'
+        'matiere_id', 'enseignant_id', 'prise_id',
     ];
 
     public function emploiDuTemps()

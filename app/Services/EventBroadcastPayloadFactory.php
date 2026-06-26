@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\EventNotification;
 use App\Models\Evenement;
+use App\Models\EventNotification;
 use App\Models\JuryPanel;
 use App\Models\Resultat;
 use Illuminate\Support\Facades\Storage;

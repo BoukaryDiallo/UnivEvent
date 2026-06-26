@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,12 +19,13 @@ class Programme extends Model
         'heure_fin',
         'salle',
         'type_section',
-        'ordre'
+        'ordre',
     ];
-    
+
     protected $casts = [
         'date_programme' => 'date',
     ];
+
     public function evenement()
     {
         return $this->belongsTo(Evenement::class);

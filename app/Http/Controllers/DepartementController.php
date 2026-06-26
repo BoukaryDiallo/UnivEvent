@@ -20,7 +20,7 @@ class DepartementController extends Controller
             ->get();
 
         return Inertia::render('departement/DepartementList', [
-            'departements' => $departements
+            'departements' => $departements,
         ]);
     }
 

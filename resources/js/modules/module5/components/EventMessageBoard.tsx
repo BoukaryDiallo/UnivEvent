@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { MessageSquare, Pin, Reply, Send } from 'lucide-react';
+import { Search, Clock } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ export function EventMessageBoard({ evenementId, messages, canManage = false, on
         () =>
             messages.filter((message) => {
                 const haystack = `${message.user.name ?? ''} ${message.contenu} ${message.type}`.toLowerCase();
+
                 return haystack.includes(search.trim().toLowerCase());
             }),
         [messages, search],
@@ -172,5 +174,4 @@ export function EventMessageBoard({ evenementId, messages, canManage = false, on
     );
 }
 
-import { Search, Clock } from 'lucide-react';
 import { usePage } from '@inertiajs/react';

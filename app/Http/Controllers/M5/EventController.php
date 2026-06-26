@@ -5,20 +5,19 @@ namespace App\Http\Controllers\M5;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EvenementResource;
 use App\Models\Evenement;
-use App\Models\InscriptionEvenement;
+use App\Models\EvenementReaction;
 use App\Models\EvenementRole;
-use App\Models\Programme;
+use App\Models\EventType;
+use App\Models\InscriptionEvenement;
 use App\Models\JuryPanel;
 use App\Models\User;
-use App\Models\EventType;
 use App\Services\EventCompletionService;
 use App\Services\EventService;
 use App\Services\MediaService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class EventController extends Controller
 {
@@ -41,13 +40,13 @@ class EventController extends Controller
         // 3. Pending are visible to creator OR admin
         $query->where(function ($q) use ($user) {
             $q->where('statut', 'publie')
-              ->orWhere('cree_par', $user->id)
-              ->when($user && $user->role === 'admin', fn($adminQuery) => $adminQuery->orWhereIn('statut', ['en_attente', 'annule', 'brouillon']));
+                ->orWhere('cree_par', $user->id)
+                ->when($user && $user->role === 'admin', fn ($adminQuery) => $adminQuery->orWhereIn('statut', ['en_attente', 'annule', 'brouillon']));
         });
 
         // Filtres
         if ($request->filled('search')) {
-            $query->where('titre', 'like', '%' . $request->search . '%');
+            $query->where('titre', 'like', '%'.$request->search.'%');
         }
         if ($request->filled('type') && $request->type !== 'all') {
             $query->where('type', $request->type);
@@ -66,6 +65,7 @@ class EventController extends Controller
         $eventsWithCompletion = $events->getCollection()->map(function (Evenement $event) {
             $data = (new EvenementResource($event))->resolve();
             $data['completion'] = $this->completionService->summarize($event);
+
             return $data;
         });
 
@@ -81,8 +81,8 @@ class EventController extends Controller
     {
         $user = Auth::user();
         $evenement->load(['createur', 'roles', 'medias', 'programmes', 'assignments.user']);
-        
-        $participation = $user 
+
+        $participation = $user
             ? InscriptionEvenement::where('evenement_id', $evenement->id)
                 ->where('utilisateur_id', $user->id)
                 ->first()
@@ -99,7 +99,7 @@ class EventController extends Controller
         $user = Auth::user();
         abort_unless($user, 401);
 
-        $reaction = \App\Models\EvenementReaction::where([
+        $reaction = EvenementReaction::where([
             'evenement_id' => $evenement->id,
             'user_id' => $user->id,
         ])->first();
@@ -107,7 +107,7 @@ class EventController extends Controller
         if ($reaction) {
             $reaction->delete();
         } else {
-            \App\Models\EvenementReaction::create([
+            EvenementReaction::create([
                 'evenement_id' => $evenement->id,
                 'user_id' => $user->id,
                 'type' => 'like',
@@ -133,38 +133,38 @@ class EventController extends Controller
     }
 
     public function manage(Evenement $evenement)
-{
-    $user = Auth::user();
-    $evenement->load([
-        'createur',
-        'roles',
-        'medias',
-        'programmes',
-        'assignments.user',
-        'juryPanel.criteria',
-    ]);
+    {
+        $user = Auth::user();
+        $evenement->load([
+            'createur',
+            'roles',
+            'medias',
+            'programmes',
+            'assignments.user',
+            'juryPanel.criteria',
+        ]);
 
-    return Inertia::render('module5/events/Manage', [
-        'event' => (new EvenementResource($evenement))->resolve(),
-        'assignable_users' => User::select(['id', 'name', 'email', 'role'])->orderBy('name')->get()->map(fn ($user) => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
-        ]),
-        'completion' => $this->completionService->summarize($evenement),
-        'suggestions' => $this->eventService->suggestions($evenement),
-        'submission_errors' => $this->eventService->submissionErrors($evenement),
-    ]);
-}
+        return Inertia::render('module5/events/Manage', [
+            'event' => (new EvenementResource($evenement))->resolve(),
+            'assignable_users' => User::select(['id', 'name', 'email', 'role'])->orderBy('name')->get()->map(fn ($user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ]),
+            'completion' => $this->completionService->summarize($evenement),
+            'suggestions' => $this->eventService->suggestions($evenement),
+            'submission_errors' => $this->eventService->submissionErrors($evenement),
+        ]);
+    }
 
-public function edit(Evenement $evenement)
-{
-    return Inertia::render('module5/events/Edit', [
-        'event' => (new EvenementResource($evenement))->resolve(),
-        'event_types' => EventType::where('is_active', true)->get(),
-    ]);
-}
+    public function edit(Evenement $evenement)
+    {
+        return Inertia::render('module5/events/Edit', [
+            'event' => (new EvenementResource($evenement))->resolve(),
+            'event_types' => EventType::where('is_active', true)->get(),
+        ]);
+    }
 
     public function store(Request $request)
     {
@@ -290,7 +290,7 @@ public function edit(Evenement $evenement)
 
         if ($request->has('statut')) {
             $evenement->update(['statut' => $request->statut]);
-            if ($request->statut === 'en_attente' && !$evenement->submitted_at) {
+            if ($request->statut === 'en_attente' && ! $evenement->submitted_at) {
                 $evenement->update(['submitted_at' => now()]);
             }
         }

@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('seances', function (Blueprint $table) {
             $table->id();
-            $table->enum('jour_semaine', ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi']);
-            $table->enum('type_seance', ['CM','TD','TP','Examen']);
+            $table->enum('jour_semaine', ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']);
+            $table->enum('type_seance', ['CM', 'TD', 'TP', 'Examen']);
             $table->text('description')->nullable();
 
             $table->foreignId('emploi_du_temps_id')->constrained()->onDelete('cascade');

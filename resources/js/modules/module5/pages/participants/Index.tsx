@@ -7,12 +7,12 @@ import {
     Bell
 } from 'lucide-react';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
-import { ParticipantDashboard } from '@/modules/module5/components/ParticipantDashboard';
 import { ActualitesFeed } from '@/modules/module5/components/ActualitesFeed';
+import { ParticipantDashboard } from '@/modules/module5/components/ParticipantDashboard';
 import type { BreadcrumbItem } from '@/types';
 
 type ParticipantsIndexProps = {

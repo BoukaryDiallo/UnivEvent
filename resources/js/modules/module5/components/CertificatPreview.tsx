@@ -1,6 +1,6 @@
-import { cn } from '@/lib/utils';
 import { DownloadIcon, CheckCircle2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type CertificatData = {
     nom_participant: string;

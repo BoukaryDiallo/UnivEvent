@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Spatie\Permission\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -15,26 +15,26 @@ class UserController extends Controller
     {
         return inertia('Users/Index', [
             'users' => User::with('roles')->get(),
-            'roles' => Role::all()
+            'roles' => Role::all(),
         ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name'     => 'required',
-            'email'    => 'required|email|unique:users',
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
-            'roles'    => 'array',          // ← plus "required" pour permettre aucun rôle
+            'roles' => 'array',          // ← plus "required" pour permettre aucun rôle
         ]);
 
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        if (!empty($request->roles)) {
+        if (! empty($request->roles)) {
             $user->syncRoles($request->roles);
         }
 
@@ -44,7 +44,7 @@ class UserController extends Controller
     public function updateRoles(Request $request, $id)
     {
         $request->validate([
-            'roles'   => 'array',
+            'roles' => 'array',
             'roles.*' => 'string|exists:roles,name',   // ← vérifie que les rôles existent
         ]);
 

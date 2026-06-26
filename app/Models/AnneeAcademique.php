@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\Module2\AnneeAcademiqueFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +12,7 @@ class AnneeAcademique extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\Module2\AnneeAcademiqueFactory::new();
+        return AnneeAcademiqueFactory::new();
     }
 
     protected $fillable = ['libelle', 'date_debut', 'date_fin', 'est_courante'];

@@ -20,12 +20,47 @@ return new class extends Migration
 
     public function down(): void
     {
+        $schema = Schema::getConnection()->getSchemaBuilder();
+
+        if ($schema->hasIndex('evenement_roles', 'evenement_roles_evenement_id_category_index')) {
+            Schema::table('evenement_roles', function (Blueprint $table) {
+                $table->dropIndex(['evenement_id', 'category']);
+            });
+        }
+
+        if ($schema->hasIndex('evenement_roles', 'evenement_roles_category_role_index')) {
+            Schema::table('evenement_roles', function (Blueprint $table) {
+                $table->dropIndex(['category', 'role']);
+            });
+        }
+
+        if ($schema->hasIndex('evenement_roles', 'evenement_roles_user_id_index')) {
+            Schema::table('evenement_roles', function (Blueprint $table) {
+                $table->dropIndex(['user_id']);
+            });
+        }
+
+        $hasUserForeignKey = collect($schema->getForeignKeys('evenement_roles'))
+            ->contains(fn (array $foreignKey): bool => $foreignKey['columns'] === ['user_id']);
+
+        if ($hasUserForeignKey && Schema::getConnection()->getDriverName() === 'sqlite') {
+            Schema::table('evenement_roles', function (Blueprint $table) {
+                $table->dropForeign(['user_id']);
+            });
+        }
+
         Schema::table('evenement_roles', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('user_id');
-            $table->dropIndex(['evenement_id', 'category']);
-            $table->dropIndex(['category', 'role']);
-            $table->dropIndex(['user_id']);
-            $table->dropColumn('category');
+            if (Schema::hasColumn('evenement_roles', 'user_id')) {
+                if (Schema::getConnection()->getDriverName() === 'sqlite') {
+                    $table->dropColumn('user_id');
+                } else {
+                    $table->dropConstrainedForeignId('user_id');
+                }
+            }
+
+            if (Schema::hasColumn('evenement_roles', 'category')) {
+                $table->dropColumn('category');
+            }
         });
     }
 };

@@ -1,16 +1,16 @@
 import { Head, Link } from '@inertiajs/react';
 import { CalendarDays, MapPin, ShieldCheck, Users, ImagePlus, Sparkles, Shield, ClipboardList, ChevronRight } from 'lucide-react';
+import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CertificateStudio } from '@/modules/module5/components/CertificateCanvasStudio';
 import { EventBadge } from '@/modules/module5/components/EventBadge';
 import { ActorManager } from '@/modules/module5/components/manage/ActorManager';
 import { EventManageLayout } from '@/modules/module5/components/manage/EventManageLayout';
 import { MediaUploader } from '@/modules/module5/components/manage/MediaUploader';
 import { SectionCard } from '@/modules/module5/components/manage/SectionCard';
 import { SmartSubmitButton } from '@/modules/module5/components/manage/SmartSubmitButton';
-import { CertificateStudio } from '@/modules/module5/components/CertificateCanvasStudio';
-import type { BreadcrumbItem } from '@/types';
 import type {
     EventAssignableUser,
     EventCompletionSummary,
@@ -20,7 +20,7 @@ import type {
     EventSummary,
     EventTeamMember,
 } from '@/modules/module5/types/event';
-import { useMemo } from 'react';
+import type { BreadcrumbItem } from '@/types';
 
 type ManageAssignment = {
     id: number;

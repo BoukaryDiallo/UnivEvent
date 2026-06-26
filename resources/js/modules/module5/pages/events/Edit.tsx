@@ -16,15 +16,15 @@ import {
     Settings
 } from 'lucide-react';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
@@ -76,6 +76,7 @@ export default function EventEdit({ event, event_types }: EventEditProps) {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (file) {
             setData('affiche', file);
             setPreviewUrl(URL.createObjectURL(file));
@@ -94,6 +95,7 @@ export default function EventEdit({ event, event_types }: EventEditProps) {
 
     const toggleCible = (id: string) => {
         const current = [...data.public_cible].filter(c => c !== 'tous');
+
         if (current.includes(id)) {
             setData('public_cible', current.filter(c => c !== id));
         } else {

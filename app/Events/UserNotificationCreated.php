@@ -14,9 +14,7 @@ class UserNotificationCreated implements ShouldBroadcastNow
     use Dispatchable;
     use SerializesModels;
 
-    public function __construct(public EventNotification $notification)
-    {
-    }
+    public function __construct(public EventNotification $notification) {}
 
     public function broadcastOn(): array
     {

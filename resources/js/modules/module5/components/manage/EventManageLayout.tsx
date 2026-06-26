@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeftRight, ExternalLink } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
-import type { EventCompletionSummary, EventSummary, EventWorkflowState } from '@/modules/module5/types/event';
+import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/app-layout';
+import type { EventCompletionSummary, EventSummary, EventWorkflowState } from '@/modules/module5/types/event';
+import type { BreadcrumbItem } from '@/types';
 import { CompletionProgress } from './CompletionProgress';
 
 type EventManageLayoutProps = {

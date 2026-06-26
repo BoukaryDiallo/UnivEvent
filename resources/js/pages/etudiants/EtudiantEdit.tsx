@@ -33,19 +33,19 @@ interface Props extends PageProps {
 
 export default function EtudiantEdit() {
     const { etudiant, filieres, niveaux } = usePage<Props>().props;
-    
+
+    const { data, setData, put, processing, errors } = useForm({
+        name: etudiant?.user?.name || '',
+        id_filiere: etudiant?.id_filiere?.toString() || '',
+        niveau: etudiant?.niveau || '',
+        date_naissance: etudiant?.date_naissance || '',
+        photo: null as File | null,
+    });
+
     // Vérifications de sécurité
     if (!etudiant) {
         return <div>Étudiant non trouvé</div>;
     }
-    
-    const { data, setData, put, processing, errors } = useForm({
-        name: etudiant.user?.name || '',
-        id_filiere: etudiant.id_filiere?.toString() || '',
-        niveau: etudiant.niveau || '',
-        date_naissance: etudiant.date_naissance || '',
-        photo: null as File | null,
-    });
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();

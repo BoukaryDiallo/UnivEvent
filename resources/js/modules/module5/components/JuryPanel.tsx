@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { 
     FileTextIcon, 
     DownloadIcon, 
@@ -7,10 +6,11 @@ import {
     ChevronRightIcon,
     SaveIcon
 } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
+import { Textarea } from '@/components/ui/textarea';
 
 type Candidature = {
     id: number;
@@ -126,6 +126,7 @@ export default function JuryPanel({ concours, candidatures, criteres, onSave }: 
                                                         value={scores[critere.id] || 0}
                                                         onChange={(e) => {
                                                             const val = parseFloat(e.target.value);
+
                                                             if (!isNaN(val)) {
                                                                 setScores(prev => ({ ...prev, [critere.id]: Math.min(20, Math.max(0, val)) }));
                                                             }

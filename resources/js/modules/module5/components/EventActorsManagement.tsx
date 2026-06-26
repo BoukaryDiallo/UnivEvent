@@ -82,6 +82,7 @@ export function EventActorsManagement({ event, canManage, onToast: _onToast }: E
                 ...section,
                 actors: section.actors.filter((actor) => {
                     const haystack = `${actor?.name ?? ''} ${actor?.email ?? ''} ${actor?.role ?? ''}`.toLowerCase();
+
                     return haystack.includes(search.trim().toLowerCase());
                 }),
             })),

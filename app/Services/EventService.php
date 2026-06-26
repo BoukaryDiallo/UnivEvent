@@ -12,8 +12,7 @@ class EventService
     public function __construct(
         private EventNotificationService $notifications,
         private JuryWorkflowService $juryWorkflow,
-    ) {
-    }
+    ) {}
 
     public function createExpress(User $user, array $data): Evenement
     {
@@ -215,7 +214,7 @@ class EventService
         }
 
         // Interaction suggestions
-        if (!$event->comments_enabled) {
+        if (! $event->comments_enabled) {
             $suggestions[] = 'Activer les commentaires';
         }
 

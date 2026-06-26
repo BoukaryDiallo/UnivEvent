@@ -23,7 +23,7 @@ class StoreClubRequest extends FormRequest
     public function rules(): array
     {
         $isAdmin = auth()->user()?->isAdmin() ?? false;
-        
+
         return [
             'nom' => 'required|string|max:255',
             'type' => 'required|string|in:sportif,culturel,scientifique,humanitaire,autre',

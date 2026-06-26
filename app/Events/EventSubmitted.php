@@ -15,6 +15,5 @@ class EventSubmitted
     public function __construct(
         public Evenement $evenement,
         public User $actor,
-    ) {
-    }
+    ) {}
 }

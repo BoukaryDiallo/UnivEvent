@@ -15,6 +15,5 @@ class EventCreated
     public function __construct(
         public Evenement $evenement,
         public User $actor,
-    ) {
-    }
+    ) {}
 }

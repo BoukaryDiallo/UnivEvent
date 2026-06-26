@@ -1,5 +1,5 @@
-import { useCallback, useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
+import { useCallback, useState, useEffect } from 'react';
 import { useDebounce } from 'use-debounce';
 
 export default function useEventFilters(initialFilters = {}) {
@@ -50,7 +50,10 @@ export default function useEventFilters(initialFilters = {}) {
     }, [debouncedSearch, filters.type, filters.statut, filters.date_from, filters.date_to, filters.public_cible]);
 
     const isFiltered = Object.entries(filters).some(([key, value]) => {
-        if (key === 'search') return value !== '';
+        if (key === 'search') {
+return value !== '';
+}
+
         return value !== 'all' && value !== '';
     });
 

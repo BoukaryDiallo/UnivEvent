@@ -12,7 +12,7 @@ class InscriptionController extends Controller
     public function approve(Request $request, $id)
     {
         $inscription = InscriptionEvenement::with('evenement')->findOrFail($id);
-        
+
         // Authorization: Check if user is creator or admin
         if (Auth::user()->role !== 'admin' && $inscription->evenement->cree_par !== Auth::id()) {
             abort(403);
@@ -21,7 +21,7 @@ class InscriptionController extends Controller
         $inscription->update([
             'statut' => 'accepte',
             'is_waitlist' => false,
-            'waitlist_position' => null
+            'waitlist_position' => null,
         ]);
 
         // Logic to notify participant...
@@ -32,7 +32,7 @@ class InscriptionController extends Controller
     public function reject(Request $request, $id)
     {
         $inscription = InscriptionEvenement::with('evenement')->findOrFail($id);
-        
+
         if (Auth::user()->role !== 'admin' && $inscription->evenement->cree_par !== Auth::id()) {
             abort(403);
         }

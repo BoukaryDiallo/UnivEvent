@@ -8,9 +8,20 @@ use App\Models\DiplomaRequest;
 use App\Services\DiplomaRequestService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DiplomaDocumentController extends Controller
 {
+    public function download(
+        DiplomaRequest $diplomaRequest,
+        DiplomaDocument $document,
+        DiplomaRequestService $service,
+    ): StreamedResponse {
+        $this->authorize('download', $document);
+
+        return $service->streamDocument($document);
+    }
+
     public function validateDocument(
         Request $request,
         DiplomaRequest $diplomaRequest,

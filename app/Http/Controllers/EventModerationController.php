@@ -12,9 +12,7 @@ use Illuminate\Http\Request;
 
 class EventModerationController extends Controller
 {
-    public function __construct(private EventAuthorizationService $authorization)
-    {
-    }
+    public function __construct(private EventAuthorizationService $authorization) {}
 
     public function restrict(Request $request, Evenement $evenement, User $user)
     {

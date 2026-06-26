@@ -73,7 +73,7 @@ class ProgramService
             $errors[] = 'Le titre de la session est requis.';
         }
 
-        if (!empty($data['heure_debut']) && !empty($data['heure_fin'])) {
+        if (! empty($data['heure_debut']) && ! empty($data['heure_fin'])) {
             if (strtotime($data['heure_debut']) >= strtotime($data['heure_fin'])) {
                 $errors[] = 'L\'heure de fin doit être après l\'heure de début.';
             }

@@ -14,9 +14,10 @@ class CreneauController extends Controller
     {
         //
         $creneaux = Creneau::latest()->paginate(10);
-         return inertia('EmploiDuTemps/Admin/creneau',[
-            "creneaux" => $creneaux
-         ]);
+
+        return inertia('EmploiDuTemps/Admin/creneau', [
+            'creneaux' => $creneaux,
+        ]);
     }
 
     /**
@@ -33,7 +34,6 @@ class CreneauController extends Controller
     public function ajouterCreneau(Request $request)
     {
         //
-        
 
         $data = $request->validate([
             'heure_debut' => 'required|date_format:H:i',
@@ -42,7 +42,7 @@ class CreneauController extends Controller
 
         Creneau::create([
             ...$data,
-            'libelle' => $data['heure_debut'].' - '.$data['heure_fin']
+            'libelle' => $data['heure_debut'].' - '.$data['heure_fin'],
         ]);
 
         return back()->with('success', 'Creneau créée avec succès');
@@ -62,7 +62,7 @@ class CreneauController extends Controller
     public function modifierCreneau(Request $request, string $id)
     {
         //
-        
+
         $data = $request->validate([
             'heure_debut' => 'required|date_format:H:i',
             'heure_fin' => 'required|date_format:H:i|after:heure_debut',
@@ -70,12 +70,10 @@ class CreneauController extends Controller
 
         $creneaux = Creneau::findOrFail($id);
 
-            $creneaux->update([
-                ...$data,
-                'libelle' => $data['heure_debut'].' - '.$data['heure_fin']
-            ]);
-        
-        
+        $creneaux->update([
+            ...$data,
+            'libelle' => $data['heure_debut'].' - '.$data['heure_fin'],
+        ]);
 
         return back()->with('success', 'Creneau modifiée avec succès');
     }
@@ -98,6 +96,6 @@ class CreneauController extends Controller
         $creneaux = Creneau::findOrFail($id);
         $creneaux->delete();
 
-        return back()-> with('success', 'Creneau supprimée avec succès');
+        return back()->with('success', 'Creneau supprimée avec succès');
     }
 }

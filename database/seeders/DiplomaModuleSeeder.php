@@ -24,7 +24,17 @@ class DiplomaModuleSeeder extends Seeder
             ?? User::factory()->create([
                 'name' => 'Test Admin',
                 'email' => 'admin@example.com',
+                'role' => 'admin',
+                'est_actif' => true,
+                'email_verified_at' => now(),
             ]);
+
+        $admin->forceFill([
+            'role' => 'admin',
+            'est_actif' => true,
+            'email_verified_at' => $admin->email_verified_at ?? now(),
+        ])->save();
+        $admin->syncRoles(['admin']);
 
         $slots = $this->createPickupSlots($admin);
 
@@ -41,7 +51,19 @@ class DiplomaModuleSeeder extends Seeder
 
         foreach ($scenarios as $i => [$name, $email, $target, $diplomaType]) {
             $owner = User::where('email', $email)->first()
-                ?? User::factory()->create(['name' => $name, 'email' => $email]);
+                ?? User::factory()->create([
+                    'name' => $name,
+                    'email' => $email,
+                    'role' => 'etudiant',
+                    'est_actif' => true,
+                    'email_verified_at' => now(),
+                ]);
+
+            $owner->forceFill([
+                'role' => 'etudiant',
+                'est_actif' => true,
+                'email_verified_at' => $owner->email_verified_at ?? now(),
+            ])->save();
 
             if (! $owner->hasRole('etudiant')) {
                 $owner->assignRole('etudiant');

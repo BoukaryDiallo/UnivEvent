@@ -13,6 +13,7 @@ class DemandeBudgetController extends Controller
     public function index()
     {
         $demandes = DemandeBudget::with('club')->get();
+
         return Inertia::render('DemandesBudget/Index', ['demandes' => $demandes]);
     }
 
@@ -39,6 +40,7 @@ class DemandeBudgetController extends Controller
     public function show(string $id)
     {
         $demande = DemandeBudget::with('club')->findOrFail($id);
+
         return Inertia::render('DemandesBudget/Show', ['demande' => $demande]);
     }
 
@@ -46,6 +48,7 @@ class DemandeBudgetController extends Controller
     {
         $demande = DemandeBudget::findOrFail($id);
         $demande->update($request->all());
+
         return redirect()->back()->with('success', 'Demande mise à jour');
     }
 
@@ -53,6 +56,7 @@ class DemandeBudgetController extends Controller
     {
         $demande = DemandeBudget::findOrFail($id);
         $demande->delete();
+
         return redirect()->route('demandes-budget.index')->with('success', 'Demande supprimée');
     }
 
@@ -65,7 +69,7 @@ class DemandeBudgetController extends Controller
         NotificationClub::create([
             'club_id' => $demande->club_id,
             'type_notif' => 'budget',
-            'message' => 'Votre demande de budget de ' . $demande->montant_demande . ' FCFA a été approuvée',
+            'message' => 'Votre demande de budget de '.$demande->montant_demande.' FCFA a été approuvée',
             'lu' => false,
             'date_envoi' => now(),
         ]);
@@ -78,14 +82,14 @@ class DemandeBudgetController extends Controller
         $demande = DemandeBudget::with('club')->findOrFail($id);
         $demande->update([
             'statut' => 'rejetée',
-            'commentaire' => $request->commentaire
+            'commentaire' => $request->commentaire,
         ]);
 
         // Notify club responsible
         NotificationClub::create([
             'club_id' => $demande->club_id,
             'type_notif' => 'budget',
-            'message' => 'Votre demande de budget de ' . $demande->montant_demande . ' FCFA a été rejetée. Motif: ' . $request->commentaire,
+            'message' => 'Votre demande de budget de '.$demande->montant_demande.' FCFA a été rejetée. Motif: '.$request->commentaire,
             'lu' => false,
             'date_envoi' => now(),
         ]);

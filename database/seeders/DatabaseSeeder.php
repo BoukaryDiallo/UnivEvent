@@ -18,10 +18,17 @@ class DatabaseSeeder extends Seeder
             EvenementSeeder::class,
         ]);
 
-        User::factory()->create([
-            'name' => 'Test Admin',
-            'email' => 'admin@example.com',
-        ])->assignRole('admin');
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Test Admin',
+                'password' => bcrypt('password'),
+                'role' => 'admin',
+                'est_actif' => true,
+                'email_verified_at' => now(),
+            ],
+        );
+        $admin->syncRoles(['admin']);
 
         $this->call(DiplomaModuleSeeder::class);
     }

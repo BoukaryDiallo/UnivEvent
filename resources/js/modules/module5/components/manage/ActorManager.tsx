@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,13 +25,16 @@ export function ActorManager({ eventId, role, title, members, assignableUsers }:
                 }
 
                 const haystack = `${user.name ?? ''} ${user.email ?? ''} ${user.role ?? ''}`.toLowerCase();
+
                 return haystack.includes(search.trim().toLowerCase());
             }),
         [assignableUsers, members, search],
     );
 
     function addMember() {
-        if (!userId) return;
+        if (!userId) {
+return;
+}
 
         router.post(
             `/module5/events/${eventId}/assign-user`,

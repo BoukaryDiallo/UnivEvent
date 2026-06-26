@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activite;
+use App\Models\Club;
 use App\Models\NotificationClub;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ class ActiviteController extends Controller
     public function index()
     {
         $activites = Activite::with(['club', 'creator'])->get();
+
         return Inertia::render('Activites/Index', ['activites' => $activites]);
     }
 
@@ -29,15 +31,15 @@ class ActiviteController extends Controller
         }
 
         $preSelectedClubId = $request->query('club_id');
-        
+
         // Filter clubs to only show those where the user is the responsible
-        $clubs = \App\Models\Club::where('statut', 'actif')
+        $clubs = Club::where('statut', 'actif')
             ->where('responsable_id', Auth::id())
             ->get();
 
         return Inertia::render('Activites/Create', [
             'clubs' => $clubs,
-            'preSelectedClubId' => $preSelectedClubId
+            'preSelectedClubId' => $preSelectedClubId,
         ]);
     }
 
@@ -53,6 +55,7 @@ class ActiviteController extends Controller
         $data['created_by'] = Auth::id();
         $data['statut'] = 'brouillon';
         $activite = Activite::create($data);
+
         return redirect()->route('clubs.show', $data['club_id'])->with('success', 'Activité créée avec succès');
     }
 
@@ -62,6 +65,7 @@ class ActiviteController extends Controller
     public function show(string $id)
     {
         $activite = Activite::with(['club', 'creator'])->findOrFail($id);
+
         return Inertia::render('Activites/Show', ['activite' => $activite]);
     }
 
@@ -80,6 +84,7 @@ class ActiviteController extends Controller
     {
         $activite = Activite::findOrFail($id);
         $activite->update($request->all());
+
         return redirect()->route('activites.index')->with('success', 'Activité mise à jour avec succès');
     }
 
@@ -90,6 +95,7 @@ class ActiviteController extends Controller
     {
         $activite = Activite::findOrFail($id);
         $activite->delete();
+
         return redirect()->route('activites.index')->with('success', 'Activité supprimée avec succès');
     }
 
@@ -102,7 +108,7 @@ class ActiviteController extends Controller
         NotificationClub::create([
             'club_id' => $activite->club_id,
             'type_notif' => 'activite',
-            'message' => 'Nouvelle activité publiée: ' . $activite->titre,
+            'message' => 'Nouvelle activité publiée: '.$activite->titre,
             'lu' => false,
             'date_envoi' => now(),
         ]);
@@ -114,6 +120,7 @@ class ActiviteController extends Controller
     {
         $activite = Activite::findOrFail($id);
         $activite->update(['statut' => 'annulé']);
+
         return redirect()->back()->with('success', 'Activité annulée');
     }
 }

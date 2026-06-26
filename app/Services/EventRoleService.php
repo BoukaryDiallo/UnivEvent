@@ -18,7 +18,7 @@ class EventRoleService
         // T06: Conflict check (participant -> jury)
         if ($role === 'jury' && $event->inscriptions()->where('utilisateur_id', $resolvedUser->id)->exists()) {
             // In a real app, we might return a warning. Here we throw an exception that controller can catch or return 422.
-            throw new \InvalidArgumentException("L utilisateur est deja inscrit en tant que participant. L affectation en tant que jury est conflictuelle.");
+            throw new \InvalidArgumentException('L utilisateur est deja inscrit en tant que participant. L affectation en tant que jury est conflictuelle.');
         }
 
         $event->assignments()->where('user_id', $resolvedUser->id)->delete();
@@ -81,7 +81,7 @@ class EventRoleService
         return $team;
     }
 
-    public function getAvailableUsers(Evenement $event, string $excludeRole = null): Collection
+    public function getAvailableUsers(Evenement $event, ?string $excludeRole = null): Collection
     {
         $assignedUserIds = $event->assignments()->pluck('user_id');
 

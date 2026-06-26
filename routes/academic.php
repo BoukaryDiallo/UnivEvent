@@ -1,14 +1,14 @@
 <?php
 
-use App\Http\Controllers\UfrController;
 use App\Http\Controllers\DepartementController;
-use App\Http\Controllers\FiliereController;
 use App\Http\Controllers\EtudiantController;
+use App\Http\Controllers\FiliereController;
+use App\Http\Controllers\UfrController;
 use Illuminate\Support\Facades\Route;
 
 // Routes pour la structure académique (accessibles uniquement aux admins)
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    
+
     // Routes UFR
     Route::get('/ufr', [UfrController::class, 'index'])->name('ufr.index');
     Route::get('/ufr/create', [UfrController::class, 'create'])->name('ufr.create');

@@ -15,8 +15,7 @@ class EventMessageController extends Controller
         private EventNotificationService $notifications,
         private EventAuthorizationService $authorization,
         private EventModerationService $moderation,
-    ) {
-    }
+    ) {}
 
     public function store(Request $request, Evenement $evenement)
     {

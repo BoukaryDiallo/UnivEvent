@@ -7,12 +7,10 @@ use App\Http\Controllers\NiveauController;
 use App\Http\Controllers\SalleController;
 use Illuminate\Support\Facades\Route;
 
-
 //  emploi du temps + seances
 Route::middleware(['auth', 'verified'])->prefix('emploie-du-temps')->name('emploie-du-temps.')->group(function () {
 
-  
-   Route::middleware('role:admin')->group(function () {
+    Route::middleware('role:admin')->group(function () {
         Route::get('/', [EmploiDuTempsController::class, 'adminVue'])->name('admin.index');
         Route::post('/ajouter', [EmploiDuTempsController::class, 'creerEmploiDuTemps'])->name('ajouter');
         Route::delete('/{id}/supprimer', [EmploiDuTempsController::class, 'supprimerEdt'])->name('supprimer');
@@ -40,7 +38,6 @@ Route::middleware(['auth', 'verified'])->prefix('emploie-du-temps')->name('emplo
     Route::get('{id}/pdf', [EmploiDuTempsController::class, 'telechargerPdf'])->name('pdf');
 });
 
-
 // Les salle
 Route::middleware(['auth', 'verified'])->prefix('salles')->name('salles.')->group(function () {
 
@@ -49,12 +46,10 @@ Route::middleware(['auth', 'verified'])->prefix('salles')->name('salles.')->grou
         Route::get('/listes', [SalleController::class, 'vueSalle'])->name('listes');
         Route::put('/{id}/modifier', [SalleController::class, 'modifierSalle'])->name('modifier');
         Route::delete('/{id}/supprimer', [SalleController::class, 'supprimerSalle'])->name('supprimer');
-        
+
     });
 
-    
 });
-
 
 // Les cours
 Route::middleware(['auth', 'verified'])->prefix('matieres')->name('matieres.')->group(function () {
@@ -67,7 +62,6 @@ Route::middleware(['auth', 'verified'])->prefix('matieres')->name('matieres.')->
     });
 });
 
-
 // Les niveau etude
 Route::middleware(['auth', 'verified'])->prefix('niveaux')->name('niveaux.')->group(function () {
 
@@ -79,9 +73,7 @@ Route::middleware(['auth', 'verified'])->prefix('niveaux')->name('niveaux.')->gr
     });
 });
 
-
-
-// 
+//
 // Les creneaux
 Route::middleware(['auth', 'verified'])->prefix('creneaux')->name('creneaux.')->group(function () {
 
@@ -90,8 +82,7 @@ Route::middleware(['auth', 'verified'])->prefix('creneaux')->name('creneaux.')->
         Route::get('/listes', [CreneauController::class, 'vueCreneau'])->name('listes');
         Route::put('/{id}/modifier', [CreneauController::class, 'modifierCreneau'])->name('modifier');
         Route::delete('/{id}/supprimer', [CreneauController::class, 'supprimerCreneau'])->name('supprimer');
-        
+
     });
 
-    
 });

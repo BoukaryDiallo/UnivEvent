@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\Election;
-use App\Models\Vote;
-use App\Models\Resultat;
 use App\Models\Candidature;
+use App\Models\Election;
+use App\Models\Resultat;
+use App\Models\Vote;
 use Illuminate\Support\Collection;
 
 class DepouillementService
@@ -21,7 +21,7 @@ class DepouillementService
     {
         $validation = $this->electionService->validerIntegrite($election);
 
-        if (!empty($validation)) {
+        if (! empty($validation)) {
             throw new \InvalidArgumentException(implode(', ', $validation));
         }
 
@@ -47,7 +47,7 @@ class DepouillementService
             $this->mettreAJourCandidatures($election, $resultats, false);
         }
 
-        if (!$secondTour && $election->tour == 1) {
+        if (! $secondTour && $election->tour == 1) {
             $election->update(['statut' => 'terminee']);
             $this->mettreAJourCandidatures($election, $resultats, true);
         }
@@ -57,7 +57,7 @@ class DepouillementService
             'second_tour' => $secondTour,
             'message' => $secondTour
                 ? 'Second tour requis'
-                : 'Élection terminée'
+                : 'Élection terminée',
         ];
     }
 
@@ -69,7 +69,7 @@ class DepouillementService
             return [
                 'id_candidature' => $id,
                 'nb_voix' => $nb,
-                'pourcentage' => $total > 0 ? round(($nb * 100) / $total, 2) : 0
+                'pourcentage' => $total > 0 ? round(($nb * 100) / $total, 2) : 0,
             ];
         })->sortByDesc('nb_voix')->values();
     }
@@ -81,13 +81,13 @@ class DepouillementService
                 [
                     'id_election' => $election->id_election,
                     'id_candidature' => $r['id_candidature'],
-                    'tour' => $election->tour
+                    'tour' => $election->tour,
                 ],
                 [
                     'nb_voix' => $r['nb_voix'],
                     'pourcentage' => $r['pourcentage'],
                     'rang' => $index + 1,
-                    'statut_publication' => 'brouillon'
+                    'statut_publication' => 'brouillon',
                 ]
             );
         }
@@ -95,14 +95,20 @@ class DepouillementService
 
     private function verifierSecondTour(Collection $resultats, int $total): bool
     {
-        if ($total === 0) return false;
+        if ($total === 0) {
+            return false;
+        }
 
         $premier = $resultats->first();
         $deuxieme = $resultats->skip(1)->first();
 
-        if (!$premier) return false;
+        if (! $premier) {
+            return false;
+        }
 
-        if ($premier['pourcentage'] < 50) return true;
+        if ($premier['pourcentage'] < 50) {
+            return true;
+        }
 
         if ($deuxieme && $premier['nb_voix'] == $deuxieme['nb_voix']) {
             return true;
@@ -117,23 +123,26 @@ class DepouillementService
 
             $c = Candidature::find($r['id_candidature']);
 
-            if (!$c) continue;
+            if (! $c) {
+                continue;
+            }
 
             if ($elu && $i === 0) {
                 $c->update(['resultat' => 'elu']);
-            } elseif (!$elu && $i < 2) {
+            } elseif (! $elu && $i < 2) {
                 $c->update(['resultat' => 'second_tour']);
             } else {
                 $c->update(['resultat' => 'eliminee']);
             }
         }
     }
-     /**
+
+    /**
      * Vérifie si un recalcul est nécessaire
      */
     public function doitRecalculer(Election $election): bool
     {
-        if (!$this->electionService->aResultatsBrouillon($election)) {
+        if (! $this->electionService->aResultatsBrouillon($election)) {
             return true;
         }
 
@@ -151,5 +160,3 @@ class DepouillementService
         return $votesApresCalcul;
     }
 }
-
-

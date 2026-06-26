@@ -14,8 +14,8 @@ class NiveauFactory extends Factory
         static $ordre = 1;
 
         return [
-            'nom'   => 'Niveau ' . $ordre,
-            'code'  => 'N' . $ordre,
+            'nom' => 'Niveau '.$ordre,
+            'code' => 'N'.$ordre,
             'ordre' => $ordre++,
         ];
     }

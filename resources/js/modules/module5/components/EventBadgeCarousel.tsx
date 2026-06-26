@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
+import { Calendar, MapPin, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users } from 'lucide-react';
 import type { EventSummary } from '@/types';
 
 interface EventBadgeCarouselProps {

@@ -1,9 +1,9 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { LiveNotificationsProvider } from '@/contexts/live-notifications-context';
-import { ErrorBoundary } from '@/components/error-boundary';
 import '../css/app.css';
 import { initializeTheme } from '@/hooks/use-appearance';
 import { getEcho } from '@/lib/echo';
@@ -38,6 +38,7 @@ createInertiaApp({
 
         if (!page) {
             console.error('[Inertia] Page introuvable pour', name, pagePath);
+
             return () => <div>Page introuvable</div>;
         }
 

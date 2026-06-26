@@ -3,10 +3,9 @@
 namespace App\Services;
 
 use App\Models\Evenement;
-use App\Models\JuryPanel;
-use App\Models\JuryCriterion;
-use App\Models\JuryScore;
 use App\Models\JuryDeliberation;
+use App\Models\JuryPanel;
+use App\Models\JuryScore;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +40,7 @@ class JuryService
             );
 
             // Assign jury members if provided
-            if (!empty($juryMembers)) {
+            if (! empty($juryMembers)) {
                 foreach ($juryMembers as $userId) {
                     $event->assignments()->updateOrCreate(
                         [
@@ -56,7 +55,7 @@ class JuryService
             }
 
             // Create criteria if provided
-            if (!empty($criteria)) {
+            if (! empty($criteria)) {
                 $this->criteriaService->createMultiple($panel, $criteria);
             }
 
@@ -184,7 +183,7 @@ class JuryService
     ): JuryDeliberation {
         return DB::transaction(function () use ($deliberation, $resolver, $newScores) {
             // Update scores if provided
-            if (!empty($newScores)) {
+            if (! empty($newScores)) {
                 foreach ($newScores as $scoreId => $value) {
                     JuryScore::find($scoreId)?->update(['score' => $value]);
                 }
@@ -219,7 +218,7 @@ class JuryService
     {
         return DB::transaction(function () use ($panel, $validator) {
             // Verify all scores are complete
-            if (!$this->scoringService->areAllScoresComplete($panel)) {
+            if (! $this->scoringService->areAllScoresComplete($panel)) {
                 throw new \Exception('Cannot finalize: incomplete scores');
             }
 

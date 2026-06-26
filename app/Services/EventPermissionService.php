@@ -10,7 +10,7 @@ class EventPermissionService
 {
     public function getPermissions(Evenement $event, ?User $user): array
     {
-        if (!$user) {
+        if (! $user) {
             return $this->getPublicPermissions($event);
         }
 
@@ -118,7 +118,7 @@ class EventPermissionService
             return true;
         }
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -168,6 +168,7 @@ class EventPermissionService
         }
 
         $assignment = $event->assignments()->where('user_id', $user->id)->first();
+
         return $assignment && ($assignment->permissions['can_manage_participants'] ?? false);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Filiere;
 use App\Models\Departement;
+use App\Models\Filiere;
 use App\Models\Ufr;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,7 +17,7 @@ class FiliereController extends Controller
             ->get();
 
         return Inertia::render('filiere/FiliereList', [
-            'filieres' => $filieres
+            'filieres' => $filieres,
         ]);
     }
 
@@ -46,7 +46,7 @@ class FiliereController extends Controller
         $filiere->load('departement.ufr');
 
         return Inertia::render('filiere/FiliereShow', [
-            'filiere' => $filiere
+            'filiere' => $filiere,
         ]);
     }
 
@@ -85,7 +85,7 @@ class FiliereController extends Controller
             ->map(function ($d) {
                 return [
                     'id' => $d->id_departement,
-                    'text' =>$d->nom,
+                    'text' => $d->nom,
                 ];
             });
 

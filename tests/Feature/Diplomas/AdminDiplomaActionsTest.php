@@ -17,6 +17,7 @@ class AdminDiplomaActionsTest extends TestCase
     private function scolarite(): User
     {
         Role::findOrCreate('admin');
+
         return tap(User::factory()->create(), fn (User $u) => $u->assignRole('admin'));
     }
 

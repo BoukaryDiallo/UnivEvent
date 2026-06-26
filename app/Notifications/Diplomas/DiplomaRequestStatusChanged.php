@@ -27,7 +27,7 @@ class DiplomaRequestStatusChanged extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $message = (new MailMessage())
+        $message = (new MailMessage)
             ->subject($this->subject())
             ->greeting('Bonjour '.$this->request->owner->name.',');
 

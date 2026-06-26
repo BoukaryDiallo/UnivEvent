@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Diplomas;
 
+use App\Enums\DiplomaRequestStatus;
 use App\Models\DiplomaDocument;
 use App\Models\DiplomaRequest;
 use App\Models\User;
@@ -142,7 +143,7 @@ class DiplomaDocumentTest extends TestCase
 
         $document = DiplomaDocument::first();
         $draft->update([
-            'status' => \App\Enums\DiplomaRequestStatus::Submitted,
+            'status' => DiplomaRequestStatus::Submitted,
             'submitted_at' => now(),
         ]);
 

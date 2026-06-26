@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('inscription_evenements', function (Blueprint $table) {
-            if (!Schema::hasColumn('inscription_evenements', 'donnees_formulaire')) {
+            if (! Schema::hasColumn('inscription_evenements', 'donnees_formulaire')) {
                 $table->json('donnees_formulaire')->nullable()->after('waitlist_position');
             }
         });

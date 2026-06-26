@@ -2,10 +2,7 @@
 
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
-
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -21,10 +18,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     });
 
-
     // Pour les roles et permissions
     // Vous pouvez utiliser des middlewares tels que
     // middleware('role:admin|etudiant|enseignant') et middleware('permission:nom permission') pour protéger vos routes
-
 
 });

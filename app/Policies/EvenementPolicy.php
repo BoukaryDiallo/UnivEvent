@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Evenement;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class EvenementPolicy
 {

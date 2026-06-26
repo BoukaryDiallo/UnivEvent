@@ -241,5 +241,4 @@ class AlerteMetier
 
         return $total.' enseignants n ont pas encore renseigne leurs disponibilites hebdomadaires.';
     }
-
 }

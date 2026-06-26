@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import type { useForm } from '@inertiajs/react';
 import { ImagePlus, ListChecks, Layers3, Sparkles, Eye, Search, Shield } from 'lucide-react';
 import { useState } from 'react';
 import InputError from '@/components/input-error';

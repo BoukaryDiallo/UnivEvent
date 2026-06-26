@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Models\InscriptionEvenement;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class EvenementResource extends JsonResource
 {
@@ -17,11 +17,11 @@ class EvenementResource extends JsonResource
     {
         $user = $request->user();
         $cover = $this->resource->preferredCoverMedia();
-        
+
         $currentInscription = $user
-            ? ($this->relationLoaded('inscriptions') 
+            ? ($this->relationLoaded('inscriptions')
                 ? $this->inscriptions->firstWhere('utilisateur_id', $user->id)
-                : \App\Models\InscriptionEvenement::where('evenement_id', $this->id)->where('utilisateur_id', $user->id)->first())
+                : InscriptionEvenement::where('evenement_id', $this->id)->where('utilisateur_id', $user->id)->first())
             : null;
 
         return [
@@ -60,7 +60,7 @@ class EvenementResource extends JsonResource
                 : (($this->validation_status === 'rejected')
                     ? 'rejected'
                     : (($this->validation_status === 'pending' && $this->submitted_at) ? 'pending' : 'draft')),
-            'workflow_state_label' => match($this->validation_status === 'approved' && $this->statut === 'publie'
+            'workflow_state_label' => match ($this->validation_status === 'approved' && $this->statut === 'publie'
                 ? 'published'
                 : (($this->validation_status === 'rejected')
                     ? 'rejected'
@@ -75,7 +75,7 @@ class EvenementResource extends JsonResource
             'activity_count' => $this->activities_count ?? ($this->relationLoaded('activities') ? $this->activities->count() : $this->activities()->count()),
             'likes_count' => $this->reactions()->where('type', 'like')->count(),
             'liked_by_me' => $user ? $this->reactions()->where('user_id', $user->id)->where('type', 'like')->exists() : false,
-            'cover_url' => $cover ? asset('storage/' . $cover->chemin_fichier) : null,
+            'cover_url' => $cover ? asset('storage/'.$cover->chemin_fichier) : null,
             'roles' => $this->roles ? $this->roles->pluck('role')->values()->all() : [],
             'programmes' => $this->whenLoaded('programmes', fn () => $this->programmes->map(fn ($programme) => [
                 'id' => $programme->id,
@@ -92,7 +92,7 @@ class EvenementResource extends JsonResource
             'medias' => $this->whenLoaded('medias', fn () => $this->medias->map(fn ($media) => [
                 'id' => $media->id,
                 'name' => $media->nom_fichier,
-                'url' => asset('storage/' . $media->chemin_fichier),
+                'url' => asset('storage/'.$media->chemin_fichier),
                 'type' => $media->type_fichier === 'image' ? 'image' : ($media->type_fichier === 'pdf' ? 'pdf' : 'autre'),
                 'size' => $media->taille_fichier,
                 'description' => $media->description,

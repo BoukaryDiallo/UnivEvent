@@ -2,9 +2,9 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseHelper
 {
@@ -70,9 +70,8 @@ class DatabaseHelper
 
     /**
      * Group a query by year and month of a specific column.
-     * 
-     * @param QueryBuilder|EloquentBuilder $query
-     * @param string $column
+     *
+     * @param  QueryBuilder|EloquentBuilder  $query
      * @return QueryBuilder|EloquentBuilder
      */
     public static function groupByYearMonth($query, string $column)
@@ -86,14 +85,14 @@ class DatabaseHelper
         if ($driver === 'pgsql') {
             // PostgreSQL requires grouping by the expression, not the alias
             return $query->groupBy(DB::raw($yearSql), DB::raw($monthSql))
-                         ->orderBy(DB::raw($yearSql))
-                         ->orderBy(DB::raw($monthSql));
+                ->orderBy(DB::raw($yearSql))
+                ->orderBy(DB::raw($monthSql));
         }
 
         // MySQL and SQLite can group by alias
         return $query->groupBy('year', 'month')
-                     ->orderBy('year')
-                     ->orderBy('month');
+            ->orderBy('year')
+            ->orderBy('month');
     }
 
     /**

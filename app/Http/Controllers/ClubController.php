@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreClubRequest;
 use App\Models\Club;
 use App\Models\NotificationClub;
+use App\Models\User;
+use App\Notifications\ClubCreationFailedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -19,18 +21,18 @@ class ClubController extends Controller
         $userId = Auth::id();
         $user = Auth::user();
 
-        $query = Club::with(['responsable', 'adhesions' => function($query) use ($userId) {
+        $query = Club::with(['responsable', 'adhesions' => function ($query) use ($userId) {
             $query->where('user_id', $userId);
         }]);
 
         // Masquer les clubs 'en attente' (sauf si on est le responsable)
-        $query->where(function($q) use ($userId) {
+        $query->where(function ($q) use ($userId) {
             $q->where('statut', '!=', 'en_attente')
-              ->orWhere('responsable_id', $userId);
+                ->orWhere('responsable_id', $userId);
         });
 
         // Masquer les clubs 'dissous' pour les non-admins
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             $query->where('statut', '!=', 'dissous');
         }
 
@@ -42,6 +44,7 @@ class ClubController extends Controller
     public function enAttente()
     {
         $clubs = Club::with('responsable')->where('statut', 'en_attente')->get();
+
         return Inertia::render('Admin/ClubsEnAttente', ['clubs' => $clubs]);
     }
 
@@ -59,28 +62,30 @@ class ClubController extends Controller
     public function store(StoreClubRequest $request)
     {
         \Log::info('Club creation attempt', ['user' => Auth::id(), 'is_admin' => Auth::user()->isAdmin()]);
-        
+
         $data = $request->validated();
         \Log::info('Validated data', $data);
-        
+
         // Si l'administrateur crée le club, valider et trouver l'utilisateur par nom et prénom
         if (Auth::user()->isAdmin()) {
             \Log::info('Admin creating club', ['president_nom' => $data['president_nom'] ?? null, 'president_prenom' => $data['president_prenom'] ?? null]);
-            
+
             if (empty($data['president_nom']) || empty($data['president_prenom'])) {
                 \Log::warning('President name missing for admin');
+
                 return redirect()->back()->with('error', 'Le nom et prénom du président sont requis pour les administrateurs.');
             }
-            $president = \App\Models\User::where('name', $data['president_nom'] . ' ' . $data['president_prenom'])->first();
-            \Log::info('President search result', ['found' => !is_null($president), 'name' => $data['president_nom'] . ' ' . $data['president_prenom']]);
-            
-            if (!$president) {
+            $president = User::where('name', $data['president_nom'].' '.$data['president_prenom'])->first();
+            \Log::info('President search result', ['found' => ! is_null($president), 'name' => $data['president_nom'].' '.$data['president_prenom']]);
+
+            if (! $president) {
                 return redirect()->back()->with('error', 'Étudiant non trouvé. Vérifiez le nom et prénom.');
             }
-            if (!$president->est_actif) {
+            if (! $president->est_actif) {
                 \Log::warning('President not active', ['president' => $president->id]);
                 // Envoyer une notification à l'administrateur en utilisant le système de notification de Laravel
-                Auth::user()->notify(new \App\Notifications\ClubCreationFailedNotification($president->name));
+                Auth::user()->notify(new ClubCreationFailedNotification($president->name));
+
                 return redirect()->back()->with('error', 'Cet étudiant n\'est pas inscrit ou son compte est désactivé. Une notification a été envoyée.');
             }
             $data['responsable_id'] = $president->id;
@@ -88,7 +93,7 @@ class ClubController extends Controller
         } else {
             $data['responsable_id'] = Auth::id();
         }
-        
+
         $data['statut'] = 'en_attente';
         $club = Club::create($data);
         \Log::info('Club created', ['club_id' => $club->id]);
@@ -135,6 +140,7 @@ class ClubController extends Controller
     {
         $club = Club::findOrFail($id);
         $club->update($request->all());
+
         return redirect()->route('clubs.index')->with('success', 'Club mis à jour avec succès');
     }
 
@@ -145,6 +151,7 @@ class ClubController extends Controller
     {
         $club = Club::findOrFail($id);
         $club->delete();
+
         return redirect()->route('clubs.index')->with('success', 'Club supprimé avec succès');
     }
 
@@ -153,16 +160,16 @@ class ClubController extends Controller
     {
         $club = Club::findOrFail($id);
         $club->update(['statut' => 'actif']);
-        
+
         // Notifier le responsable du club
         NotificationClub::create([
             'club_id' => $club->id,
             'type_notif' => 'adhesion',
-            'message' => 'Votre club ' . $club->nom . ' a été validé et est maintenant actif',
+            'message' => 'Votre club '.$club->nom.' a été validé et est maintenant actif',
             'lu' => false,
             'date_envoi' => now(),
         ]);
-        
+
         return redirect()->back()->with('success', 'Club validé avec succès');
     }
 
@@ -170,16 +177,16 @@ class ClubController extends Controller
     {
         $club = Club::findOrFail($id);
         $club->update(['statut' => 'dissous']);
-        
+
         // Notifier le responsable du club
         NotificationClub::create([
             'club_id' => $club->id,
             'type_notif' => 'adhesion',
-            'message' => 'Votre club ' . $club->nom . ' a été rejeté. Motif: ' . $request->commentaire,
+            'message' => 'Votre club '.$club->nom.' a été rejeté. Motif: '.$request->commentaire,
             'lu' => false,
             'date_envoi' => now(),
         ]);
-        
+
         return redirect()->back()->with('success', 'Club rejeté');
     }
 
@@ -194,7 +201,7 @@ class ClubController extends Controller
         NotificationClub::create([
             'club_id' => $club->id,
             'type_notif' => 'adhesion',
-            'message' => 'Votre club ' . $club->nom . ' a été suspendu. Motif: ' . $motif,
+            'message' => 'Votre club '.$club->nom.' a été suspendu. Motif: '.$motif,
             'lu' => false,
             'date_envoi' => now(),
         ]);
@@ -213,7 +220,7 @@ class ClubController extends Controller
         NotificationClub::create([
             'club_id' => $club->id,
             'type_notif' => 'adhesion',
-            'message' => 'Votre club ' . $club->nom . ' a été dissous. Motif: ' . $motif,
+            'message' => 'Votre club '.$club->nom.' a été dissous. Motif: '.$motif,
             'lu' => false,
             'date_envoi' => now(),
         ]);
@@ -230,7 +237,7 @@ class ClubController extends Controller
         NotificationClub::create([
             'club_id' => $club->id,
             'type_notif' => 'adhesion',
-            'message' => 'Votre club ' . $club->nom . ' a été réactivé et est maintenant actif',
+            'message' => 'Votre club '.$club->nom.' a été réactivé et est maintenant actif',
             'lu' => false,
             'date_envoi' => now(),
         ]);
@@ -253,7 +260,7 @@ class ClubController extends Controller
             ->where('statut', 'approuvee')
             ->first();
 
-        if (!$newResponsable) {
+        if (! $newResponsable) {
             return redirect()->back()->with('error', 'L\'utilisateur sélectionné n\'est pas un membre du club.');
         }
 
@@ -264,7 +271,7 @@ class ClubController extends Controller
         NotificationClub::create([
             'club_id' => $club->id,
             'type_notif' => 'adhesion',
-            'message' => 'Vous êtes maintenant le responsable du club ' . $club->nom,
+            'message' => 'Vous êtes maintenant le responsable du club '.$club->nom,
             'lu' => false,
             'date_envoi' => now(),
         ]);

@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\M5;
 
 use App\Http\Controllers\Controller;
-use App\Models\Evenement;
-use App\Models\InscriptionEvenement;
 use App\Models\Certificat;
+use App\Models\Evenement;
+use App\Models\EvenementActivity;
 use App\Models\EventType;
+use App\Models\InscriptionEvenement;
 use App\Support\DatabaseHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class EventAdminDashboardController extends Controller
 {
@@ -29,20 +30,20 @@ class EventAdminDashboardController extends Controller
             InscriptionEvenement::query(),
             'created_at'
         )->get()
-            ->map(fn($row) => [
-                'name' => sprintf('%04d-%02d', (int)$row->year, (int)$row->month),
+            ->map(fn ($row) => [
+                'name' => sprintf('%04d-%02d', (int) $row->year, (int) $row->month),
                 'value' => $row->value,
             ]);
 
         $typesEvenements = Evenement::select('type', DB::raw('COUNT(*) as value'))
             ->groupBy('type')
             ->get()
-            ->map(fn($row) => [
+            ->map(fn ($row) => [
                 'name' => ucfirst($row->type),
                 'value' => $row->value,
             ]);
 
-        $actualites = \App\Models\EvenementActivity::with(['user:id,name', 'evenement:id,titre'])
+        $actualites = EvenementActivity::with(['user:id,name', 'evenement:id,titre'])
             ->latest()
             ->take(20)
             ->get();
@@ -62,7 +63,7 @@ class EventAdminDashboardController extends Controller
                     }), 1)
                     : 0,
             ],
-            'evenements_en_attente' => $pendingEvents->take(5)->map(fn($event) => [
+            'evenements_en_attente' => $pendingEvents->take(5)->map(fn ($event) => [
                 'id' => $event->id,
                 'titre' => $event->titre,
                 'type' => $event->type,
@@ -70,7 +71,7 @@ class EventAdminDashboardController extends Controller
                     'name' => $event->createur?->name,
                 ],
             ]),
-            'activite_recente' => $allInscriptions->take(8)->map(fn($ins) => [
+            'activite_recente' => $allInscriptions->take(8)->map(fn ($ins) => [
                 'user' => ['name' => $ins->utilisateur->name],
                 'action' => "s'est inscrit à {$ins->evenement->titre}",
                 'created_at' => $ins->created_at->format('d/m/Y H:i'),
@@ -91,10 +92,10 @@ class EventAdminDashboardController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('utilisateur', function($q) use ($search) {
+            $query->whereHas('utilisateur', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            })->orWhereHas('evenement', function($q) use ($search) {
+                    ->orWhere('email', 'like', "%{$search}%");
+            })->orWhereHas('evenement', function ($q) use ($search) {
                 $q->where('titre', 'like', "%{$search}%");
             });
         }
@@ -174,6 +175,7 @@ class EventAdminDashboardController extends Controller
         }
 
         $eventType->delete();
+
         return redirect()->back()->with('success', 'Type d\'événement supprimé.');
     }
 }

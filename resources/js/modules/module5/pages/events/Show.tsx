@@ -40,8 +40,10 @@ export default function EventShow({ event, participation: directParticipation, a
     const toggleLike = () => {
         if (!auth.user) {
             router.visit('/login');
+
             return;
         }
+
         router.post(`/module5/events/${event.id}/toggle-reaction`, {}, { preserveScroll: true });
     };
 

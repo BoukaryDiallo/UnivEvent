@@ -13,6 +13,7 @@ class DemandeLocalController extends Controller
     public function index()
     {
         $demandes = DemandeLocal::with('club')->get();
+
         return Inertia::render('DemandesLocal/Index', ['demandes' => $demandes]);
     }
 
@@ -39,6 +40,7 @@ class DemandeLocalController extends Controller
     public function show(string $id)
     {
         $demande = DemandeLocal::with('club')->findOrFail($id);
+
         return Inertia::render('DemandesLocal/Show', ['demande' => $demande]);
     }
 
@@ -46,6 +48,7 @@ class DemandeLocalController extends Controller
     {
         $demande = DemandeLocal::findOrFail($id);
         $demande->update($request->all());
+
         return redirect()->back()->with('success', 'Demande mise à jour');
     }
 
@@ -53,6 +56,7 @@ class DemandeLocalController extends Controller
     {
         $demande = DemandeLocal::findOrFail($id);
         $demande->delete();
+
         return redirect()->route('demandes-local.index')->with('success', 'Demande supprimée');
     }
 
@@ -65,7 +69,7 @@ class DemandeLocalController extends Controller
         NotificationClub::create([
             'club_id' => $demande->club_id,
             'type_notif' => 'local',
-            'message' => 'Votre demande de local pour le ' . $demande->date->format('d/m/Y') . ' a été approuvée',
+            'message' => 'Votre demande de local pour le '.$demande->date->format('d/m/Y').' a été approuvée',
             'lu' => false,
             'date_envoi' => now(),
         ]);
@@ -78,14 +82,14 @@ class DemandeLocalController extends Controller
         $demande = DemandeLocal::with('club')->findOrFail($id);
         $demande->update([
             'statut' => 'rejetée',
-            'commentaire' => $request->commentaire
+            'commentaire' => $request->commentaire,
         ]);
 
         // Notify club responsible
         NotificationClub::create([
             'club_id' => $demande->club_id,
             'type_notif' => 'local',
-            'message' => 'Votre demande de local pour le ' . $demande->date->format('d/m/Y') . ' a été rejetée. Motif: ' . $request->commentaire,
+            'message' => 'Votre demande de local pour le '.$demande->date->format('d/m/Y').' a été rejetée. Motif: '.$request->commentaire,
             'lu' => false,
             'date_envoi' => now(),
         ]);

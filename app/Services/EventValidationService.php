@@ -13,8 +13,7 @@ class EventValidationService
     public function __construct(
         private EventNotificationService $notifications,
         private EventService $eventService,
-    ) {
-    }
+    ) {}
 
     public function submitForValidation(Evenement $event, User $user): void
     {

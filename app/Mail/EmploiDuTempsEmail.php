@@ -2,15 +2,14 @@
 
 namespace App\Mail;
 
+use App\Models\EmploiDuTemps;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\EmploiDuTemps;
-use App\Models\User;
 
 class EmploiDuTempsEmail extends Mailable
 {
@@ -23,7 +22,7 @@ class EmploiDuTempsEmail extends Mailable
         public EmploiDuTemps $edt,
         public User $enseignant,
         public string $pdfPath
-    ){ }
+    ) {}
 
     /**
      * Get the message envelope.

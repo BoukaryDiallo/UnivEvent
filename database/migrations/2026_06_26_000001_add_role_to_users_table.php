@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasColumn('users', 'deleted_at')) {
+        if (Schema::hasColumn('users', 'role')) {
             return;
         }
 
         Schema::table('users', function (Blueprint $table) {
-            $table->softDeletes();
+            $table->string('role')->default('participant')->after('password');
         });
     }
 
@@ -25,12 +25,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (! Schema::hasColumn('users', 'deleted_at')) {
+        if (! Schema::hasColumn('users', 'role')) {
             return;
         }
 
         Schema::table('users', function (Blueprint $table) {
-            $table->dropSoftDeletes();
+            $table->dropColumn('role');
         });
     }
 };

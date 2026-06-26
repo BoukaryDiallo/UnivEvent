@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Concerns\MapsParticipationStatus;
 use App\Events\EventStatusUpdated;
+use App\Http\Requests\ExpressEvenementRequest;
+use App\Http\Requests\StoreEvenementRequest;
+use App\Http\Resources\EvenementResource;
 use App\Models\Evenement;
 use App\Models\EvenementActivity;
 use App\Models\EvenementMedia;
@@ -11,20 +14,17 @@ use App\Models\EvenementRole;
 use App\Models\JuryPanel;
 use App\Models\Programme;
 use App\Models\User;
-use App\Http\Requests\ExpressEvenementRequest;
-use App\Http\Requests\StoreEvenementRequest;
-use App\Http\Resources\EvenementResource;
-use App\Services\EventCompletionService;
 use App\Services\EventAuthorizationService;
-use App\Services\EventService;
-use App\Services\EventNotificationService;
+use App\Services\EventCompletionService;
 use App\Services\EventManagementService;
-use App\Services\JuryWorkflowService;
-use App\Services\EventValidationService;
-use App\Services\EventRoleService;
+use App\Services\EventNotificationService;
 use App\Services\EventPermissionService;
-use App\Services\ProgramService;
+use App\Services\EventRoleService;
+use App\Services\EventService;
+use App\Services\EventValidationService;
+use App\Services\JuryWorkflowService;
 use App\Services\MediaService;
+use App\Services\ProgramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -50,8 +50,7 @@ class EvenementController extends Controller
         private EventPermissionService $permissionService,
         private ProgramService $programService,
         private MediaService $mediaService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -164,9 +163,9 @@ class EvenementController extends Controller
 
         $influentialEvents = EvenementResource::collection(
             (clone $discoveryQuery)
-            ->orderByRaw('(inscriptions_count * 5) + (comments_count * 3) + (activities_count * 2) DESC')
-            ->take(10)
-            ->get()
+                ->orderByRaw('(inscriptions_count * 5) + (comments_count * 3) + (activities_count * 2) DESC')
+                ->take(10)
+                ->get()
         );
 
         return Inertia::render('evenements/Index', [
@@ -429,7 +428,7 @@ class EvenementController extends Controller
                 : [],
         ]);
     }
-// ... Suppression de centaines de lignes de sérialisation manuelle ...
+    // ... Suppression de centaines de lignes de sérialisation manuelle ...
 
     public function update(StoreEvenementRequest $request, Evenement $evenement)
     {
@@ -523,24 +522,24 @@ class EvenementController extends Controller
             // Si jury en cours de délibération: marquer annulée
             if ($evenement->juryPanel) {
                 $panel = $evenement->juryPanel;
-                if ($panel->scoring_opened_at && !$panel->scoring_closed_at) {
+                if ($panel->scoring_opened_at && ! $panel->scoring_closed_at) {
                     $panel->update([
                         'scoring_closed_at' => now(),
                         'meta' => array_merge(
                             $panel->meta ?? [],
                             ['cancelled_reason' => 'Événement supprimé par le créateur']
-                        )
+                        ),
                     ]);
                 }
             }
 
             // Logger la suppression
             $this->logActivity(
-                $evenement, 
-                $request->user()->id, 
-                'suppression', 
-                'Événement supprimé', 
-                'Supprimé par ' . $request->user()->name
+                $evenement,
+                $request->user()->id,
+                'suppression',
+                'Événement supprimé',
+                'Supprimé par '.$request->user()->name
             );
 
             $evenement->delete();
@@ -711,7 +710,7 @@ class EvenementController extends Controller
         ]);
 
         $errors = $this->programService->validateSessionData($validated);
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             return back()->withErrors($errors);
         }
 
@@ -738,7 +737,7 @@ class EvenementController extends Controller
         ]);
 
         $errors = $this->programService->validateSessionData($validated);
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             return back()->withErrors($errors);
         }
 
@@ -835,7 +834,7 @@ class EvenementController extends Controller
 
         $assignment = $evenement->assignments()->where('user_id', $user->id)->first();
 
-        if (!$this->mediaService->canDownload($media, $user, $assignment)) {
+        if (! $this->mediaService->canDownload($media, $user, $assignment)) {
             abort(403, 'Téléchargement non autorisé');
         }
 
@@ -1083,6 +1082,7 @@ class EvenementController extends Controller
             if ($programme) {
                 $programme->update($payload);
                 $idsToKeep[] = $programme->id;
+
                 continue;
             }
 
@@ -1124,75 +1124,75 @@ class EvenementController extends Controller
             ? ($evenement->cree_par === $user->id ? 'createur' : ($assignment?->role === 'organisateur' ? 'organisateur' : null))
             : null;
 
-    $currentInscription = $user
-        ? $evenement->inscriptions->firstWhere('utilisateur_id', $user->id)
-        : null;
+        $currentInscription = $user
+            ? $evenement->inscriptions->firstWhere('utilisateur_id', $user->id)
+            : null;
 
-    return [
-        'id' => $evenement->id,
-        'titre' => $evenement->titre,
-        'description' => $evenement->description,
-        'type' => $evenement->type,
+        return [
+            'id' => $evenement->id,
+            'titre' => $evenement->titre,
+            'description' => $evenement->description,
+            'type' => $evenement->type,
 
-        'date_debut' => optional($evenement->date_debut)?->toIso8601String(),
-        'date_fin' => optional($evenement->date_fin)?->toIso8601String(),
+            'date_debut' => optional($evenement->date_debut)?->toIso8601String(),
+            'date_fin' => optional($evenement->date_fin)?->toIso8601String(),
 
-        'lieu' => $evenement->lieu,
-        'statut' => $evenement->statut,
-        'validation_status' => $evenement->validation_status,
-        'workflow_state' => $this->eventService->workflowState($evenement),
-        'rejection_reason' => $evenement->rejection_reason,
-        'submitted_at' => optional($evenement->submitted_at)?->toIso8601String(),
-        'visibilite' => $evenement->visibilite,
-        'public_cible' => $evenement->public_cible,
-        'capacite_max' => $evenement->capacite_max,
+            'lieu' => $evenement->lieu,
+            'statut' => $evenement->statut,
+            'validation_status' => $evenement->validation_status,
+            'workflow_state' => $this->eventService->workflowState($evenement),
+            'rejection_reason' => $evenement->rejection_reason,
+            'submitted_at' => optional($evenement->submitted_at)?->toIso8601String(),
+            'visibilite' => $evenement->visibilite,
+            'public_cible' => $evenement->public_cible,
+            'capacite_max' => $evenement->capacite_max,
 
-        'participants_count' => $evenement->inscriptions_count,
-        'comments_count' => $evenement->comments_count ?? 0,
-        'activity_count' => $evenement->activities_count ?? 0,
+            'participants_count' => $evenement->inscriptions_count,
+            'comments_count' => $evenement->comments_count ?? 0,
+            'activity_count' => $evenement->activities_count ?? 0,
 
-        'cover_url' => $cover
-            ? Storage::url($cover->chemin_fichier)
-            : null,
+            'cover_url' => $cover
+                ? Storage::url($cover->chemin_fichier)
+                : null,
 
-        'roles' => $evenement->roles->pluck('role')->values(),
+            'roles' => $evenement->roles->pluck('role')->values(),
 
-        'createur' => [
-            'id' => $evenement->createur?->id,
-            'name' => $evenement->createur?->name,
-            'role' => $evenement->createur?->role,
-        ],
+            'createur' => [
+                'id' => $evenement->createur?->id,
+                'name' => $evenement->createur?->name,
+                'role' => $evenement->createur?->role,
+            ],
 
-        // 🔥 NOUVEAU : ACTEURS (IMPORTANT POUR MODAL)
-        'actors' => $evenement->assignments
-            ? $evenement->assignments->map(function ($assignment) {
-                return [
-                    'id' => $assignment->user?->id,
-                    'name' => $assignment->user?->name,
-                    'email' => $assignment->user?->email,
-                    'role' => $assignment->role,
-                    'is_president' => (bool) $assignment->is_president_jury,
-                ];
-            })->values()
-            : [],
+            // 🔥 NOUVEAU : ACTEURS (IMPORTANT POUR MODAL)
+            'actors' => $evenement->assignments
+                ? $evenement->assignments->map(function ($assignment) {
+                    return [
+                        'id' => $assignment->user?->id,
+                        'name' => $assignment->user?->name,
+                        'email' => $assignment->user?->email,
+                        'role' => $assignment->role,
+                        'is_president' => (bool) $assignment->is_president_jury,
+                    ];
+                })->values()
+                : [],
 
-        // 👤 participation utilisateur courant
-        'participation' => $currentInscription ? [
-            'id' => $currentInscription->id,
-            'statut' => $this->mapParticipationStatus($currentInscription->statut),
-            'backend_statut' => $currentInscription->statut,
+            // 👤 participation utilisateur courant
+            'participation' => $currentInscription ? [
+                'id' => $currentInscription->id,
+                'statut' => $this->mapParticipationStatus($currentInscription->statut),
+                'backend_statut' => $currentInscription->statut,
         ] : null,
 
-        'can_join' => $user
-            ? $this->canJoin($evenement, $user)
-            : false,
-        'management_role' => $managementRole,
-          'can_manage' => $canManage,
-          'can_edit' => $user ? $this->authorization->canEditEvent($evenement, $user) : false,
-        'can_delete' => $user ? $this->authorization->isAdminOrCreator($evenement, $user) : false,
-        'can_submit' => $user ? ($evenement->cree_par === $user->id || $user->isAdmin()) : false,
-    ];
-}
+            'can_join' => $user
+                ? $this->canJoin($evenement, $user)
+                : false,
+            'management_role' => $managementRole,
+            'can_manage' => $canManage,
+            'can_edit' => $user ? $this->authorization->canEditEvent($evenement, $user) : false,
+            'can_delete' => $user ? $this->authorization->isAdminOrCreator($evenement, $user) : false,
+            'can_submit' => $user ? ($evenement->cree_par === $user->id || $user->isAdmin()) : false,
+        ];
+    }
 
     private function serializeEvenementDetail(Evenement $evenement, ?int $currentInscriptionId): array
     {
@@ -1333,7 +1333,7 @@ class EvenementController extends Controller
     {
         return [
             'availableRoles' => $this->availableRoles(),
-            'assignableUsers' => \App\Models\User::query()
+            'assignableUsers' => User::query()
                 ->select('id', 'name', 'email')
                 ->orderBy('name')
                 ->get()
@@ -1533,7 +1533,7 @@ class EvenementController extends Controller
 
     private function logActivity(Evenement $evenement, ?int $userId, string $type, string $label, ?string $description = null, array $meta = []): void
     {
-        \App\Models\EvenementActivity::create([
+        EvenementActivity::create([
             'evenement_id' => $evenement->id,
             'user_id' => $userId,
             'type' => $type,
@@ -1794,7 +1794,7 @@ class EvenementController extends Controller
 
         $eventData['medias'] = $this->mediaService->getMediaForEvent($evenement, $request->user());
         Log::info('Media data added');
-       
+
         $eventData['activities'] = ($request->user()->id === $evenement->cree_par || $request->user()->isAdmin())
             ? $evenement->activities->map(fn ($activity) => [
                 'id' => $activity->id,
@@ -1811,18 +1811,18 @@ class EvenementController extends Controller
             : [];
 
         $eventData['criteria'] = optional($evenement->juryPanel)
-        ->criteria
-        ?->map(function ($criterion) {
-            return [
-                'id' => $criterion->id,
-                'nom' => $criterion->nom,
-                'description' => $criterion->description,
-                'bareme' => $criterion->bareme !== null ? (float) $criterion->bareme : null,
-                'coefficient' => $criterion->coefficient !== null ? (float) $criterion->coefficient : null,
-                'ordre' => $criterion->ordre,
-                'actif' => (bool) $criterion->actif,
-            ];
-        })?->values()?->toArray() ?? [];
+            ->criteria
+            ?->map(function ($criterion) {
+                return [
+                    'id' => $criterion->id,
+                    'nom' => $criterion->nom,
+                    'description' => $criterion->description,
+                    'bareme' => $criterion->bareme !== null ? (float) $criterion->bareme : null,
+                    'coefficient' => $criterion->coefficient !== null ? (float) $criterion->coefficient : null,
+                    'ordre' => $criterion->ordre,
+                    'actif' => (bool) $criterion->actif,
+                ];
+            })?->values()?->toArray() ?? [];
         Log::info('Criteria data added');
 
         $eventData['comments_count'] = $evenement->comments->count();
@@ -1846,7 +1846,7 @@ class EvenementController extends Controller
         Log::info('Submission errors added', ['errors_count' => count($eventData['submission_errors'])]);
 
         $eventData['suggestions'] = $this->eventService->suggestions($evenement) ?? [];
-        if (!is_array($eventData['suggestions'])) {
+        if (! is_array($eventData['suggestions'])) {
             $eventData['suggestions'] = [];
         }
         Log::info('Suggestions added', ['suggestions_count' => count($eventData['suggestions'])]);
@@ -1860,8 +1860,8 @@ class EvenementController extends Controller
         ]);
 
         // Nettoyer les données pour éviter les objets vides
-        $eventData['suggestions'] = array_filter($eventData['suggestions'], fn($item) => is_string($item));
-        
+        $eventData['suggestions'] = array_filter($eventData['suggestions'], fn ($item) => is_string($item));
+
         return Inertia::render('evenements/Manage', [
             'evenement' => $eventData,
             'can' => [
@@ -1880,7 +1880,7 @@ class EvenementController extends Controller
             'meta' => $this->formMeta(),
         ]);
     }
- 
+
     public function gestion(Request $request)
     {
         $user = $request->user();
@@ -1896,7 +1896,7 @@ class EvenementController extends Controller
                 'createur:id,name,email,role',
                 'roles',
                 'medias',
-                'assignments.user:id,name,email,role' // 🔥 IMPORTANT
+                'assignments.user:id,name,email,role', // 🔥 IMPORTANT
             ])
             ->withCount(['inscriptions', 'comments', 'activities'])
             ->when($filters['search'] !== '', function ($builder) use ($filters) {
@@ -1922,45 +1922,45 @@ class EvenementController extends Controller
             })
             ->latest('date_debut');
 
-    // 👤 USER → ses événements
-    if (! $user->isAdmin()) {
-        $query->where(function ($builder) use ($user, $filters) {
-            if ($filters['role'] === 'createur') {
-                $builder->where('cree_par', $user->id);
+        // 👤 USER → ses événements
+        if (! $user->isAdmin()) {
+            $query->where(function ($builder) use ($user, $filters) {
+                if ($filters['role'] === 'createur') {
+                    $builder->where('cree_par', $user->id);
 
-                return;
-            }
+                    return;
+                }
 
-            if ($filters['role'] === 'organisateur') {
-                $builder->whereHas('assignments', fn ($assignments) => $assignments
-                    ->where('user_id', $user->id)
-                    ->where('role', 'organisateur'));
+                if ($filters['role'] === 'organisateur') {
+                    $builder->whereHas('assignments', fn ($assignments) => $assignments
+                        ->where('user_id', $user->id)
+                        ->where('role', 'organisateur'));
 
-                return;
-            }
+                    return;
+                }
 
-            $builder->where('cree_par', $user->id)
-                ->orWhereHas('assignments', fn ($assignments) => $assignments
-                    ->where('user_id', $user->id)
-                    ->where('role', 'organisateur'));
-        });
+                $builder->where('cree_par', $user->id)
+                    ->orWhereHas('assignments', fn ($assignments) => $assignments
+                        ->where('user_id', $user->id)
+                        ->where('role', 'organisateur'));
+            });
+        }
+
+        $mesEvenements = $query->get()->map(
+            fn (Evenement $e) => $this->serializeEvenementCard($e, $user)
+        )->values();
+
+        // 👑 ADMIN → tous les événements
+        $allEventsForAdmin = ($user && $user->role === 'admin') ? $mesEvenements : [];
+
+        return Inertia::render('evenements/EventManagement', [
+            'mesEvenements' => $mesEvenements,
+            'allEventsForAdmin' => $allEventsForAdmin,
+            'filters' => $filters,
+            'isAdmin' => ($user && $user->role === 'admin'),
+            'pendingEventsCount' => Evenement::where('validation_status', 'pending')->whereNotNull('submitted_at')->count(),
+        ]);
     }
-
-    $mesEvenements = $query->get()->map(
-        fn(Evenement $e) => $this->serializeEvenementCard($e, $user)
-    )->values();
-
-    // 👑 ADMIN → tous les événements
-    $allEventsForAdmin = ($user && $user->role === 'admin') ? $mesEvenements : [];
-
-    return Inertia::render('evenements/EventManagement', [
-        'mesEvenements' => $mesEvenements,
-        'allEventsForAdmin' => $allEventsForAdmin,
-        'filters' => $filters,
-        'isAdmin' => ($user && $user->role === 'admin'),
-        'pendingEventsCount' => Evenement::where('validation_status', 'pending')->whereNotNull('submitted_at')->count(),
-    ]);
-}
 
     public function gestionConferences(Request $request)
     {
@@ -1975,13 +1975,13 @@ class EvenementController extends Controller
     public function edit(Evenement $evenement)
     {
         $this->authorize('update', $evenement);
-        
+
         $evenement->loadMissing([
             'createur',
-            'roles', 
-            'assignments.user', 
-            'medias', 
-            'programmes'
+            'roles',
+            'assignments.user',
+            'medias',
+            'programmes',
         ]);
 
         if ($evenement->type === 'concours') {
@@ -1991,7 +1991,7 @@ class EvenementController extends Controller
         // Transformer en données pour formulaire avec pré-remplissage
         $eventData = new EvenementResource($evenement);
         $eventData = $eventData->toArray(request());
-        
+
         // Ajouter les données d'affectations
         $eventData['assigned_users'] = $this->serializeAssignmentFormData($evenement->assignments);
 

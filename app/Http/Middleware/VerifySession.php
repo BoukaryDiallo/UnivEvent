@@ -18,8 +18,9 @@ class VerifySession
     {
         if (Auth::check()) {
             // Verify session is still valid
-            if (!Auth::user()->est_actif) {
+            if (! Auth::user()->est_actif) {
                 Auth::logout();
+
                 return redirect()->route('login')->with('error', 'Votre compte a été désactivé');
             }
         }

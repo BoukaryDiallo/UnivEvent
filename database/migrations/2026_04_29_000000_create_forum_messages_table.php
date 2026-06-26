@@ -1,4 +1,5 @@
 <?php
+
 /* C:\Users\PADSEM\clother-integrateur\UnivEvent\database\migrations\2026_04_29_000000_create_forum_messages_table.php */
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

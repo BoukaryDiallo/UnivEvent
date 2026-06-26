@@ -18,7 +18,7 @@ class Candidature extends Model
         'cnib_pdf',
         'casier_judiciaire_pdf',
         'attestation_inscription_pdf',
-        'statut',   
+        'statut',
         'resultat',
         'id_user',
         'id_election',

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\NotificationClub;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -29,6 +28,7 @@ class NotificationClubController extends Controller
     {
         $notification = NotificationClub::findOrFail($id);
         $notification->update(['lu' => true]);
+
         return redirect()->back()->with('success', 'Notification marquée comme lue');
     }
 

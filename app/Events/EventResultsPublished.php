@@ -18,8 +18,7 @@ class EventResultsPublished implements ShouldBroadcastNow
     public function __construct(
         public Evenement $evenement,
         public User $validator,
-    ) {
-    }
+    ) {}
 
     public function broadcastOn(): array
     {

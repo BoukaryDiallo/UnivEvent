@@ -41,7 +41,7 @@ class CertificateGenerator
     public function generate(Evenement $evenement, User $user, array $overrides = [], ?string $type = null): Certificat
     {
         $resolvedType = $type ?? $this->resolveCertificateType($evenement, $user);
-        
+
         $existing = Certificat::query()
             ->where('evenement_id', $evenement->id)
             ->where('utilisateur_id', $user->id)
@@ -55,7 +55,7 @@ class CertificateGenerator
 
         // 1. Verification QR (The certificate itself)
         $verifyQr = (new Builder(
-            writer: new PngWriter(),
+            writer: new PngWriter,
             data: $urlVerification,
             size: 150,
             margin: 5,
@@ -65,13 +65,13 @@ class CertificateGenerator
         $inscription = InscriptionEvenement::where('evenement_id', $evenement->id)
             ->where('utilisateur_id', $user->id)
             ->first();
-        
-        $registrationQrData = $inscription && $inscription->access_token 
+
+        $registrationQrData = $inscription && $inscription->access_token
             ? route('acces.scan', $inscription->access_token)
             : 'N/A';
 
         $regQr = (new Builder(
-            writer: new PngWriter(),
+            writer: new PngWriter,
             data: $registrationQrData,
             size: 150,
             margin: 5,
@@ -114,7 +114,7 @@ class CertificateGenerator
             ->where('utilisateur_id', $user->id)
             ->first();
 
-        $label = match($type) {
+        $label = match ($type) {
             'attestation_intervenant' => 'Attestation de Conférencier',
             'certificat_admission' => 'Certificat de Réussite',
             default => 'Attestation de Participation',

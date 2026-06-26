@@ -241,7 +241,7 @@ class ControlPanelPolicy
     public function viewLiveStats(User $user, Evenement $event): bool
     {
         // Organizers, presidents, and event creators can view live stats
-        return $this->viewOrganizerDashboard($user, $event) || 
+        return $this->viewOrganizerDashboard($user, $event) ||
                $this->viewJuryDashboard($user, $event);
     }
 }

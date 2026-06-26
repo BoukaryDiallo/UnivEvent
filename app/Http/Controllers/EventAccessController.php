@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Evenement;
 use App\Models\InscriptionEvenement;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ class EventAccessController extends Controller
 
         $user = $request->user();
         $targetEventId = $request->query('target');
-        
+
         $canManage = $user && (
             $user->isAdmin() || $inscription->evenement?->cree_par === $user->id
         );
@@ -44,7 +45,7 @@ class EventAccessController extends Controller
         // Security : Seul l'admin, l'organisateur ou le propriétaire du ticket peut voir les infos
         abort_unless($canManage || ($user && $user->id === $inscription->utilisateur_id), 403);
 
-        $isWrongEvent = $targetEventId && (int)$targetEventId !== $inscription->evenement_id;
+        $isWrongEvent = $targetEventId && (int) $targetEventId !== $inscription->evenement_id;
 
         return Inertia::render('module5/admin/ScannerResult', [
             'inscription' => [
@@ -71,7 +72,7 @@ class EventAccessController extends Controller
             ->firstOrFail();
 
         $targetEventId = $request->input('target_event_id');
-        if ($targetEventId && (int)$targetEventId !== $inscription->evenement_id) {
+        if ($targetEventId && (int) $targetEventId !== $inscription->evenement_id) {
             return back()->withErrors(['target' => 'Ce ticket n\'appartient pas à l\'événement actuel.']);
         }
 
@@ -94,28 +95,28 @@ class EventAccessController extends Controller
     {
         $user = Auth::user();
         abort_unless($user, 401);
-        
+
         // Security check
-        if (!$user->isAdmin() && $inscription->utilisateur_id !== $user->id && $inscription->evenement->cree_par !== $user->id) {
+        if (! $user->isAdmin() && $inscription->utilisateur_id !== $user->id && $inscription->evenement->cree_par !== $user->id) {
             abort(403);
         }
 
         $inscription->load(['utilisateur', 'evenement']);
         $token = $inscription->access_token;
-        
-        if (!$token) {
+
+        if (! $token) {
             $token = bin2hex(random_bytes(16));
             $inscription->update(['access_token' => $token]);
         }
 
         $qr = (new Builder(
-            writer: new PngWriter(),
+            writer: new PngWriter,
             data: route('acces.scan', $token),
             size: 260,
             margin: 8,
         ))->build();
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('evenements.ticket', [
+        $pdf = Pdf::loadView('evenements.ticket', [
             'inscription' => $inscription,
             'qrCode' => base64_encode($qr->getString()),
         ]);
@@ -139,7 +140,7 @@ class EventAccessController extends Controller
         );
 
         $qr = new Builder(
-            writer: new PngWriter(),
+            writer: new PngWriter,
             data: route('acces.scan', $token),
             size: 260,
             margin: 8,

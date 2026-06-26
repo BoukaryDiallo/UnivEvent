@@ -14,6 +14,7 @@ class UserController extends Controller
     {
         //
         $users = User::all();
+
         return inertia('roles', [
             'users' => $users,
         ]);

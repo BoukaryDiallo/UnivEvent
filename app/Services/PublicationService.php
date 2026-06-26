@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Election;
 use App\Models\Candidature;
+use App\Models\Election;
 use App\Models\Resultat;
 use Illuminate\Support\Collection;
 
@@ -20,14 +20,14 @@ class PublicationService
     {
         $errors = $this->validerPublication($election);
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             throw new \InvalidArgumentException(implode(', ', $errors));
         }
 
         $resultats = $this->getResultatsBrouillon($election);
 
         if ($resultats->isEmpty()) {
-            throw new \InvalidArgumentException("Aucun résultat à publier");
+            throw new \InvalidArgumentException('Aucun résultat à publier');
         }
 
         $this->marquerResultatsOfficiels($election);
@@ -37,7 +37,7 @@ class PublicationService
         return [
             'decision' => $decision,
             'message' => 'Publication effectuée avec succès',
-            'resultats_publies' => $resultats->count()
+            'resultats_publies' => $resultats->count(),
         ];
     }
 
@@ -46,11 +46,11 @@ class PublicationService
         $errors = [];
 
         if ($this->electionService->resultatsPublies($election)) {
-            $errors[] = "Résultats déjà publiés";
+            $errors[] = 'Résultats déjà publiés';
         }
 
-        if (!$this->electionService->aResultatsBrouillon($election)) {
-            $errors[] = "Aucun résultat en brouillon";
+        if (! $this->electionService->aResultatsBrouillon($election)) {
+            $errors[] = 'Aucun résultat en brouillon';
         }
 
         return $errors;
@@ -78,8 +78,8 @@ class PublicationService
         $premier = $resultats->first();
         $deuxieme = $resultats->skip(1)->first();
 
-        if (!$premier) {
-            throw new \InvalidArgumentException("Aucun candidat trouvé");
+        if (! $premier) {
+            throw new \InvalidArgumentException('Aucun candidat trouvé');
         }
 
         if ($election->tour == 1) {
@@ -118,7 +118,7 @@ class PublicationService
         return [
             'type' => 'elu_direct',
             'message' => 'Élu au premier tour',
-            'id_candidature_elu' => $id
+            'id_candidature_elu' => $id,
         ];
     }
 
@@ -136,13 +136,13 @@ class PublicationService
 
         $election->update([
             'tour' => 2,
-            'statut' => 'second_tour_planifie'
+            'statut' => 'second_tour_planifie',
         ]);
 
         return [
             'type' => 'second_tour',
             'message' => 'Second tour requis',
-            'candidatures_qualifiees' => $top2->toArray()
+            'candidatures_qualifiees' => $top2->toArray(),
         ];
     }
 
@@ -160,7 +160,7 @@ class PublicationService
         return [
             'type' => 'elu_second_tour',
             'message' => 'Élu au second tour',
-            'id_candidature_elu' => $id
+            'id_candidature_elu' => $id,
         ];
     }
 

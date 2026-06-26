@@ -28,15 +28,15 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->enum('statut', [
-            'brouillon',
-            'liste_generee',
-            'planifiee',
-            'ouverte',
-            'cloturee',
-            'terminee',
-            'second_tour',
-            'second_tour_planifie',
-        ])->default('brouillon');
+                'brouillon',
+                'liste_generee',
+                'planifiee',
+                'ouverte',
+                'cloturee',
+                'terminee',
+                'second_tour',
+                'second_tour_planifie',
+            ])->default('brouillon');
             $table->integer('tour')->default(1);
 
             $table->timestamps();

@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Database\Seeders\RbacSeeder;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Fortify\Features;
 
@@ -22,7 +23,7 @@ abstract class TestCase extends BaseTestCase
             return;
         }
 
-        $this->seed(\Database\Seeders\RbacSeeder::class);
+        $this->seed(RbacSeeder::class);
     }
 
     protected function skipUnlessFortifyFeature(string $feature, ?string $message = null): void

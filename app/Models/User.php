@@ -4,32 +4,23 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
-use App\Models\Charge;
-use App\Models\Dispo;
-use App\Models\Ecart;
-use App\Models\HistoriqueDisponibilite;
-use App\Models\Etudiant;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'est_actif'])]
+#[Fillable(['name', 'email', 'password', 'role', 'est_actif'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-<<<<<<< HEAD
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
-=======
-    use HasFactory, Notifiable, SoftDeletes, TwoFactorAuthenticatable, HasRoles;
->>>>>>> main
+    use HasFactory, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     protected function casts(): array
     {
@@ -40,9 +31,6 @@ class User extends Authenticatable
             'est_actif' => 'boolean',
         ];
     }
-
-<<<<<<< HEAD
-=======
 
     public function isAdmin(): bool
     {
@@ -190,5 +178,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(JuryScore::class, 'participant_id');
     }
->>>>>>> main
 }

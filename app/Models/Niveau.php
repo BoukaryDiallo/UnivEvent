@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\Module2\NiveauFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +12,7 @@ class Niveau extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\Module2\NiveauFactory::new();
+        return NiveauFactory::new();
     }
 
     protected $fillable = ['nom', 'code', 'ordre'];

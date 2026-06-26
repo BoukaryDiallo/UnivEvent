@@ -10,6 +10,7 @@ class Resultat extends Model
     use SoftDeletes;
 
     protected $table = 'resultats';
+
     protected $primaryKey = 'id_resultat';
 
     protected $fillable = [
@@ -21,8 +22,6 @@ class Resultat extends Model
         'rang',
         'statut_publication',
     ];
-
-   
 
     public function election()
     {

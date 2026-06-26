@@ -3,13 +3,13 @@
 namespace Database\Seeders;
 
 use App\Models\Certificat;
-use App\Models\EventMessage;
-use App\Models\EventNotification;
 use App\Models\Evenement;
 use App\Models\EvenementComment;
+use App\Models\EventMessage;
+use App\Models\EventNotification;
 use App\Models\InscriptionEvenement;
 use App\Models\Programme;
-use App\Models\Resultat;
+use App\Models\ResultatEvaluation;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
@@ -153,7 +153,7 @@ class EvenementSeeder extends Seeder
                 'evenement_id' => $event->id,
                 'titre' => $programme[0],
                 'description' => $programme[1],
-                'intervenant' => $index < 2 ? "Intervenant Expert ".($index + 1) : null,
+                'intervenant' => $index < 2 ? 'Intervenant Expert '.($index + 1) : null,
                 'date_programme' => $event->date_debut?->toDateString(),
                 'heure_debut' => $programme[2],
                 'heure_fin' => $programme[3],
@@ -437,7 +437,7 @@ class EvenementSeeder extends Seeder
                 'is_waitlist' => false,
             ]);
 
-            Resultat::create([
+            ResultatEvaluation::create([
                 'evenement_id' => $event->id,
                 'utilisateur_id' => $user->id,
                 'note' => $notes[$index]['note'],

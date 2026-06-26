@@ -3,16 +3,18 @@
 namespace App\Http\Controllers\M5;
 
 use App\Http\Controllers\Controller;
-use App\Models\Evenement;
-use App\Models\InscriptionEvenement;
 use App\Models\Certificat;
+use App\Models\Evenement;
+use App\Models\EvenementActivity;
 use App\Models\EvenementRole;
+use App\Models\EventType;
+use App\Models\InscriptionEvenement;
 use App\Models\User;
 use App\Support\DatabaseHelper;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
 
 class EventDashboardController extends Controller
 {
@@ -20,7 +22,7 @@ class EventDashboardController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        
+
         // Check if user has any event-specific assignments
         $assignments = EvenementRole::where('user_id', $user->id);
         $assignedRoles = $assignments->pluck('role')->unique()->toArray();
@@ -47,13 +49,13 @@ class EventDashboardController extends Controller
     private function organizerDashboard(Request $request)
     {
         $user = Auth::user();
-        
+
         // Include events created by user OR assigned as organizer
         $eventsQuery = Evenement::where('cree_par', $user->id)
-            ->orWhereHas('roles', fn($q) => $q->where('user_id', $user->id)->where('role', 'organisateur'));
-        
+            ->orWhereHas('roles', fn ($q) => $q->where('user_id', $user->id)->where('role', 'organisateur'));
+
         $totalEventsCount = $eventsQuery->count();
-        
+
         // Detailed data for drill-downs
         $mes_evenements = (clone $eventsQuery)
             ->withCount(['inscriptions', 'comments'])
@@ -64,7 +66,7 @@ class EventDashboardController extends Controller
             ->with(['utilisateur', 'evenement'])
             ->latest()
             ->get()
-            ->map(fn($ins) => [
+            ->map(fn ($ins) => [
                 'id' => $ins->id,
                 'user' => [
                     'id' => $ins->utilisateur->id,
@@ -74,10 +76,10 @@ class EventDashboardController extends Controller
                 'event_title' => $ins->evenement->titre,
                 'event_id' => $ins->evenement->id,
                 'statut' => $ins->statut,
-                'is_waitlist' => (bool)$ins->is_waitlist,
+                'is_waitlist' => (bool) $ins->is_waitlist,
                 'waitlist_position' => $ins->waitlist_position,
                 'registered_at' => $ins->created_at->format('d/m/Y H:i'),
-                'has_cv' => (bool)($ins->donnees_formulaire['cv_path'] ?? false),
+                'has_cv' => (bool) ($ins->donnees_formulaire['cv_path'] ?? false),
             ]);
 
         $prochains_evenements = (clone $eventsQuery)
@@ -86,7 +88,7 @@ class EventDashboardController extends Controller
             ->get();
 
         // Fetch Activities for these events
-        $actualites = \App\Models\EvenementActivity::whereIn('evenement_id', $eventsQuery->pluck('id'))
+        $actualites = EvenementActivity::whereIn('evenement_id', $eventsQuery->pluck('id'))
             ->with(['user:id,name', 'evenement:id,titre'])
             ->latest()
             ->take(15)
@@ -114,14 +116,14 @@ class EventDashboardController extends Controller
     private function juryDashboard(Request $request)
     {
         $user = Auth::user();
-        
-        $assignedEvents = Evenement::whereHas('roles', fn($q) => $q->where('user_id', $user->id)->where('role', 'jury'))
+
+        $assignedEvents = Evenement::whereHas('roles', fn ($q) => $q->where('user_id', $user->id)->where('role', 'jury'))
             ->with(['juryPanel.criteria'])
             ->withCount(['inscriptions'])
             ->get();
 
         // Simulate some data for now to match component props
-        $concours_assignes = $assignedEvents->map(fn($event) => [
+        $concours_assignes = $assignedEvents->map(fn ($event) => [
             'concours' => [
                 'id' => $event->id,
                 'titre' => $event->titre,
@@ -131,7 +133,7 @@ class EventDashboardController extends Controller
             'statut' => $event->competition_status,
         ]);
 
-        $actualites = \App\Models\EvenementActivity::whereIn('evenement_id', $assignedEvents->pluck('id'))
+        $actualites = EvenementActivity::whereIn('evenement_id', $assignedEvents->pluck('id'))
             ->with(['user:id,name', 'evenement:id,titre'])
             ->latest()
             ->take(15)
@@ -146,7 +148,7 @@ class EventDashboardController extends Controller
                 'concours_actifs' => $assignedEvents->where('statut', 'publie')->count(),
                 'candidatures_evaluees' => 0,
                 'candidatures_restantes' => $assignedEvents->sum('inscriptions_count'),
-            ]
+            ],
         ]);
     }
 
@@ -178,7 +180,7 @@ class EventDashboardController extends Controller
             ->limit(6)
             ->get();
 
-        $actualites = \App\Models\EvenementActivity::whereIn('evenement_id', $mes_inscriptions->pluck('evenement_id'))
+        $actualites = EvenementActivity::whereIn('evenement_id', $mes_inscriptions->pluck('evenement_id'))
             ->with(['user:id,name', 'evenement:id,titre'])
             ->latest()
             ->take(15)
@@ -186,7 +188,7 @@ class EventDashboardController extends Controller
 
         $totalInscriptions = $mes_inscriptions->count();
         $upcomingEventsCount = $mes_inscriptions
-            ->filter(fn($inscription) => $inscription->evenement && $inscription->evenement->date_debut > now())
+            ->filter(fn ($inscription) => $inscription->evenement && $inscription->evenement->date_debut > now())
             ->pluck('evenement.id')
             ->unique()
             ->count();
@@ -203,7 +205,7 @@ class EventDashboardController extends Controller
                 'inscrits' => $totalInscriptions,
                 'en_attente' => $mes_inscriptions->where('statut', 'en_attente')->count(),
                 'certificats_disponibles' => $mes_certificats->count(),
-                'evenements_termines' => Evenement::whereHas('inscriptions', fn($q) => $q->where('utilisateur_id', $user->id))
+                'evenements_termines' => Evenement::whereHas('inscriptions', fn ($q) => $q->where('utilisateur_id', $user->id))
                     ->where('date_fin', '<', now())
                     ->count(),
             ],
@@ -225,18 +227,23 @@ class EventDashboardController extends Controller
             InscriptionEvenement::query(),
             'created_at'
         )->get()
-            ->map(fn($row) => [
-                'name' => sprintf('%04d-%02d', (int)$row->year, (int)$row->month),
+            ->map(fn ($row) => [
+                'name' => sprintf('%04d-%02d', (int) $row->year, (int) $row->month),
                 'value' => $row->value,
             ]);
 
         $typesEvenements = Evenement::select('type', DB::raw('COUNT(*) as value'))
             ->groupBy('type')
             ->get()
-            ->map(fn($row) => [
+            ->map(fn ($row) => [
                 'name' => ucfirst($row->type),
                 'value' => $row->value,
             ]);
+
+        $actualites = EvenementActivity::with(['user:id,name', 'evenement:id,titre'])
+            ->latest()
+            ->take(20)
+            ->get();
 
         return Inertia::render('module5/admin/Index', [
             'stats_globales' => [
@@ -253,7 +260,7 @@ class EventDashboardController extends Controller
                     }), 1)
                     : 0,
             ],
-            'evenements_en_attente' => $pendingEvents->map(fn($event) => [
+            'evenements_en_attente' => $pendingEvents->map(fn ($event) => [
                 'id' => $event->id,
                 'titre' => $event->titre,
                 'type' => $event->type,
@@ -261,7 +268,7 @@ class EventDashboardController extends Controller
                     'name' => $event->createur?->name,
                 ],
             ]),
-            'activite_recente' => $allInscriptions->take(8)->map(fn($ins) => [
+            'activite_recente' => $allInscriptions->take(8)->map(fn ($ins) => [
                 'user' => ['name' => $ins->utilisateur->name],
                 'action' => "s'est inscrit à {$ins->evenement->titre}",
                 'created_at' => $ins->created_at->format('d/m/Y H:i'),
@@ -270,6 +277,8 @@ class EventDashboardController extends Controller
                 'inscriptions_par_mois' => $inscriptionsParMois,
                 'types_evenements' => $typesEvenements,
             ],
+            'event_types' => EventType::all(),
+            'actualites' => $actualites,
         ]);
     }
 }

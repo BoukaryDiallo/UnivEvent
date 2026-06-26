@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\JuryPanel;
 use App\Models\JuryCriterion;
+use App\Models\JuryPanel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 

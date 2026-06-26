@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { Check, LoaderCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -36,6 +36,7 @@ export function InlineEditField({
 
         const timeout = window.setTimeout(async () => {
             setState('saving');
+
             try {
                 await onSave(draft);
                 setState('saved');

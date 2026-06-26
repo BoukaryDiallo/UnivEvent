@@ -5,18 +5,15 @@ namespace App\Http\Controllers\M5;
 use App\Http\Controllers\Controller;
 use App\Models\Certificat;
 use App\Models\Evenement;
+use App\Services\CertificateGenerator;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-
-use App\Services\CertificateGenerator;
+use Inertia\Inertia;
 
 class CertificatController extends Controller
 {
-    public function __construct(private CertificateGenerator $generator)
-    {
-    }
+    public function __construct(private CertificateGenerator $generator) {}
 
     public function bulkGenerate(Request $request)
     {
@@ -32,7 +29,7 @@ class CertificatController extends Controller
             abort(403);
         }
 
-        if (!$evenement->evenement_certifie) {
+        if (! $evenement->evenement_certifie) {
             return back()->withErrors(['error' => 'Cet événement n\'est pas configuré comme certifiant.']);
         }
 
@@ -66,7 +63,7 @@ class CertificatController extends Controller
             ->with('evenement')
             ->latest()
             ->get()
-            ->map(fn($cert) => [
+            ->map(fn ($cert) => [
                 'id' => $cert->id,
                 'evenement_titre' => $cert->evenement->titre,
                 'date_evenement' => $cert->evenement->date_debut->format('d/m/Y'),
@@ -98,17 +95,17 @@ class CertificatController extends Controller
             ->where('role', 'organisateur')
             ->exists();
 
-        if (!$isParticipant && !$isCreator && !$isAdmin && !$isOrganizer) {
+        if (! $isParticipant && ! $isCreator && ! $isAdmin && ! $isOrganizer) {
             abort(403, 'Vous n\'avez pas l\'autorisation de télécharger ce certificat.');
         }
 
-        if (!$certificat->fichier || !Storage::disk('public')->exists($certificat->fichier)) {
+        if (! $certificat->fichier || ! Storage::disk('public')->exists($certificat->fichier)) {
             abort(404, 'Fichier PDF du certificat non trouvé sur le serveur.');
         }
 
         $filename = "Certificat_{$evenement->titre}_{$certificat->utilisateur->name}.pdf";
 
-        return response()->download(storage_path('app/public/' . $certificat->fichier), $filename);
+        return response()->download(storage_path('app/public/'.$certificat->fichier), $filename);
     }
 
     public function verify($token)
@@ -117,7 +114,7 @@ class CertificatController extends Controller
             ->with(['utilisateur', 'evenement'])
             ->first();
 
-        if (!$certificat) {
+        if (! $certificat) {
             return Inertia::render('module5/certificats/Verify', [
                 'certificat' => null,
                 'token' => $token,

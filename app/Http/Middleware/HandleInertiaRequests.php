@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Evenement;
 use App\Models\EventNotification;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
@@ -43,11 +44,6 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-<<<<<<< HEAD
-                'user' => $request->user(),
-                'roles' => $request->user() ? $request->user()->getRoleNames() : [],
-                'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
-=======
                 'user' => $request->user()
                     ? array_merge(
                         $request->user()->toArray(),
@@ -56,16 +52,16 @@ class HandleInertiaRequests extends Middleware
                             'roles' => $user ? $user->getRoleNames() : [],
                             'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
                             'event_roles' => $request->user()->assignments()->pluck('role')->unique()->toArray(),
-                            'has_managed_events' =>
-                                $request->user()->isAdmin()
-                                || \App\Models\Evenement::where('cree_par', $request->user()->id)->exists()
+                            'has_managed_events' => $request->user()->isAdmin()
+                                || Evenement::where('cree_par', $request->user()->id)->exists()
                                 || $request->user()->assignments()
                                     ->whereIn('role', ['organisateur', 'jury', 'intervenant'])
                                     ->exists(),
                         ]
                     )
                     : null,
->>>>>>> main
+                'roles' => $user ? $user->getRoleNames() : [],
+                'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
             ],
             'notifications' => fn () => $request->user()
                 ? [

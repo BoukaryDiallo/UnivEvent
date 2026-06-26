@@ -21,6 +21,7 @@ class CodeReviewFixesTest extends TestCase
     private function scolarite(): User
     {
         Role::findOrCreate('admin');
+
         return tap(User::factory()->create(), fn (User $u) => $u->assignRole('admin'));
     }
 
@@ -40,6 +41,21 @@ class CodeReviewFixesTest extends TestCase
 
         $this->actingAs($scolarite)
             ->get(route('diplomas.documents.download', [$request, $document]))
+            ->assertOk();
+    }
+
+    public function test_scolarite_can_download_a_student_document_from_admin_route(): void
+    {
+        Storage::fake('local');
+        $scolarite = $this->scolarite();
+        $owner = User::factory()->create();
+        $request = DiplomaRequest::factory()->for($owner, 'owner')->submitted()->create();
+        $document = DiplomaDocument::factory()->for($request)->create();
+
+        Storage::disk('local')->put($document->path, '%PDF-1.4 placeholder test file.');
+
+        $this->actingAs($scolarite)
+            ->get(route('admin.diplomas.documents.download', [$request, $document]))
             ->assertOk();
     }
 

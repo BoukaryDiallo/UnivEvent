@@ -16,9 +16,11 @@ class EnsureStudent
             abort(403);
         }
 
-        $role = $user->role ?? 'student';
+        $isStudent = in_array($user->role, ['student', 'etudiant'], true)
+            || $user->hasRole('student')
+            || $user->hasRole('etudiant');
 
-        if ($role !== 'student') {
+        if (! $isStudent) {
             abort(403);
         }
 

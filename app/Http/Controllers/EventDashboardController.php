@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\EventNotification;
 use App\Models\Evenement;
+use App\Models\EventNotification;
 use App\Models\InscriptionEvenement;
 use App\Models\User;
 use App\Services\UpcomingEventReminderService;
@@ -14,9 +14,7 @@ use Inertia\Inertia;
 
 class EventDashboardController extends Controller
 {
-    public function __construct(private UpcomingEventReminderService $reminders)
-    {
-    }
+    public function __construct(private UpcomingEventReminderService $reminders) {}
 
     public function index(Request $request)
     {
@@ -234,10 +232,10 @@ class EventDashboardController extends Controller
             'mesEvenementsGestion' => Evenement::query()
                 ->with(['createur:id,name,email,role', 'roles', 'medias'])
                 ->withCount(['inscriptions', 'comments', 'activities'])
-                ->when(!$user->isAdmin(), fn($q) => $q->where('cree_par', $user->id))
+                ->when(! $user->isAdmin(), fn ($q) => $q->where('cree_par', $user->id))
                 ->latest('date_debut')
                 ->get()
-                ->map(fn(Evenement $e) => $this->serializeEvenement($e, $user)),
+                ->map(fn (Evenement $e) => $this->serializeEvenement($e, $user)),
             // User roles and permissions for control panel
             'userRoles' => [$user->role],
             'userPermissions' => [

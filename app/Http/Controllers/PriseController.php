@@ -12,8 +12,7 @@ class PriseController extends Controller
 {
     public function __construct(
         protected DispoContrat $metier
-    ) {
-    }
+    ) {}
 
     public function etat(Request $request): JsonResponse
     {

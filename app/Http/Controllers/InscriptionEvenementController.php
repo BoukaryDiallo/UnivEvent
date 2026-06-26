@@ -2,24 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Certificat;
 use App\Models\Evenement;
+use App\Models\EvenementActivity;
 use App\Models\InscriptionEvenement;
 use App\Services\EventAuthorizationService;
 use App\Services\EventNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class InscriptionEvenementController extends Controller
 {
     public function __construct(
         private EventNotificationService $notifications,
         private EventAuthorizationService $authorization,
-    )
-    {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -51,7 +50,7 @@ class InscriptionEvenementController extends Controller
 
         if ($existing) {
             return back()->withErrors([
-                'evenement_id' => 'Vous êtes déjà inscrit à cet événement.'
+                'evenement_id' => 'Vous êtes déjà inscrit à cet événement.',
             ]);
         }
 
@@ -170,11 +169,11 @@ class InscriptionEvenementController extends Controller
 
         $mes_inscriptions = InscriptionEvenement::query()
             ->with([
-                'evenement.createur:id,name,email,role', 
-                'evenement.roles', 
+                'evenement.createur:id,name,email,role',
+                'evenement.roles',
                 'evenement.medias',
                 'evenement.programmes',
-                'evenement.messages' => fn($q) => $q->where('status', 'active')
+                'evenement.messages' => fn ($q) => $q->where('status', 'active'),
             ])
             ->where('utilisateur_id', $user->id)
             ->latest()
@@ -190,10 +189,11 @@ class InscriptionEvenementController extends Controller
                         'waitlist_position' => $inscription->waitlist_position,
                     ]);
                 }
+
                 return $inscription;
             });
 
-        $mes_certificats = \App\Models\Certificat::where('utilisateur_id', $user->id)
+        $mes_certificats = Certificat::where('utilisateur_id', $user->id)
             ->with('evenement')
             ->get();
 
@@ -203,7 +203,7 @@ class InscriptionEvenementController extends Controller
             ->limit(6)
             ->get();
 
-        $actualites = \App\Models\EvenementActivity::whereIn('evenement_id', $mes_inscriptions->pluck('evenement_id'))
+        $actualites = EvenementActivity::whereIn('evenement_id', $mes_inscriptions->pluck('evenement_id'))
             ->with(['user:id,name', 'evenement:id,titre'])
             ->latest()
             ->take(15)
@@ -217,7 +217,7 @@ class InscriptionEvenementController extends Controller
             'stats' => [
                 'total_inscriptions' => $mes_inscriptions->count(),
                 'total_certificats' => $mes_certificats->count(),
-                'prochains_evenements' => $mes_inscriptions->filter(fn($i) => $i->evenement && $i->evenement->date_debut > now())->count(),
+                'prochains_evenements' => $mes_inscriptions->filter(fn ($i) => $i->evenement && $i->evenement->date_debut > now())->count(),
             ],
         ]);
     }

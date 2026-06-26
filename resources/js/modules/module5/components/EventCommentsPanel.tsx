@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { Heart, MessageCircle, Send, Trash2 } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
@@ -239,5 +240,4 @@ export function EventCommentsPanel({ evenementId, comments, canManage = false, o
     );
 }
 
-import { Clock } from 'lucide-react';
 import { usePage } from '@inertiajs/react';

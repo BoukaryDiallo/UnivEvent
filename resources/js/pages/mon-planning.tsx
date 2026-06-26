@@ -174,6 +174,7 @@ export default function MonPlanning({
                                             <div className="pt-2 text-sm font-medium text-muted-foreground">{heure}</div>
                                             {grille.jours.map((jour) => {
                                                 const cell = grille.cells.find((item) => item.jour === jour && item.heure === heure);
+
                                                 return (
                                                     <div
                                                         key={`${jour}-${heure}`}

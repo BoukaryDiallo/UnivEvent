@@ -2,63 +2,66 @@
 
 namespace Tests\Feature\Module2;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\EmploiDuTemps;
 use App\Models\AnneeAcademique;
+use App\Models\EmploiDuTemps;
 use App\Models\Filiere;
 use App\Models\Niveau;
-use Database\Factories\Module2\AnneeAcademiqueFactory;
+use App\Models\User;
+use Database\Seeders\RbacSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class EmploiDuTempsTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $user;
+
     private array $payload;
+
     protected bool $seed = true;
-    protected string $seeder = \Database\Seeders\RbacSeeder::class;
+
+    protected string $seeder = RbacSeeder::class;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->user->assignRole('admin');
 
-        $annee   = AnneeAcademique::factory()->create();
+        $annee = AnneeAcademique::factory()->create();
         $filiere = Filiere::factory()->create();
-        $niveau  = Niveau::factory()->create();
+        $niveau = Niveau::factory()->create();
 
         $this->payload = [
-            'titre' => 'EDT Test Unique ' . uniqid(),
-            'semestre'            => 'S1',
+            'titre' => 'EDT Test Unique '.uniqid(),
+            'semestre' => 'S1',
             'annee_academique_id' => $annee->id,
-            'filiere_id'          => $filiere->id_filiere,
-            'niveau_id'           => $niveau->id,
-            'groupe'              => null,
-            'date_debut'          => now()->addDays(10)->format('Y-m-d'),
-            'date_fin'            => now()->addMonths(6)->format('Y-m-d'), 
+            'filiere_id' => $filiere->id_filiere,
+            'niveau_id' => $niveau->id,
+            'groupe' => null,
+            'date_debut' => now()->addDays(10)->format('Y-m-d'),
+            'date_fin' => now()->addMonths(6)->format('Y-m-d'),
         ];
     }
 
     public function test_creation_sans_groupe(): void
-{
-    $response = $this->actingAs($this->user)
-        ->post(route('emploie-du-temps.ajouter'), $this->payload);
+    {
+        $response = $this->actingAs($this->user)
+            ->post(route('emploie-du-temps.ajouter'), $this->payload);
 
-    $response->assertSessionHas('success');
+        $response->assertSessionHas('success');
 
-    // Vérifie juste que l'EDT existe, sans vérifier le statut
-    $this->assertDatabaseHas('emploi_du_temps', [
-        'titre' => $this->payload['titre'],
-    ]);
+        // Vérifie juste que l'EDT existe, sans vérifier le statut
+        $this->assertDatabaseHas('emploi_du_temps', [
+            'titre' => $this->payload['titre'],
+        ]);
 
-    // Affiche le statut réel pour déboguer
-    $edt = \App\Models\EmploiDuTemps::where('titre', $this->payload['titre'])->first();
-    $this->assertEquals('Brouillon', $edt->statut, "Statut réel: {$edt->statut}");
-}
+        // Affiche le statut réel pour déboguer
+        $edt = EmploiDuTemps::where('titre', $this->payload['titre'])->first();
+        $this->assertEquals('Brouillon', $edt->statut, "Statut réel: {$edt->statut}");
+    }
 
     public function test_creation_avec_groupe(): void
     {
@@ -73,11 +76,11 @@ class EmploiDuTempsTest extends TestCase
     {
         EmploiDuTemps::factory()->create([
             'annee_academique_id' => $this->payload['annee_academique_id'],
-            'filiere_id'          => $this->payload['filiere_id'],
-            'niveau_id'           => $this->payload['niveau_id'],
-            'date_debut'          => now()->addDays(10)->format('Y-m-d'),
-            'date_fin'            => now()->addMonths(6)->format('Y-m-d'), 
-            'groupe'              => null,
+            'filiere_id' => $this->payload['filiere_id'],
+            'niveau_id' => $this->payload['niveau_id'],
+            'date_debut' => now()->addDays(10)->format('Y-m-d'),
+            'date_fin' => now()->addMonths(6)->format('Y-m-d'),
+            'groupe' => null,
         ]);
 
         $this->actingAs($this->user)
@@ -91,11 +94,11 @@ class EmploiDuTempsTest extends TestCase
 
         EmploiDuTemps::factory()->create([
             'annee_academique_id' => $payload['annee_academique_id'],
-            'filiere_id'          => $payload['filiere_id'],
-            'niveau_id'           => $payload['niveau_id'],
-            'date_debut'          => now()->addDays(10)->format('Y-m-d'),
-            'date_fin'            => now()->addMonths(6)->format('Y-m-d'), 
-            'groupe'              => 'G1',
+            'filiere_id' => $payload['filiere_id'],
+            'niveau_id' => $payload['niveau_id'],
+            'date_debut' => now()->addDays(10)->format('Y-m-d'),
+            'date_fin' => now()->addMonths(6)->format('Y-m-d'),
+            'groupe' => 'G1',
         ]);
 
         $this->actingAs($this->user)
@@ -122,7 +125,7 @@ class EmploiDuTempsTest extends TestCase
         $this->actingAs($this->user)
             ->post(route('emploie-du-temps.ajouter'), array_merge($this->payload, [
                 'date_debut' => '2025-06-30',
-                'date_fin'   => '2025-01-06',
+                'date_fin' => '2025-01-06',
             ]))
             ->assertSessionHasErrors('date_fin');
     }

@@ -1,12 +1,12 @@
 <?php
 
-use App\Http\Controllers\AdhesionController;
 use App\Http\Controllers\ActiviteController;
+use App\Http\Controllers\AdhesionController;
 use App\Http\Controllers\ClubController;
 use App\Http\Controllers\DemandeBudgetController;
 use App\Http\Controllers\DemandeLocalController;
-use App\Http\Controllers\NotificationClubController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\NotificationClubController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {

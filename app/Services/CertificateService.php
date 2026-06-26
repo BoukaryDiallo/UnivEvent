@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Certificat;
 use App\Models\Evenement;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
 
 class CertificateService
 {
@@ -21,7 +20,7 @@ class CertificateService
 
     public function certificateUrl(Certificat $certificat): string
     {
-        return asset('storage/' . $certificat->fichier);
+        return asset('storage/'.$certificat->fichier);
     }
 
     public function userIsEligible(Evenement $evenement, User $user): bool

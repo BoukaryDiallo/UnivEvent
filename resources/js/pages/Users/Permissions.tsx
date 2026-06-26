@@ -1,16 +1,26 @@
 import { Head, router, useForm } from '@inertiajs/react';
+import { Separator } from '@radix-ui/react-separator';
+import { Lock, Plus, RefreshCcw, Shield } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 // shadcn
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import AppLayout from '@/layouts/app-layout';
-import { Badge, Lock, Plus, RefreshCcw, Shield } from 'lucide-react';
-import { Separator } from '@radix-ui/react-separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import AppLayout from '@/layouts/app-layout';
+import { assign as assignPermissions, index as permissionsIndex, store as storePermission } from '@/routes/admin/permissions';
+import type { BreadcrumbItem } from '@/types';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Permissions',
+        href: permissionsIndex(),
+    },
+];
 
 export default function Permissions({ permissions, roles }: any) {
     const { data, setData, post, processing, reset } = useForm({ name: '' });
@@ -43,7 +53,7 @@ export default function Permissions({ permissions, roles }: any) {
 
     function handlePermissionSubmit(e: any) {
         e.preventDefault();
-        post('/admin/permissions', {
+        post(storePermission().url, {
             preserveScroll: true,
             preserveState: false,
             onSuccess: () => reset(),
@@ -52,7 +62,7 @@ export default function Permissions({ permissions, roles }: any) {
 
     function assignRole(roleName: string) {
         setLoadingSave(prev => ({ ...prev, [roleName]: true }));
-        router.post('/admin/permissions/assign', {
+        router.post(assignPermissions().url, {
             role: roleName,
             permissions: selected[roleName] ?? [],
         }, {

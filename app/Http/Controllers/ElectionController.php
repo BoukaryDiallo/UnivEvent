@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Election;
-use App\Models\Ufr;
+use App\Models\Candidature;
 use App\Models\Departement;
+use App\Models\Election;
 use App\Models\Etudiant;
 use App\Models\Filiere;
-use \App\Models\Vote;
-use \App\Models\Candidature;
-use Illuminate\Http\Request;
+use App\Models\Resultat;
+use App\Models\Ufr;
+use App\Models\Vote;
 use App\Services\ListeElectoraleService;
-use Inertia\Inertia;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class ElectionController extends Controller
 {
@@ -38,6 +39,7 @@ class ElectionController extends Controller
             'filieres' => Filiere::all(),
         ]);
     }
+
     public function formGenererListe(Election $election)
     {
         $ufrs = Ufr::query()
@@ -68,15 +70,15 @@ class ElectionController extends Controller
      */
     private function validateType(Request $request)
     {
-        if ($request->type === 'ufr' && !$request->id_ufr) {
+        if ($request->type === 'ufr' && ! $request->id_ufr) {
             return back()->withErrors([
-                'id_ufr' => "L'UFR est requis pour une élection UFR."
+                'id_ufr' => "L'UFR est requis pour une élection UFR.",
             ]);
         }
 
-        if ($request->type === 'promotion' && !$request->id_filiere) {
+        if ($request->type === 'promotion' && ! $request->id_filiere) {
             return back()->withErrors([
-                'id_filiere' => "La filière est requise pour une élection de promotion."
+                'id_filiere' => 'La filière est requise pour une élection de promotion.',
             ]);
         }
 
@@ -141,17 +143,17 @@ class ElectionController extends Controller
                 $validated = $request->validate([
                     'niveau' => [
                         'required',
-                        'in:Licence1,Licence2,Licence3,Master1,Master2,Doctorat1,Doctorat2,Doctorat3'
-                    ]
+                        'in:Licence1,Licence2,Licence3,Master1,Master2,Doctorat1,Doctorat2,Doctorat3',
+                    ],
                 ]);
 
                 $filters['niveau'] = $validated['niveau'];
             }
 
-            $nb = (new ListeElectoraleService())->generer($election, $filters);
+            $nb = (new ListeElectoraleService)->generer($election, $filters);
 
             $election->update([
-                'statut' => 'liste_generee'
+                'statut' => 'liste_generee',
             ]);
 
             return redirect()
@@ -204,7 +206,7 @@ class ElectionController extends Controller
 
         $election->update([
             'statut' => 'planifiee',
-            'tour' => 1
+            'tour' => 1,
         ]);
         $election->fresh()->synchronizeStatus();
 
@@ -220,7 +222,7 @@ class ElectionController extends Controller
             'ufr',
             'filiere',
             'candidatures.user',
-            'listesElectorales'
+            'listesElectorales',
         ]);
 
         return Inertia::render('elections/ElectionShow', compact('election'));
@@ -314,7 +316,7 @@ class ElectionController extends Controller
     public function secondTourForm(Election $election)
     {
         // Vérifier que l'élection est bien en statut 'cloturee' ou 'second_tour_planifie'
-        if (!in_array($election->statut, ['cloturee', 'second_tour_planifie'])) {
+        if (! in_array($election->statut, ['cloturee', 'second_tour_planifie'])) {
             return back()->with('error', 'Le second tour ne peut être configuré que pour une élection clôturée nécessitant un second tour.');
         }
 
@@ -381,7 +383,7 @@ class ElectionController extends Controller
         ]);
 
         // Vérifier que l'élection est bien en statut 'cloturee' ou 'second_tour_planifie'
-        if (!in_array($election->statut, ['cloturee', 'second_tour_planifie'])) {
+        if (! in_array($election->statut, ['cloturee', 'second_tour_planifie'])) {
             return back()->with('error', 'Le second tour ne peut être configuré que pour une élection clôturée nécessitant un second tour.');
         }
 
@@ -404,12 +406,12 @@ class ElectionController extends Controller
     {
         $election->fresh()->synchronizeStatus();
         $election->load(['ufr', 'filiere', 'candidatures.user', 'listesElectorales.etudiant']);
-        
+
         // Statistiques
-        $totalVotes =Vote::where('id_election', $election->id_election)->count();
+        $totalVotes = Vote::where('id_election', $election->id_election)->count();
         $totalVoters = $election->listesElectorales()->count();
         $totalCandidatures = $election->candidatures()->count();
-        
+
         // Candidatures validées (ou qualifiées pour second tour)
         if ($election->statut === 'second_tour' && $election->tour == 2) {
             // Au second tour, afficher uniquement les candidats qualifiés
@@ -426,7 +428,7 @@ class ElectionController extends Controller
         }
 
         // Récupérer les résultats de dépouillement (brouillons)
-        $resultatsDepouillement = \App\Models\Resultat::where('id_election', $election->id_election)
+        $resultatsDepouillement = Resultat::where('id_election', $election->id_election)
             ->where('tour', $election->tour)
             ->where('statut_publication', 'brouillon')
             ->with(['candidature.user'])
@@ -449,7 +451,7 @@ class ElectionController extends Controller
     public function stats(Election $election)
     {
         $election->fresh()->synchronizeStatus();
-        $totalVotes =Vote::where('id_election', $election->id_election)->count();
+        $totalVotes = Vote::where('id_election', $election->id_election)->count();
         $totalVoters = $election->listesElectorales()->count();
         $totalCandidatures = $election->candidatures()->count();
         $candidaturesValidees = $election->candidatures()

@@ -10,10 +10,11 @@ class Ufr extends Model
     use SoftDeletes;
 
     protected $table = 'ufrs';
+
     protected $primaryKey = 'id_ufr';
 
     protected $fillable = [
-        'nom'
+        'nom',
     ];
 
     public function departements()

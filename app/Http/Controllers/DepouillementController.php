@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Election;
 use App\Models\Resultat;
-use App\Services\ElectionService;
 use App\Services\DepouillementService;
+use App\Services\ElectionService;
 use Inertia\Inertia;
 
 class DepouillementController extends Controller
 {
     private ElectionService $electionService;
+
     private DepouillementService $depouillementService;
 
     public function __construct(
@@ -25,7 +26,7 @@ class DepouillementController extends Controller
     {
         try {
 
-            if (!$this->electionService->peutEtreDepouillee($election)) {
+            if (! $this->electionService->peutEtreDepouillee($election)) {
                 return back()->with('error', 'Cette élection ne peut pas être dépouillée.');
             }
 
@@ -33,7 +34,7 @@ class DepouillementController extends Controller
                 return back()->with('error', 'Résultats déjà publiés. Dépouillement verrouillé.');
             }
 
-            if (!$this->depouillementService->doitRecalculer($election)) {
+            if (! $this->depouillementService->doitRecalculer($election)) {
                 return back()->with('info', 'Les résultats sont déjà à jour.');
             }
 
@@ -75,13 +76,13 @@ class DepouillementController extends Controller
         if ($resultats->isNotEmpty() && $election->tour === 1) {
             $premier = $resultats->first();
             $deuxieme = $resultats->skip(1)->first();
-            
+
             // Égalité des voix OU pas de majorité absolue
             $secondTourRequis = ($deuxieme && $premier->nb_voix === $deuxieme->nb_voix) || ($premier->pourcentage <= 50);
         }
 
         // Vérifier si on peut publier (pas encore de résultats officiels)
-        $peutPublier = !Resultat::where('id_election', $election->id_election)
+        $peutPublier = ! Resultat::where('id_election', $election->id_election)
             ->where('tour', $election->tour)
             ->where('statut_publication', 'officiel')
             ->exists();
@@ -92,7 +93,7 @@ class DepouillementController extends Controller
             'total' => $total,
             'tour' => $election->tour,
             'secondTourRequis' => $secondTourRequis,
-            'peutPublier' => $peutPublier
+            'peutPublier' => $peutPublier,
         ]);
     }
 
@@ -116,7 +117,7 @@ class DepouillementController extends Controller
         } catch (\Exception $e) {
 
             return response()->json([
-                'error' => 'Impossible de récupérer l’état'
+                'error' => 'Impossible de récupérer l’état',
             ], 500);
         }
     }

@@ -13,7 +13,7 @@ class EvenementResource extends JsonResource
         $user = $request->user();
         // Récupération de la couverture
         $cover = $this->relationLoaded('medias') ? $this->medias->firstWhere('type', 'image') : null;
-        
+
         $data = [
             'id' => $this->id,
             'titre' => $this->titre,
@@ -36,8 +36,9 @@ class EvenementResource extends JsonResource
                 'name' => $this->createur?->name,
                 'role' => $this->createur?->role,
             ],
-            'participation' => $this->when($user, function() use ($user) {
+            'participation' => $this->when($user, function () use ($user) {
                 $inscription = $this->inscriptions->firstWhere('utilisateur_id', $user->id);
+
                 return $inscription ? [
                     'id' => $inscription->id,
                     'statut' => $inscription->statut === 'accepte' ? 'participe' : 'interesse',
@@ -52,13 +53,13 @@ class EvenementResource extends JsonResource
         }
 
         if ($this->relationLoaded('activities')) {
-            $data['activities'] = $this->activities->map(fn($a) => [
+            $data['activities'] = $this->activities->map(fn ($a) => [
                 'id' => $a->id,
                 'type' => $a->type,
                 'label' => $a->label,
                 'description' => $a->description,
                 'created_at' => $a->created_at->toIso8601String(),
-                'user' => ['name' => $a->user?->name, 'role' => $a->user?->role]
+                'user' => ['name' => $a->user?->name, 'role' => $a->user?->role],
             ]);
         }
 
@@ -74,17 +75,18 @@ class EvenementResource extends JsonResource
         $roles = ['organisateur', 'participant', 'intervenant', 'jury'];
         $grouped = [];
         foreach ($roles as $role) {
-            $grouped[$role] = $this->assignments->where('role', $role)->map(fn($as) => [
+            $grouped[$role] = $this->assignments->where('role', $role)->map(fn ($as) => [
                 'user_id' => $as->user_id,
                 'name' => $as->user?->name,
                 'permissions' => [
-                    'can_manage_messages' => (bool)$as->can_manage_messages,
-                    'can_manage_comments' => (bool)$as->can_manage_comments,
-                    'can_edit_event' => (bool)$as->can_edit_event,
-                    'can_manage_results' => (bool)$as->can_manage_results,
-                ]
+                    'can_manage_messages' => (bool) $as->can_manage_messages,
+                    'can_manage_comments' => (bool) $as->can_manage_comments,
+                    'can_edit_event' => (bool) $as->can_edit_event,
+                    'can_manage_results' => (bool) $as->can_manage_results,
+                ],
             ])->values();
         }
+
         return $grouped;
     }
 }

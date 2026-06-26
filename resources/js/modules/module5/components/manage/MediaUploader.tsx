@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
-import { useState } from 'react';
 import { Trash2, Upload } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,7 +19,9 @@ export function MediaUploader({ eventId, medias }: MediaUploaderProps) {
     const [confidentialite, setConfidentialite] = useState<EventMedia['confidentialite']>('public');
 
     function upload() {
-        if (!files.length) return;
+        if (!files.length) {
+return;
+}
 
         const formData = new FormData();
         files.forEach((file) => formData.append('media[]', file));

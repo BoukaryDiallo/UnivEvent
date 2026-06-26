@@ -14,9 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class PickupService
 {
-    public function __construct(private readonly DiplomaRequestService $requests)
-    {
-    }
+    public function __construct(private readonly DiplomaRequestService $requests) {}
 
     public function createSlot(User $actor, array $attributes): PickupSlot
     {

@@ -1,7 +1,10 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import type { FormEvent} from 'react';
 import { useState } from 'react';
-import { validateDocument as validateDocumentAction } from '@/actions/App/Http/Controllers/Admin/DiplomaDocumentController';
+import {
+    download as downloadDocumentAction,
+    validateDocument as validateDocumentAction,
+} from '@/actions/App/Http/Controllers/Admin/DiplomaDocumentController';
 import {
     archive as archiveAction,
     deliver as deliverAction,
@@ -9,7 +12,6 @@ import {
     reject as rejectAction,
     validateDossier as validateDossierAction,
 } from '@/actions/App/Http/Controllers/Admin/DiplomaRequestController';
-import { download as downloadDocument } from '@/actions/App/Http/Controllers/DiplomaDocumentController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -329,7 +331,7 @@ return;
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Button variant="outline" size="sm" asChild>
-                                            <a href={downloadDocument([request.id, doc.id]).url}>
+                                            <a href={downloadDocumentAction([request.id, doc.id]).url}>
                                                 Télécharger
                                             </a>
                                         </Button>

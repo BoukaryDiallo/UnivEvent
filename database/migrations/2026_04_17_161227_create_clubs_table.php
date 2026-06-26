@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('clubs', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
-            $table->enum('type', ['sportif','culturel','scientifique','humanitaire','autre']);
+            $table->enum('type', ['sportif', 'culturel', 'scientifique', 'humanitaire', 'autre']);
             $table->text('description')->nullable();
-            $table->enum('statut', ['en_attente','actif','suspendu','dissous'])->default('en_attente');
+            $table->enum('statut', ['en_attente', 'actif', 'suspendu', 'dissous'])->default('en_attente');
             $table->foreignId('responsable_id')->constrained('users')->onDelete('restrict');
             $table->timestamps();
         });

@@ -11,6 +11,7 @@ export function useInitials(): GetInitialsFn {
         }
 
         const names = safeName.split(' ').filter(Boolean);
+
         if (names.length === 0) {
             return '';
         }

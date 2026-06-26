@@ -3,8 +3,8 @@ import { CalendarDays, Clock3, Heart, MapPin, MessageSquare, Users } from 'lucid
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { show } from '@/routes/module5';
 import { store as joinEvent } from '@/routes/inscriptions';
+import { show } from '@/routes/module5';
 import type { EventSummary } from '@/types';
 import { EventBadge } from './EventBadge';
 import { UserAvatar } from './UserAvatar';

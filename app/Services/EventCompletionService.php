@@ -109,17 +109,27 @@ class EventCompletionService
                 $jury > 1,
             ];
             $missing = [];
-            if ($organizers === 0) $missing[] = 'Ajoutez au moins un organisateur';
-            if ($jury === 0) $missing[] = 'Ajoutez au moins un jury';
-            if ($jury < 2) $missing[] = 'Idéalement 3 à 5 jurés';
+            if ($organizers === 0) {
+                $missing[] = 'Ajoutez au moins un organisateur';
+            }
+            if ($jury === 0) {
+                $missing[] = 'Ajoutez au moins un jury';
+            }
+            if ($jury < 2) {
+                $missing[] = 'Idéalement 3 à 5 jurés';
+            }
         } else {
             $checks = [
                 $organizers > 0,
                 $speakers > 0,
             ];
             $missing = [];
-            if ($organizers === 0) $missing[] = 'Ajoutez au least un organisateur';
-            if ($speakers === 0) $missing[] = 'Ajoutez au moins un intervenant';
+            if ($organizers === 0) {
+                $missing[] = 'Ajoutez au least un organisateur';
+            }
+            if ($speakers === 0) {
+                $missing[] = 'Ajoutez au moins un intervenant';
+            }
         }
 
         return $this->buildSection(

@@ -28,6 +28,7 @@ export function ParticipantsList({ participants, canManage = false, onToast }: P
         () =>
             participants.filter((participant) => {
                 const haystack = `${participant.user.name ?? ''} ${participant.user.email ?? ''} ${participant.user.role ?? ''}`.toLowerCase();
+
                 return haystack.includes(search.trim().toLowerCase());
             }),
         [participants, search],

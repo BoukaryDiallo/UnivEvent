@@ -107,7 +107,9 @@ class ProgrammeController extends Controller
         $heureFin = $validated['heure_fin'] ?? $heureDebut;
 
         // Performance : On ne fait la requête que si la salle est renseignée
-        if ($validated['salle'] === 'En ligne' || $validated['salle'] === 'Externe') return;
+        if ($validated['salle'] === 'En ligne' || $validated['salle'] === 'Externe') {
+            return;
+        }
 
         $conflict = Programme::query()
             ->where('evenement_id', $eventId)

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Evenement;
 use App\Models\User;
-use App\Services\EventAuthorizationService;
 
 class ParticipantService
 {
@@ -12,8 +11,7 @@ class ParticipantService
         private EventAuthorizationService $authorization,
         private MediaService $mediaService,
         private CertificateService $certificateService,
-    ) {
-    }
+    ) {}
 
     public function buildParticipantEventPayload(Evenement $evenement, User $user): array
     {

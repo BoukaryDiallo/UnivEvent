@@ -53,21 +53,25 @@ class Election extends Model
     {
         if ($this->statut === 'planifiee' && now() >= $this->date_debut) {
             $this->update(['statut' => 'ouverte']);
+
             return 'ouverte';
         }
 
         if ($this->statut === 'second_tour_planifie' && now() >= $this->date_debut) {
             $this->update(['statut' => 'second_tour']);
+
             return 'second_tour';
         }
 
         if ($this->statut === 'ouverte' && now() >= $this->date_fin) {
             $this->update(['statut' => 'cloturee']);
+
             return 'cloturee';
         }
 
         if ($this->statut === 'second_tour' && now() >= $this->date_fin) {
             $this->update(['statut' => 'cloturee']);
+
             return 'cloturee';
         }
 
@@ -79,4 +83,3 @@ class Election extends Model
         return $this->hasMany(Vote::class, 'id_election');
     }
 }
-

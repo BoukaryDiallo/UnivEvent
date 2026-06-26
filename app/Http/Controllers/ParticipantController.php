@@ -18,8 +18,7 @@ class ParticipantController extends Controller
         private ParticipantService $participantService,
         private MediaService $mediaService,
         private CertificateService $certificateService,
-    ) {
-    }
+    ) {}
 
     public function show(Request $request, Evenement $evenement)
     {

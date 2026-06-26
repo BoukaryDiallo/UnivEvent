@@ -19,8 +19,7 @@ class EventCertificateGenerated implements ShouldBroadcastNow
     public function __construct(
         public Evenement $evenement,
         public Certificat $certificat,
-    ) {
-    }
+    ) {}
 
     public function broadcastOn(): array
     {

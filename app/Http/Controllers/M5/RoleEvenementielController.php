@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Evenement;
 use App\Models\EvenementRole;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class RoleEvenementielController extends Controller
 {

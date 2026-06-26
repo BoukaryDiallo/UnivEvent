@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Ufr;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class UfrController extends Controller
 {
@@ -18,13 +18,12 @@ class UfrController extends Controller
             ->paginate(10);
 
         return Inertia::render('ufr/UfrList', [
-            'ufrs' => $ufrs
+            'ufrs' => $ufrs,
         ]);
     }
 
-    
     //  * FORMULAIRE CRÉATION
-   
+
     public function create()
     {
         return Inertia::render('ufr/UfrCreate');
@@ -52,7 +51,7 @@ class UfrController extends Controller
         $ufr->load(['departements.filieres']);
 
         return Inertia::render('ufr/UfrShow', [
-            'ufr' => $ufr
+            'ufr' => $ufr,
         ]);
     }
 
@@ -62,7 +61,7 @@ class UfrController extends Controller
     public function edit(Ufr $ufr)
     {
         return Inertia::render('Ufr/Edit', [
-            'ufr' => $ufr
+            'ufr' => $ufr,
         ]);
     }
 
@@ -72,7 +71,7 @@ class UfrController extends Controller
     public function update(Request $request, Ufr $ufr)
     {
         $request->validate([
-            'nom' => 'required|string|max:255|unique:ufrs,nom,' . $ufr->id_ufr . ',id_ufr',
+            'nom' => 'required|string|max:255|unique:ufrs,nom,'.$ufr->id_ufr.',id_ufr',
         ]);
 
         $ufr->update($request->only('nom'));

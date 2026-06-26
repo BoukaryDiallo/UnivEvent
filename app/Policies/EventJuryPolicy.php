@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\Evenement;
-use App\Models\JuryPanel;
 use App\Models\JuryCriterion;
-use App\Models\JuryScore;
 use App\Models\JuryDeliberation;
+use App\Models\JuryPanel;
+use App\Models\JuryScore;
 use App\Models\User;
 
 /**
@@ -48,12 +48,12 @@ class EventJuryPolicy
      */
     public function submitScores(User $user, Evenement $event): bool
     {
-        if (!$this->viewDashboard($user, $event)) {
+        if (! $this->viewDashboard($user, $event)) {
             return false;
         }
 
         $panel = $event->juryPanel;
-        if (!$panel) {
+        if (! $panel) {
             return false;
         }
 
@@ -82,7 +82,7 @@ class EventJuryPolicy
         $panel = $score->panel;
 
         // Check if scoring period allows updates
-        if ($panel->scoring_closed_at !== null && !$panel->criteria_locked) {
+        if ($panel->scoring_closed_at !== null && ! $panel->criteria_locked) {
             return false;
         }
 

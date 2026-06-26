@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, LoaderCircle, TriangleAlert } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 function readCsrfToken() {
@@ -9,9 +9,17 @@ function readCsrfToken() {
 function findSection(error: string) {
     const value = error.toLowerCase();
 
-    if (value.includes('organisateur')) return 'actors';
-    if (value.includes('programme') || value.includes('criter')) return 'program';
-    if (value.includes('date') || value.includes('description') || value.includes('titre')) return 'general';
+    if (value.includes('organisateur')) {
+return 'actors';
+}
+
+    if (value.includes('programme') || value.includes('criter')) {
+return 'program';
+}
+
+    if (value.includes('date') || value.includes('description') || value.includes('titre')) {
+return 'general';
+}
 
     return 'general';
 }
@@ -50,6 +58,7 @@ export function SmartSubmitButton({ eventId, initialErrors, onSuccess, onNavigat
 
             if (!response.ok) {
                 setErrors(payload?.errors ?? ['Veuillez completer les sections requises.']);
+
                 return;
             }
 

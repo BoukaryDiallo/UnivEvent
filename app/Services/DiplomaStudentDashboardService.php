@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\DiplomaRequestStatus;
 use App\Models\DiplomaRequest;
 use App\Models\DiplomaRequestEvent;
+use App\Models\PickupAppointment;
 use App\Models\User;
 use App\Presenters\DiplomaRequestPresenter;
 
@@ -49,7 +50,7 @@ class DiplomaStudentDashboardService
 
     private function upcomingAppointment(User $student)
     {
-        return \App\Models\PickupAppointment::query()
+        return PickupAppointment::query()
             ->whereHas('diplomaRequest', fn ($q) => $q->where('owner_id', $student->id))
             ->whereHas('pickupSlot', fn ($q) => $q->where('starts_at', '>', now()))
             ->whereNull('delivered_at')

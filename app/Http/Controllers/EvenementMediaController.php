@@ -7,15 +7,13 @@ use App\Models\EvenementMedia;
 use App\Services\EventAuthorizationService;
 use App\Services\MediaService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class EvenementMediaController extends Controller
 {
     public function __construct(
         private EventAuthorizationService $authorization,
         private MediaService $mediaService
-    ) {
-    }
+    ) {}
 
     public function index()
     {

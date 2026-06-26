@@ -27,7 +27,7 @@ class PickupReminder extends Notification implements ShouldQueue
         $slot = $this->appointment->pickupSlot;
         $request = $this->appointment->diplomaRequest;
 
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject('Rappel — retrait de diplôme demain')
             ->greeting('Bonjour '.$request->owner->name.',')
             ->line(sprintf(

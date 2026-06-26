@@ -12,20 +12,18 @@ class RoleMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  ...$roles
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             abort(401, 'Unauthorized');
         }
 
         $user = Auth::user();
 
         foreach ($roles as $role) {
-            if ($user->hasRole($role)) {
+            if ($user->hasRole($role) || $user->role === $role) {
                 return $next($request);
             }
         }

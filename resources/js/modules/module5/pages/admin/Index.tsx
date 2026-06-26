@@ -14,6 +14,7 @@ import {
     Trash2Icon,
     Edit3Icon
 } from 'lucide-react';
+import { useState } from 'react';
 import { 
     LineChart, 
     Line, 
@@ -26,16 +27,15 @@ import {
     Pie,
     Cell
 } from 'recharts';
-import { useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import AppLayout from '@/layouts/app-layout';
 import { ActualitesFeed } from '@/modules/module5/components/ActualitesFeed';
 
 type AdminDashboardProps = {
@@ -58,8 +58,27 @@ type AdminDashboardProps = {
 };
 
 const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f43f5e'];
+const DEFAULT_STATS = {
+    total_evenements: 0,
+    publies: 0,
+    en_attente: 0,
+    total_participants: 0,
+    total_certificats: 0,
+    taux_remplissage_moyen: 0,
+};
+const DEFAULT_GRAPHIQUES = {
+    inscriptions_par_mois: [],
+    types_evenements: [],
+};
 
-export default function AdminDashboard({ stats_globales, evenements_en_attente, activite_recente, graphiques, event_types, actualites }: AdminDashboardProps) {
+export default function AdminDashboard({
+    stats_globales = DEFAULT_STATS,
+    evenements_en_attente = [],
+    activite_recente = [],
+    graphiques = DEFAULT_GRAPHIQUES,
+    event_types = [],
+    actualites = [],
+}: AdminDashboardProps) {
     const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
     const [editingType, setEditingType] = useState<any>(null);
 
@@ -80,6 +99,7 @@ export default function AdminDashboard({ stats_globales, evenements_en_attente, 
 
     const handleReject = (id: number) => {
         const reason = window.prompt("Raison du refus :");
+
         if (reason) {
             router.post(`/admin/events/${id}/reject`, { reason });
         }
@@ -108,6 +128,7 @@ export default function AdminDashboard({ stats_globales, evenements_en_attente, 
 
     const submitType = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (editingType) {
             patch(`/admin/types/${editingType.id}`, {
                 onSuccess: () => setIsTypeModalOpen(false),
@@ -333,6 +354,7 @@ export default function AdminDashboard({ stats_globales, evenements_en_attente, 
                         <div className="grid gap-4 sm:grid-cols-2">
                             {event_types.map((type) => {
                                 const isSystemType = ['concours', 'conference'].includes(type.slug);
+
                                 return (
                                     <div key={type.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4 dark:bg-slate-950 dark:border-slate-800">
                                         <div className="flex items-start justify-between">
@@ -501,4 +523,3 @@ function MiniStat({ title, value, color, href }: { title: string, value: string 
         </div>
     );
 }
-

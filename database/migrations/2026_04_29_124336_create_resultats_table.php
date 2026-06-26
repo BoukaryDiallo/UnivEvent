@@ -28,7 +28,6 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-
             $table->foreign('id_election')
                 ->references('id_election')
                 ->on('elections')
@@ -42,6 +41,7 @@ return new class extends Migration
             $table->unique(['id_election', 'id_candidature', 'tour']);
         });
     }
+
     /**
      * Reverse the migrations.
      */

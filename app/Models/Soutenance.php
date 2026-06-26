@@ -8,7 +8,7 @@ class Soutenance extends Model
 {
     protected $fillable = [
         'titre', 'description', 'date_soutenance',
-        'heure_debut', 'heure_fin', 'salle_id', 'etudiant_id', 'statut'
+        'heure_debut', 'heure_fin', 'salle_id', 'etudiant_id', 'statut',
     ];
 
     public function salle()

@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ufrs', function (Blueprint $table) {
-        $table->id('id_ufr');
+            $table->id('id_ufr');
 
-        $table->string('nom')->unique();
+            $table->string('nom')->unique();
 
-        $table->timestamps();
-        $table->softDeletes(); // 👈 IMPORTANT
-    });
+            $table->timestamps();
+            $table->softDeletes(); // 👈 IMPORTANT
+        });
     }
 
     /**

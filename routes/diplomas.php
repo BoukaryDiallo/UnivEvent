@@ -10,6 +10,15 @@ use App\Http\Controllers\DiplomaRequestController;
 use App\Http\Controllers\PickupAppointmentController;
 use Illuminate\Support\Facades\Route;
 
+Route::middleware(['auth', 'verified'])
+    ->prefix('diplomas')
+    ->name('diplomas.')
+    ->group(function () {
+        Route::get('/{diplomaRequest}/documents/{document}/download', [DiplomaDocumentController::class, 'download'])
+            ->scopeBindings()
+            ->name('documents.download');
+    });
+
 Route::middleware(['auth', 'verified', 'student'])
     ->prefix('diplomas')
     ->name('diplomas.')
@@ -23,9 +32,6 @@ Route::middleware(['auth', 'verified', 'student'])
 
         Route::post('/{diplomaRequest}/documents', [DiplomaDocumentController::class, 'store'])
             ->name('documents.store');
-        Route::get('/{diplomaRequest}/documents/{document}/download', [DiplomaDocumentController::class, 'download'])
-            ->scopeBindings()
-            ->name('documents.download');
         Route::delete('/{diplomaRequest}/documents/{document}', [DiplomaDocumentController::class, 'destroy'])
             ->scopeBindings()
             ->name('documents.destroy');
@@ -60,6 +66,9 @@ Route::middleware(['auth', 'verified', 'scolarite'])
             ->name('deliver');
         Route::post('/{diplomaRequest}/archive', [AdminDiplomaRequestController::class, 'archive'])
             ->name('archive');
+        Route::get('/{diplomaRequest}/documents/{document}/download', [AdminDiplomaDocumentController::class, 'download'])
+            ->scopeBindings()
+            ->name('documents.download');
         Route::post('/{diplomaRequest}/documents/{document}/validate', [AdminDiplomaDocumentController::class, 'validateDocument'])
             ->scopeBindings()
             ->name('documents.validate');

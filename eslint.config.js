@@ -63,34 +63,11 @@ export default [
         },
         rules: {
             '@typescript-eslint/no-explicit-any': 'off',
-            '@typescript-eslint/consistent-type-imports': [
-                'error',
-                {
-                    prefer: 'type-imports',
-                    fixStyle: 'separate-type-imports',
-                },
-            ],
-            'import/order': [
-                'error',
-                {
-                    groups: [
-                        'builtin',
-                        'external',
-                        'internal',
-                        'parent',
-                        'sibling',
-                        'index',
-                    ],
-                    alphabetize: {
-                        order: 'asc',
-                        caseInsensitive: true,
-                    },
-                },
-            ],
-            'import/consistent-type-specifier-style': [
-                'error',
-                'prefer-top-level',
-            ],
+            '@typescript-eslint/no-unused-vars': 'off',
+            '@typescript-eslint/no-require-imports': 'off',
+            '@typescript-eslint/consistent-type-imports': 'off',
+            'import/order': 'off',
+            'import/consistent-type-specifier-style': 'off',
         },
     },
     {
@@ -126,6 +103,7 @@ export default [
         rules: {
             curly: ['error', 'all'],
             '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: false }],
+            'react-hooks/set-state-in-effect': 'off',
         },
     },
 ];

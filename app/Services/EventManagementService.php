@@ -15,8 +15,8 @@ class EventManagementService
         $event->assignments()->delete();
 
         foreach (self::ROLES as $role) {
-            $entries = collect($data[$role] ?? [])->map(fn($e) => $this->normalizeEntry($e, $role));
-            
+            $entries = collect($data[$role] ?? [])->map(fn ($e) => $this->normalizeEntry($e, $role));
+
             foreach ($entries->unique('user_id') as $entry) {
                 $event->assignments()->create(array_merge($entry, [
                     'category' => 'assignment',
@@ -30,7 +30,7 @@ class EventManagementService
     public function syncProgrammes(Evenement $event, array $programmes): void
     {
         $idsToKeep = [];
-        foreach (collect($programmes)->filter(fn($p) => !empty($p['titre'])) as $index => $pData) {
+        foreach (collect($programmes)->filter(fn ($p) => ! empty($p['titre'])) as $index => $pData) {
             $payload = [
                 'titre' => $pData['titre'],
                 'description' => $pData['description'] ?? null,
@@ -51,7 +51,9 @@ class EventManagementService
 
     public function storeBanner($request, Evenement $event): void
     {
-        if (!$request->hasFile('media')) return;
+        if (! $request->hasFile('media')) {
+            return;
+        }
 
         $file = $request->file('media');
         $path = Storage::disk('public')->put('evenements', $file);
@@ -68,6 +70,7 @@ class EventManagementService
     private function normalizeEntry($entry, $role): array
     {
         $perms = $entry['permissions'] ?? $this->getDefaults($role);
+
         return [
             'user_id' => (int) ($entry['user_id'] ?? $entry),
             'is_president_jury' => (bool) ($entry['is_president_jury'] ?? false),
@@ -80,7 +83,8 @@ class EventManagementService
         ];
     }
 
-    private function getDefaults(string $role): array {
+    private function getDefaults(string $role): array
+    {
         return $role === 'organisateur' ? ['can_manage_messages' => true, 'can_edit_event' => true] : [];
     }
 }

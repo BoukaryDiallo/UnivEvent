@@ -23,8 +23,8 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
 import { EventBadge } from '@/modules/module5/components/EventBadge';
 
@@ -79,7 +79,10 @@ export default function OrganizerDashboard({ mes_evenements, inscriptions, stats
     };
 
     const handleBatchApprove = () => {
-        if (selectedIds.length === 0) return;
+        if (selectedIds.length === 0) {
+return;
+}
+
         if (confirm(`Valider les ${selectedIds.length} inscriptions sélectionnées ?`)) {
             selectedIds.forEach(id => {
                 router.patch(`/inscriptions/${id}/valider`, {}, { preserveScroll: true });
@@ -90,8 +93,10 @@ export default function OrganizerDashboard({ mes_evenements, inscriptions, stats
 
     const handleAutoFill = (event: any) => {
         const availableSeats = event.capacite_max - event.participants_count;
+
         if (availableSeats <= 0 && event.capacite_max) {
             alert('La capacité maximale est déjà atteinte.');
+
             return;
         }
 
@@ -100,6 +105,7 @@ export default function OrganizerDashboard({ mes_evenements, inscriptions, stats
 
         if (toApprove.length === 0) {
             alert('Aucun candidat en attente pour cet événement.');
+
             return;
         }
 
@@ -253,8 +259,11 @@ export default function OrganizerDashboard({ mes_evenements, inscriptions, stats
                                                         <Checkbox 
                                                             checked={selectedIds.includes(ins.id)}
                                                             onCheckedChange={(checked) => {
-                                                                if (checked) setSelectedIds([...selectedIds, ins.id]);
-                                                                else setSelectedIds(selectedIds.filter(id => id !== ins.id));
+                                                                if (checked) {
+setSelectedIds([...selectedIds, ins.id]);
+} else {
+setSelectedIds(selectedIds.filter(id => id !== ins.id));
+}
                                                             }}
                                                         />
                                                     )}
@@ -277,7 +286,9 @@ export default function OrganizerDashboard({ mes_evenements, inscriptions, stats
                                                     <EventBadge status={ins.statut} size="sm" />
                                                 </td>
                                                 <td className="px-8 py-6 text-right">
-                                                    <Button variant="ghost" className="rounded-lg h-8 text-indigo-600 font-bold text-[10px] uppercase tracking-widest" onClick={(e) => { e.stopPropagation(); setSelectedParticipant(ins); }}>Gérer</Button>
+                                                    <Button variant="ghost" className="rounded-lg h-8 text-indigo-600 font-bold text-[10px] uppercase tracking-widest" onClick={(e) => {
+ e.stopPropagation(); setSelectedParticipant(ins); 
+}}>Gérer</Button>
                                                 </td>
                                             </tr>
                                         ))}

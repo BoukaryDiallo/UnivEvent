@@ -1,4 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
+import { FileSpreadsheet, Upload } from 'lucide-react';
+import { useRef } from 'react';
 import { DispoShell } from '@/components/dispo/entete';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -7,8 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { BreadcrumbItem } from '@/types';
 import type { LigneDispo, NiveauOption, ResumeDispo, UserDispo } from '@/types/dispo';
-import { FileSpreadsheet, Upload } from 'lucide-react';
-import { useRef } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -185,6 +185,7 @@ export default function DispoFormPage({
                                                         preserveScroll: true,
                                                         onSuccess: () => {
                                                             importForm.reset();
+
                                                             if (importInputRef.current) {
                                                                 importInputRef.current.value = '';
                                                             }

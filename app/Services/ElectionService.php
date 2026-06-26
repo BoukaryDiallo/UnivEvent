@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Election;
 use App\Models\Candidature;
+use App\Models\Election;
 use App\Models\Resultat;
 
 class ElectionService
@@ -63,18 +63,18 @@ class ElectionService
     public function validerIntegrite(Election $election): array
     {
         $errors = [];
-        
-        if (!$this->peutEtreDepouillee($election)) {
+
+        if (! $this->peutEtreDepouillee($election)) {
             $errors[] = "L'élection doit être clôturée avant dépouillement";
         }
 
         if ($this->resultatsPublies($election)) {
-            $errors[] = "Les résultats sont déjà publiés et immuables";
+            $errors[] = 'Les résultats sont déjà publiés et immuables';
         }
 
         $candidatures = $this->getCandidaturesValidees($election);
         if ($candidatures->isEmpty()) {
-            $errors[] = "Aucune candidature validée pour cette élection";
+            $errors[] = 'Aucune candidature validée pour cette élection';
         }
 
         return $errors;

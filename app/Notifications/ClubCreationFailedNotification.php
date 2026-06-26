@@ -3,8 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ClubCreationFailedNotification extends Notification
@@ -39,7 +37,7 @@ class ClubCreationFailedNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => 'Création de club échouée: l\'étudiant ' . $this->studentName . ' n\'est pas inscrit/actif.',
+            'message' => 'Création de club échouée: l\'étudiant '.$this->studentName.' n\'est pas inscrit/actif.',
             'type' => 'error',
         ];
     }

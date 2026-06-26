@@ -10,13 +10,13 @@ class Departement extends Model
     use SoftDeletes;
 
     protected $table = 'departements';
+
     protected $primaryKey = 'id_departement';
 
     protected $fillable = [
         'id_ufr',
-        'nom'
+        'nom',
     ];
-
 
     public function ufr()
     {
