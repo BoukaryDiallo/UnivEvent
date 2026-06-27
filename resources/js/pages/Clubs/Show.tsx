@@ -133,6 +133,39 @@ return
     }
   }
 
+  const handleApproveLocal = (demandeId: number) => {
+    router.visit(`/demandes-local/${demandeId}/valider`, { method: 'put', preserveScroll: true })
+  }
+
+  const handleRejectLocal = (demandeId: number) => {
+    router.visit(`/demandes-local/${demandeId}/rejeter`, { method: 'put', preserveScroll: true })
+  }
+
+  const handleApproveBudget = (demandeId: number) => {
+    router.visit(`/demandes-budget/${demandeId}/valider`, { method: 'put', preserveScroll: true })
+  }
+
+  const handleRejectBudget = (demandeId: number) => {
+    router.visit(`/demandes-budget/${demandeId}/rejeter`, { method: 'put', preserveScroll: true })
+  }
+
+  const handleRemoveMember = (adhesionId: number) => {
+    if (confirm('Voulez-vous vraiment retirer ce membre du club ?')) {
+      router.visit(`/adhesions/${adhesionId}/rejeter`, {
+        method: 'put',
+        preserveScroll: true
+      })
+    }
+  }
+
+  const handleChangeRole = (adhesionId: number, newRole: string) => {
+    router.visit(`/adhesions/${adhesionId}`, {
+      method: 'put',
+      data: { role_dans_club: newRole },
+      preserveScroll: true
+    })
+  }
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={club.nom} />
@@ -178,28 +211,28 @@ return
                         Forum
                       </button>
                     </SheetTrigger>
-                    <SheetContent className="p-0 sm:max-w-md border-l-0">
-                      <div className="flex flex-col h-full bg-white">
-                        <SheetHeader className="p-6 border-b border-slate-100">
+                    <SheetContent className="p-0 sm:max-w-md border-l-0 dark:border-slate-800">
+                      <div className="flex flex-col h-full bg-white dark:bg-slate-950">
+                        <SheetHeader className="p-6 border-b border-slate-100 dark:border-slate-800">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center">
                               <MessageSquare className="w-5 h-5 text-white" />
                             </div>
-                            <SheetTitle className="text-xl font-bold text-slate-900">Forum - {club.nom}</SheetTitle>
+                            <SheetTitle className="text-xl font-bold text-slate-900 dark:text-white">Forum - {club.nom}</SheetTitle>
                           </div>
                         </SheetHeader>
 
                         {/* Messages List */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-slate-50/50">
+                        <div className="flex-1 overflow-y-auto p-6 flex flex-col-reverse gap-6 custom-scrollbar bg-slate-50/50 dark:bg-slate-950/50">
                           {club.forum_messages && club.forum_messages.map((message: any) => (
                             <div key={message.id} className={`flex flex-col ${message.user.id === user.id ? 'items-end' : 'items-start'}`}>
                               <div className={`max-w-[90%] rounded-2xl px-4 py-3 shadow-sm border ${
-                                message.user.id === user.id 
-                                ? 'bg-slate-900 text-white border-slate-800 rounded-tr-none' 
-                                : 'bg-white text-slate-900 border-slate-100 rounded-tl-none'
+                                 message.user.id === user.id 
+                                 ? 'bg-slate-900 dark:bg-indigo-600 text-white border-slate-800 dark:border-indigo-500 rounded-tr-none' 
+                                 : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-slate-100 dark:border-slate-800 rounded-tl-none'
                               }`}>
                                 <div className="flex items-center justify-between gap-4 mb-1">
-                                  <span className={`text-[10px] font-bold uppercase tracking-wider ${message.user.id === user.id ? 'text-slate-300' : 'text-slate-500'}`}>
+                                  <span className={`text-[10px] font-bold uppercase tracking-wider ${message.user.id === user.id ? 'text-slate-300 dark:text-indigo-200' : 'text-slate-500 dark:text-slate-400'}`}>
                                     {message.user.id === user.id ? 'Moi' : message.user.name}
                                   </span>
                                   <span className={`text-[10px] ${message.user.id === user.id ? 'text-slate-400' : 'text-slate-400'}`}>
@@ -208,12 +241,10 @@ return
                                 </div>
                                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.contenu}</p>
                                 
-                                {(message.user.id === user.id || isAdmin) && (
+                                {(message.user.id === user.id) && (
                                   <button
                                     onClick={() => handleDeleteMessage(message.id)}
-                                    className={`mt-2 text-[10px] font-bold uppercase flex items-center gap-1 hover:underline ${
-                                      message.user.id === user.id ? 'text-slate-300' : 'text-rose-500'
-                                    }`}
+                                    className={`mt-2 text-[10px] font-bold uppercase flex items-center gap-1 hover:underline text-slate-300 dark:text-indigo-200`}
                                   >
                                     <Trash2 className="w-3 h-3" />
                                     Supprimer
@@ -225,20 +256,20 @@ return
                         </div>
 
                         {/* Message Form */}
-                        <div className="p-4 bg-white border-t border-slate-100">
+                        <div className="p-4 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800">
                           <form onSubmit={handlePostMessage} className="relative">
                             <textarea
                               value={forumForm.data.contenu}
                               onChange={e => forumForm.setData('contenu', e.target.value)}
                               placeholder="Votre message..."
-                              className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 outline-none transition-all resize-none h-12 min-h-[48px] max-h-32 text-sm"
+                              className="w-full pl-4 pr-12 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-slate-900 dark:focus:ring-indigo-500 outline-none transition-all resize-none h-12 min-h-[48px] max-h-32 text-sm"
                               rows={1}
                               required
                             />
                             <button
                               type="submit"
                               disabled={forumForm.processing || !forumForm.data.contenu.trim()}
-                              className="absolute right-2 top-2 p-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all shadow-sm disabled:opacity-50"
+                              className="absolute right-2 top-2 p-1.5 bg-slate-900 dark:bg-indigo-600 text-white rounded-lg hover:bg-slate-800 dark:hover:bg-indigo-700 transition-all shadow-sm disabled:opacity-50"
                             >
                               <Send className="w-4 h-4" />
                             </button>
@@ -279,7 +310,7 @@ return
             {[
               { id: 'overview', label: 'Vue d\'ensemble', icon: Building2 },
               { id: 'activities', label: 'Activités', icon: Calendar },
-              { id: 'community', label: 'Communauté', icon: Users, badge: club.adhesions?.length },
+              { id: 'community', label: 'Communauté', icon: Users, badge: club.adhesions?.filter((a: any) => a.statut === 'approuvee').length },
               ...(canManage ? [{ id: 'admin', label: 'Administration', icon: Shield, badge: club.adhesions?.filter((a: any) => a.statut === 'en_attente').length }] : []),
             ].map((tab) => (
               <button
@@ -438,23 +469,47 @@ return
           {activeTab === 'community' && (
             <div className="space-y-6">
               <h2 className="text-2xl font-black text-slate-900 dark:text-white">Membres du club</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="flex flex-col gap-4">
                 {club.adhesions && club.adhesions.filter((a: any) => a.statut === 'approuvee').map((adhesion: any) => (
-                  <div key={adhesion.id} className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center group transition-all hover:shadow-md">
-                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 font-black text-2xl border-2 border-white shadow-sm mb-4">
-                      {adhesion.user?.name?.charAt(0) || 'U'}
+                  <div key={adhesion.id} className="bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between group transition-all hover:shadow-md">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 font-bold text-xl border-2 border-white dark:border-slate-900 shadow-sm">
+                        {adhesion.user?.name?.charAt(0) || 'U'}
+                      </div>
+                      <div>
+                        <p className="font-black text-slate-900 dark:text-white text-lg line-clamp-1">{adhesion.user?.name}</p>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                          {adhesion.role_dans_club || 'Membre'}
+                        </p>
+                      </div>
                     </div>
-                    <p className="font-black text-slate-900 dark:text-white text-lg line-clamp-1">{adhesion.user?.name}</p>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-                      {adhesion.role_dans_club || 'Membre'}
-                    </p>
                     {canManage && adhesion.user?.id !== user?.id && (
-                      <button
-                        onClick={() => handleTransferResponsabilite(adhesion.user.id)}
-                        className="mt-4 px-4 py-1.5 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-50 transition-all opacity-0 group-hover:opacity-100"
-                      >
-                        Désigner Responsable
-                      </button>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                        <select
+                          value={adhesion.role_dans_club || 'membre'}
+                          onChange={(e) => handleChangeRole(adhesion.id, e.target.value)}
+                          className="text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
+                        >
+                          <option value="membre">Membre</option>
+                          <option value="secretaire">Secrétaire</option>
+                          <option value="tresorier">Trésorier</option>
+                          <option value="vice_president">Vice-Président</option>
+                        </select>
+                        <button
+                          onClick={() => handleTransferResponsabilite(adhesion.user.id)}
+                          className="px-3 py-1.5 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                          title="Désigner Responsable"
+                        >
+                          Désigner
+                        </button>
+                        <button
+                          onClick={() => handleRemoveMember(adhesion.id)}
+                          className="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-colors"
+                          title="Retirer du club"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -488,6 +543,16 @@ return
                               {demande.statut}
                             </span>
                           </div>
+                          {isAdmin && demande.statut === 'en_attente' && (
+                            <div className="flex gap-2">
+                              <button onClick={() => handleApproveLocal(demande.id)} className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors">
+                                <Check className="w-4 h-4" />
+                              </button>
+                              <button onClick={() => handleRejectLocal(demande.id)} className="p-2 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors">
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -517,6 +582,16 @@ return
                               {demande.statut}
                             </span>
                           </div>
+                          {isAdmin && demande.statut === 'en_attente' && (
+                            <div className="flex gap-2">
+                              <button onClick={() => handleApproveBudget(demande.id)} className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors">
+                                <Check className="w-4 h-4" />
+                              </button>
+                              <button onClick={() => handleRejectBudget(demande.id)} className="p-2 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors">
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

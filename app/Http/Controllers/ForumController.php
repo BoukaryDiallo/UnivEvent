@@ -36,8 +36,8 @@ class ForumController extends Controller
 
     public function destroy(ForumMessage $message)
     {
-        // Check if user is author or admin
-        if ($message->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+        // Check if user is author
+        if ($message->user_id !== Auth::id()) {
             return back()->with('error', 'Action non autorisée.');
         }
 
