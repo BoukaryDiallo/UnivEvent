@@ -36,6 +36,7 @@ class UserController extends Controller
 
         if (! empty($request->roles)) {
             $user->syncRoles($request->roles);
+            $user->update(['role' => $request->roles[0]]);
         }
 
         return back()->with('success', 'Utilisateur créé');
@@ -50,6 +51,9 @@ class UserController extends Controller
 
         $user = User::findOrFail($id);
         $user->syncRoles($request->roles ?? []);
+        if (! empty($request->roles)) {
+            $user->update(['role' => $request->roles[0]]);
+        }
 
         return back()->with('success', 'Rôles mis à jour');
     }
@@ -58,6 +62,7 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->assignRole('enseignant');   // ← assignRole ajoute sans supprimer les autres
+        $user->update(['role' => 'enseignant']);
 
         return back()->with('success', 'Utilisateur promu enseignant');
     }

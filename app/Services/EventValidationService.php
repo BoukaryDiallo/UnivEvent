@@ -114,7 +114,7 @@ class EventValidationService
 
     private function notifyAdmins(Evenement $event, string $action): void
     {
-        $admins = User::where('role', 'admin')->get();
+        $admins = User::role('admin')->get();
         $title = match ($action) {
             'submitted' => "Validation d'evenement : nouvelle soumission",
             'resubmitted' => "Validation d'evenement : nouvelle version a revoir",

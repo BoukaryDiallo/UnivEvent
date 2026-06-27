@@ -148,14 +148,13 @@ class DispoController extends Controller
         $nom = trim((string) $request->string('nom'));
         $specialite = trim((string) $request->string('specialite'));
 
-        $enseignants = User::query()
-            ->where('role', 'enseignant')
-            ->with('enseignant')
+        $enseignants = User::role('enseignant')
+            ->select('id', 'name')
             ->orderBy('name')
             ->get();
 
         $cible = $id > 0
-            ? User::query()->where('role', 'enseignant')->with('enseignant')->find($id)
+            ? User::role('enseignant')->with('enseignant')->find($id)
             : null;
 
         return inertia('dispo/consultation-page', [

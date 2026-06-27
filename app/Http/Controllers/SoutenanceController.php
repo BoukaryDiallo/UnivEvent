@@ -21,7 +21,7 @@ class SoutenanceController extends Controller
     public function create()
     {
         $salles = Salle::where('disponible', true)->get();
-        $etudiants = User::where('role', 'etudiant')->get();
+        $etudiants = User::role('etudiant')->get();
 
         return Inertia::render('soutenances/create', compact('salles', 'etudiants'));
     }
@@ -60,7 +60,7 @@ class SoutenanceController extends Controller
     public function edit(Soutenance $soutenance)
     {
         $salles = Salle::all();
-        $etudiants = User::where('role', 'etudiant')->get();
+        $etudiants = User::role('etudiant')->get();
 
         return Inertia::render('soutenances/edit', compact('soutenance', 'salles', 'etudiants'));
     }

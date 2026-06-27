@@ -290,7 +290,7 @@ class JuryController extends Controller
     public function create()
     {
         $soutenances = Soutenance::all();
-        $enseignants = User::where('role', 'enseignant')->get();
+        $enseignants = User::role('enseignant')->get();
 
         return Inertia::render('soutenances/jurys/create', compact('soutenances', 'enseignants'));
     }
@@ -330,7 +330,7 @@ class JuryController extends Controller
     public function edit(Jury $jury)
     {
         $soutenances = Soutenance::all();
-        $enseignants = User::where('role', 'enseignant')->get();
+        $enseignants = User::role('enseignant')->get();
 
         return Inertia::render('soutenances/jurys/edit', compact('jury', 'soutenances', 'enseignants'));
     }

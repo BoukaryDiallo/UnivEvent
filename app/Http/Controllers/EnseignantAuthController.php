@@ -40,6 +40,8 @@ class EnseignantAuthController extends Controller
                 'est_actif' => true,
             ]);
 
+            $user->assignRole('enseignant');
+
             Enseignant::create([
                 'user_id' => $user->id,
                 'nom' => $data['nom'],
