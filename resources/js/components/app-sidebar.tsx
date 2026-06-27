@@ -157,11 +157,6 @@ export function AppSidebar() {
                         href: '/resultats',
                         icon: BarChart3,
                     },
-                    {
-                        title: 'Dépouillement',
-                        href: '/votes/live',
-                        icon: FileText,
-                    },
                 ],
             });
         } else {

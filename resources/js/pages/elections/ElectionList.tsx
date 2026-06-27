@@ -3,7 +3,7 @@ import ElectionStatusBadge from '@/components/elections/ElectionStatusBadge';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import CrudList from '@/components/ui/crud-list';
 import AppLayout from '@/layouts/app-layout';
-import { index as electionsIndex, create as electionsCreate, admin as electionsAdmin } from '@/routes/elections';
+import { index as electionsIndex, create as electionsCreate, admin as electionsAdmin, show as electionsShow } from '@/routes/elections';
 import type { PageProps } from '@/types/app';
 
 interface Election {
@@ -73,6 +73,12 @@ export default function ElectionList() {
     ];
 
     const actions = [
+        {
+            label: 'Voir',
+            onClick: (election: Election) => {},
+            asChild: true as const,
+            href: (election: Election) => electionsShow.url({ election: election.id_election })
+        },
         {
             label: 'Administrer',
             onClick: (election: Election) => {},

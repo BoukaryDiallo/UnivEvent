@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import CrudList from '@/components/ui/crud-list'
 import AppLayout from '@/layouts/app-layout'
-import {destroy,index as departementIndex,edit as departementEdit,create as departementCreate} from '@/routes/departement';
+import {destroy,index as departementIndex,edit as departementEdit,create as departementCreate,show as departementShow} from '@/routes/departement';
 import type { PageProps } from '@/types/app'
 
 type Departement = {
@@ -27,7 +27,7 @@ export default function DepartementList() {
     confirm({
       title: 'Supprimer le département',
       description: 'Êtes-vous sûr de vouloir supprimer ce département ?',
-      onConfirm: () => router.delete(departement.destroy.url(id)),
+      onConfirm: () => router.delete(destroy.url(id)),
       variant: 'destructive'
     })
   }
@@ -58,6 +58,12 @@ export default function DepartementList() {
   ]
 
   const actions = [
+    {
+      label: 'Voir',
+      onClick: () => {},
+      asChild: true as const,
+      href: (departementItem: Departement) => departementShow.url(departementItem.id_departement)
+    },
     {
       label: 'Modifier',
       onClick: () => {},

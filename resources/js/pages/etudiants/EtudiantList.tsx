@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import CrudList from '@/components/ui/crud-list'
 import AppLayout from '@/layouts/app-layout'
-import {destroy,index as etudiantsIndex,edit as etudiantsEdit,create as etudiantsCreate} from '@/routes/etudiants';
+import {destroy,index as etudiantsIndex,edit as etudiantsEdit,create as etudiantsCreate,show as etudiantsShow} from '@/routes/etudiants';
 import type { PageProps } from '@/types/app'
 
 type Etudiant = {
@@ -108,6 +108,12 @@ export default function EtudiantList() {
   ]
 
   const actions = [
+    {
+      label: 'Voir',
+      onClick: () => {},
+      asChild: true as const,
+      href: (etudiant: Etudiant) => etudiantsShow.url(etudiant.id)
+    },
     {
       label: 'Modifier',
       onClick: () => {},

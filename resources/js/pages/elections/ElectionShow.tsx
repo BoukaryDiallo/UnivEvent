@@ -1,5 +1,4 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
-import { route } from 'ziggy-js';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import { edit as electionsEdit, index as electionsIndex } from '@/routes/elections';
 import type { PageProps } from '@/types/app';
 
 interface Election {
@@ -45,7 +45,7 @@ export default function ElectionShow() {
 
     const generateList = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post(route('elections.generer-liste', election.id_election));
+        router.post(`/elections/${election.id_election}/generer-liste`);
     };
 
     return (
@@ -76,7 +76,7 @@ export default function ElectionShow() {
                             )}
                         </ul>
                         <div className="mt-3">
-                            {election.listesElectorales.length === 0 && election.statut === 'brouillon' ? (
+                            {(!election.listesElectorales || election.listesElectorales.length === 0) && election.statut === 'brouillon' ? (
                                 <form onSubmit={generateList} className="flex items-end space-x-4">
                                     {election.type === 'promotion' && (
                                         <div>
@@ -100,7 +100,7 @@ export default function ElectionShow() {
                             ) : (
                                 <Alert className="border-blue-200 bg-blue-50">
                                     <AlertDescription>
-                                        {election.listesElectorales.length > 0
+                                        {election.listesElectorales && election.listesElectorales.length > 0
                                             ? `✅ Liste électorale générée (${election.listesElectorales.length} électeurs)`
                                             : 'ℹ️ Activez l\'élection pour générer la liste'}
                                     </AlertDescription>
@@ -109,13 +109,13 @@ export default function ElectionShow() {
                         </div>
                         <div className="mt-4 flex justify-end space-x-2">
                             <Button variant="outline" asChild>
-                                <a href={route('elections.edit', election.id_election)}>Modifier</a>
+                                <a href={electionsEdit.url({ election: election.id_election })}>Modifier</a>
                             </Button>
                             <Button variant="destructive" onClick={handleDelete}>
                                 Annuler
                             </Button>
                             <Button variant="secondary" asChild>
-                                <a href={route('elections.index')}>Retour à la liste</a>
+                                <a href={electionsIndex.url()}>Retour à la liste</a>
                             </Button>
                         </div>
                     </CardContent>

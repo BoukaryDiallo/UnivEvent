@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { useConfirmDialog } from '@/components/ui/confirm-dialog'
 import CrudList from '@/components/ui/crud-list'
 import AppLayout from '@/layouts/app-layout'
-import {destroy,index as filiereIndex,edit as filiereEdit,create as filiereCreate} from '@/routes/filiere';
+import {destroy,index as filiereIndex,edit as filiereEdit,create as filiereCreate,show as filiereShow} from '@/routes/filiere';
 import type { PageProps } from '@/types/app'
 
 type Filiere = {
@@ -86,6 +86,12 @@ export default function FiliereList() {
   ]
 
   const actions = [
+    {
+      label: 'Voir',
+      onClick: () => {},
+      asChild: true as const,
+      href: (filiere: Filiere) => filiereShow.url(filiere.id_filiere)
+    },
     {
       label: 'Modifier',
       onClick: () => {},

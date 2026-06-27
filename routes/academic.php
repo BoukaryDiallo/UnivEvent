@@ -13,6 +13,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/ufr', [UfrController::class, 'index'])->name('ufr.index');
     Route::get('/ufr/create', [UfrController::class, 'create'])->name('ufr.create');
     Route::post('/ufr', [UfrController::class, 'store'])->name('ufr.store');
+    Route::get('/ufr/{ufr}', [UfrController::class, 'show'])->name('ufr.show');
     Route::get('/ufr/{ufr}/edit', [UfrController::class, 'edit'])->name('ufr.edit');
     Route::put('/ufr/{ufr}', [UfrController::class, 'update'])->name('ufr.update');
     Route::delete('/ufr/{ufr}', [UfrController::class, 'destroy'])->name('ufr.destroy');
@@ -21,6 +22,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/departement', [DepartementController::class, 'index'])->name('departement.index');
     Route::get('/departement/create', [DepartementController::class, 'create'])->name('departement.create');
     Route::post('/departement', [DepartementController::class, 'store'])->name('departement.store');
+    Route::get('/departement/{departement}', [DepartementController::class, 'show'])->name('departement.show');
     Route::get('/departement/{departement}/edit', [DepartementController::class, 'edit'])->name('departement.edit');
     Route::put('/departement/{departement}', [DepartementController::class, 'update'])->name('departement.update');
     Route::delete('/departement/{departement}', [DepartementController::class, 'destroy'])->name('departement.destroy');
@@ -29,6 +31,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/filiere', [FiliereController::class, 'index'])->name('filiere.index');
     Route::get('/filiere/create', [FiliereController::class, 'create'])->name('filiere.create');
     Route::post('/filiere', [FiliereController::class, 'store'])->name('filiere.store');
+    Route::get('/filiere/{filiere}', [FiliereController::class, 'show'])->name('filiere.show');
     Route::get('/filiere/{filiere}/edit', [FiliereController::class, 'edit'])->name('filiere.edit');
     Route::put('/filiere/{filiere}', [FiliereController::class, 'update'])->name('filiere.update');
     Route::delete('/filiere/{filiere}', [FiliereController::class, 'destroy'])->name('filiere.destroy');
@@ -37,6 +40,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/etudiants', [EtudiantController::class, 'index'])->name('etudiants.index');
     Route::get('/etudiants/create', [EtudiantController::class, 'create'])->name('etudiants.create');
     Route::post('/etudiants', [EtudiantController::class, 'store'])->name('etudiants.store');
+    Route::get('/etudiants/{etudiant}', [EtudiantController::class, 'show'])->name('etudiants.show');
     Route::get('/etudiants/{etudiant}/edit', [EtudiantController::class, 'edit'])->name('etudiants.edit');
     Route::put('/etudiants/{etudiant}', [EtudiantController::class, 'update'])->name('etudiants.update');
     Route::delete('/etudiants/{etudiant}', [EtudiantController::class, 'destroy'])->name('etudiants.destroy');
